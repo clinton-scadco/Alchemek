@@ -1,0 +1,36 @@
+{
+    "name": "ssahpgaminggarage",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "dev": "node esbuild.js --mode=development --watch=true",
+        "prod": "node esbuild.js --mode=production --watch=true",
+        "build": "node esbuild.js --mode=production"
+    },
+    "author": "",
+    "license": "ISC",
+    "type": "module",
+    "dependencies": {
+        "@fortawesome/fontawesome-svg-core": "^6.4.0",
+        "@fortawesome/pro-duotone-svg-icons": "^6.4.0",
+        "@fortawesome/pro-light-svg-icons": "^6.4.0",
+        "@fortawesome/pro-regular-svg-icons": "^6.4.0",
+        "@fortawesome/pro-solid-svg-icons": "^6.4.0",
+        "@fortawesome/pro-thin-svg-icons": "^6.4.0",
+        "@fortawesome/react-fontawesome": "^0.2.0",
+        "grommet": "^2.40.2",
+        "lodash": "^4.17.21",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "react-router-dom": "^6.27.0",
+        "react-singleton-hook": "^4.0.1",
+        "styled-components": "^6.1.13"
+    },
+    "devDependencies": {
+        "esbuild": "^0.17.18",
+        "esbuild-sass-plugin": "^2.9.0",
+        "servor": "^4.0.2",
+        "typescript": "^5.0.4"
+    }
+}

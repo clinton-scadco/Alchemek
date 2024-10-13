@@ -1,0 +1,51 @@
+:root {
+    --accent: #17a2b8;
+}
+
+@font-face {
+    font-family: "OpenSansLight";
+    src: url("/fonts/OpenSans-Light.ttf");
+}
+
+@font-face {
+    font-family: "OpenSans";
+    src: url("/fonts/OpenSans-Regular.ttf");
+}
+
+body {
+    font-family: "OpenSans";
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+}
+
+h1,
+h2 {
+    font-family: "OpenSansLight";
+}
+
+.d-flex {
+    display: flex;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-muted {
+    color: var(--text-light);
+}
+
+.text-danger {
+    color: var(--red-light);
+}
+
+input {
+    width: 100%;
+}
+
+.container {
+    padding: 1rem;
+}
