@@ -3,7 +3,9 @@ export interface IAction {
     perform?: (inventory: any, entities: Entity[], source: Entity) => void;
     initialize?: (inventory: any) => void;
     condition?: (inventory: any, entities: Entity[]) => boolean;
+    milestones?: (inventory: any, entities: Entity[], milestones: string[]) => boolean;
     source?: string[];
+    type?: string[];
 }
 
 export class Action implements IAction {
@@ -11,14 +13,18 @@ export class Action implements IAction {
     perform: (inventory: any, entities: Entity[], source: Entity) => void;
     initialize: (inventory: any) => void;
     condition: (inventory: any, entities: Entity[]) => boolean;
+    milestones: (inventory: any, entities: Entity[], milestones: string[]) => boolean;
     source?: string[];
+    type?: string[];
 
-    constructor({ name, perform, initialize, condition, source }: IAction) {
+    constructor({ name, perform, initialize, condition, milestones, source, type }: IAction) {
         this.name = name;
         this.perform = perform || (() => {});
         this.initialize = initialize || (() => {});
         this.condition = condition || (() => true);
+        this.milestones = milestones || (() => true);
         this.source = source || [];
+        this.type = type || [];
     }
 }
 

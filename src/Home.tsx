@@ -58,11 +58,32 @@ const actions = [
         },
         source: ["Fire"],
     }),
+    new Action({
+        name: "Emberstone",
+        perform: (inventory, entities, source) => {
+            inventory.stone -= 2;
+            inventory.emberStone += 1;
+        },
+        initialize: (inventory) => {
+            inventory.emberStone = 0;
+        },
+        condition: (inventory, entities) => {
+            return inventory.stone >= 2 ? !!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200) : false;
+        },
+        milestones: (inventory, entities, milestones) => {
+            if (!!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200) && !milestones.includes("Emberstone")) {
+                milestones.push("Emberstone");
+            }
+            return milestones.includes("Emberstone");
+        },
+        type: ["Ritual"],
+    }),
 ];
 
 const Home = () => {
     const [inventory, setInventory] = React.useState({} as any);
     const [entities, setEntities] = React.useState([] as Entity[]);
+    const [milestones, setMilestones] = React.useState([] as string[]);
 
     React.useEffect(() => {
         const newInventory = {};
@@ -83,6 +104,14 @@ const Home = () => {
         setInventory({ ...inventory });
         setEntities([...entities]);
     };
+
+    React.useEffect(() => {
+        let newMilestones = [...milestones];
+        actions.forEach((action) => {
+            action.milestones(inventory, entities, newMilestones);
+        });
+        setMilestones(newMilestones);
+    }, [inventory, entities]);
 
     React.useEffect(() => {
         const intervalId = setInterval(() => {
@@ -107,12 +136,26 @@ const Home = () => {
         <>
             <Inventory inventory={inventory}></Inventory>
             <Entities entities={entities} performEntityAction={performEntityAction} inventory={inventory}></Entities>
-            <Box gap="small">
-                {actions
-                    .filter((action) => action.source?.length == 0)
-                    .map((action) => (
-                        <ActionButton key={action.name} action={action} performAction={performAction} disabled={!action?.condition(inventory, entities)}></ActionButton>
-                    ))}
+            <Box direction="row" gap="small">
+                <Box gap="small">
+                    <Text>Actions</Text>
+                    {actions
+                        .filter((action) => action.source?.length == 0)
+                        .filter((action) => action.type?.length == 0)
+                        .map((action) => (
+                            <ActionButton key={action.name} action={action} performAction={performAction} disabled={!action?.condition(inventory, entities)}></ActionButton>
+                        ))}
+                </Box>
+                <Box gap="small">
+                    <Text>Rituals</Text>
+                    {actions
+                        .filter((action) => action.source?.length == 0)
+                        .filter((action) => action.type?.includes("Ritual"))
+                        .filter((action) => action.milestones(inventory, entities, milestones))
+                        .map((action) => (
+                            <ActionButton key={action.name} action={action} performAction={performAction} disabled={!action?.condition(inventory, entities)}></ActionButton>
+                        ))}
+                </Box>
             </Box>
         </>
     );
@@ -124,16 +167,18 @@ const ActionButton = ({ action, performAction, disabled }) => {
 
 const Inventory = ({ inventory }: { inventory: { [key: string]: number } }) => {
     return (
-        <Box>
+        <Box height={{ min: "200px" }}>
             <Heading level={3}>Inventory</Heading>
             <ul>
-                {Object.entries(inventory).map(([key, value]) => (
-                    <li>
-                        <Text>
-                            {key}: {value}
-                        </Text>
-                    </li>
-                ))}
+                {Object.entries(inventory)
+                    .filter(([key, value]) => value > 0)
+                    .map(([key, value]) => (
+                        <li>
+                            <Text>
+                                {key}: {value}
+                            </Text>
+                        </li>
+                    ))}
             </ul>
         </Box>
     );
@@ -141,7 +186,7 @@ const Inventory = ({ inventory }: { inventory: { [key: string]: number } }) => {
 
 const Entities = ({ entities, performEntityAction, inventory }: { entities: Entity[]; performEntityAction: Function; inventory: { [key: string]: number } }) => {
     return (
-        <Box>
+        <Box height={{ min: "200px" }}>
             <Heading level={3}>Entities</Heading>
             <ul>
                 {entities.map((entity) => (
