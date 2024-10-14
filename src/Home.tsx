@@ -1,48 +1,7 @@
 import { initialize } from "esbuild";
 import { Box, Button, Heading, Text } from "grommet";
 import * as React from "react";
-
-interface IAction {
-    name: string;
-    perform?: (inventory: any, entities: Entity[]) => void;
-    initialize?: (inventory: any) => void;
-    condition?: (inventory: any, entities: Entity[]) => boolean;
-}
-
-class Action implements IAction {
-    name: string;
-    perform: (inventory: any, entities: Entity[]) => void;
-    initialize: (inventory: any) => void;
-    condition: (inventory: any, entities: Entity[]) => boolean;
-
-    constructor({ name, perform, initialize, condition }: IAction) {
-        this.name = name;
-        this.perform = perform || (() => {});
-        this.initialize = initialize || (() => {});
-        this.condition = condition || (() => true);
-    }
-}
-
-interface IEntity {
-    name: string;
-    ttl?: number;
-    temperature?: number;
-    tick?: () => void;
-}
-
-class Entity implements IEntity {
-    name: string;
-    ttl: number;
-    temperature: number;
-    tick: () => void;
-
-    constructor({ name, ttl, temperature, tick }: IEntity) {
-        this.name = name;
-        this.ttl = ttl || -1;
-        this.temperature = temperature || 0;
-        this.tick = tick || (() => {});
-    }
-}
+import { Action, Entity } from "./Classes";
 
 const actions = [
     new Action({
@@ -57,7 +16,7 @@ const actions = [
     }),
     new Action({
         name: "Make Fire",
-        perform: (inventory, entities) => {
+        perform: (inventory, entities, source) => {
             inventory.wood -= 2;
             entities.push(
                 new Entity({
@@ -80,9 +39,9 @@ const actions = [
     }),
     new Action({
         name: "Feed Fire",
-        perform: (inventory, entities) => {
+        perform: (inventory, entities, source) => {
             inventory.wood -= 1;
-            let fire = entities.find((entity) => entity.name === "Fire");
+            let fire = source;
             if (fire) {
                 fire.ttl += 5;
 
@@ -97,12 +56,13 @@ const actions = [
         condition: (inventory, entities) => {
             return inventory.wood >= 1 ? !!entities.find((entity) => entity.name === "Fire") : false;
         },
+        source: ["Fire"],
     }),
 ];
 
 const Home = () => {
-    const [inventory, setInventory] = React.useState({});
-    const [entities, setEntities] = React.useState([]);
+    const [inventory, setInventory] = React.useState({} as any);
+    const [entities, setEntities] = React.useState([] as Entity[]);
 
     React.useEffect(() => {
         const newInventory = {};
@@ -114,6 +74,12 @@ const Home = () => {
 
     const performAction = (action) => {
         action.perform(inventory, entities);
+        setInventory({ ...inventory });
+        setEntities([...entities]);
+    };
+
+    const performEntityAction = (action, entity) => {
+        action.perform(inventory, entities, entity);
         setInventory({ ...inventory });
         setEntities([...entities]);
     };
@@ -140,17 +106,23 @@ const Home = () => {
     return (
         <>
             <Inventory inventory={inventory}></Inventory>
-            <Entities entities={entities}></Entities>
+            <Entities entities={entities} performEntityAction={performEntityAction} inventory={inventory}></Entities>
             <Box gap="small">
-                {actions.map((action) => (
-                    <Button key={action.name} label={action.name} onClick={() => performAction(action)} disabled={!action?.condition(inventory, entities)}></Button>
-                ))}
+                {actions
+                    .filter((action) => action.source?.length == 0)
+                    .map((action) => (
+                        <ActionButton key={action.name} action={action} performAction={performAction} disabled={!action?.condition(inventory, entities)}></ActionButton>
+                    ))}
             </Box>
         </>
     );
 };
 
-const Inventory = ({ inventory }) => {
+const ActionButton = ({ action, performAction, disabled }) => {
+    return <Button label={action.name} onClick={() => performAction(action)} disabled={disabled}></Button>;
+};
+
+const Inventory = ({ inventory }: { inventory: { [key: string]: number } }) => {
     return (
         <Box>
             <Heading level={3}>Inventory</Heading>
@@ -167,7 +139,7 @@ const Inventory = ({ inventory }) => {
     );
 };
 
-const Entities = ({ entities }) => {
+const Entities = ({ entities, performEntityAction, inventory }: { entities: Entity[]; performEntityAction: Function; inventory: { [key: string]: number } }) => {
     return (
         <Box>
             <Heading level={3}>Entities</Heading>
@@ -178,6 +150,11 @@ const Entities = ({ entities }) => {
                             <Text>{entity.name}</Text>
                             <Text>{entity.ttl.toFixed(0)}s</Text>
                             <Text>{entity.temperature.toFixed(0)} &#176;C</Text>
+                            {actions
+                                .filter((action) => action.source?.includes(entity.name))
+                                .map((action) => (
+                                    <ActionButton key={action.name} action={action} performAction={() => performEntityAction(action, entity)} disabled={!action?.condition(inventory, entities)}></ActionButton>
+                                ))}
                         </Box>
                     </li>
                 ))}
