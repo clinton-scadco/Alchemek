@@ -1,26 +1,26 @@
 export interface IAction {
     name: string;
-    perform?: (inventory: any, entities: Entity[], source: Entity) => void;
-    initialize?: (inventory: any) => void;
-    condition?: (inventory: any, entities: Entity[]) => boolean;
-    milestones?: (inventory: any, entities: Entity[], milestones: string[]) => boolean;
+    perform?: (inventory: Item[], entities: Entity[], source: Entity) => void;
+
+    condition?: (inventory: Item[], entities: Entity[], source?: Entity) => boolean;
+    milestones?: (inventory: Item[], entities: Entity[], milestones: string[]) => boolean;
     source?: string[];
     type?: string[];
 }
 
 export class Action implements IAction {
     name: string;
-    perform: (inventory: any, entities: Entity[], source: Entity) => void;
-    initialize: (inventory: any) => void;
-    condition: (inventory: any, entities: Entity[]) => boolean;
-    milestones: (inventory: any, entities: Entity[], milestones: string[]) => boolean;
+    perform: (inventory: Item[], entities: Entity[], source: Entity) => void;
+
+    condition: (inventory: Item[], entities: Entity[], source?: Entity) => boolean;
+    milestones: (inventory: Item[], entities: Entity[], milestones: string[]) => boolean;
     source?: string[];
     type?: string[];
 
-    constructor({ name, perform, initialize, condition, milestones, source, type }: IAction) {
+    constructor({ name, perform, condition, milestones, source, type }: IAction) {
         this.name = name;
         this.perform = perform || (() => {});
-        this.initialize = initialize || (() => {});
+
         this.condition = condition || (() => true);
         this.milestones = milestones || (() => true);
         this.source = source || [];
@@ -46,5 +46,23 @@ export class Entity implements IEntity {
         this.ttl = ttl || -1;
         this.temperature = temperature || 0;
         this.tick = tick || (() => {});
+    }
+}
+
+export interface IItem {
+    name: string;
+    durability?: number;
+    maxDurability?: number;
+}
+
+export class Item implements IItem {
+    name: string;
+    durability: number;
+    maxDurability: number;
+
+    constructor({ name, durability, maxDurability }: IItem) {
+        this.name = name;
+        this.durability = durability || -1;
+        this.maxDurability = maxDurability || durability || -1;
     }
 }
