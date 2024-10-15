@@ -1,4 +1,4 @@
-import { Action, Entity, Item } from "./Classes";
+import { Action, Entity, Item, Kin } from "./Classes";
 
 function RemoveItem(inventory: Item[], name, count) {
     let removedCount = 0;
@@ -25,20 +25,24 @@ export const actions = [
     }),
     new Action({
         name: "Make Fire",
-        perform: (inventory, entities, source) => {
+        perform: (inventory, entities, kins, source) => {
             RemoveItem(inventory, "Wood", 2);
             entities.push(
                 new Entity({
                     name: "Fire",
                     ttl: 30,
                     temperature: 100,
-                    tick: function () {
+                    tick: function (inventory, entities, kins, ticks) {
                         if (this.temperature <= 100) {
                             this.ttl -= 1;
                         } else {
                             this.ttl = 30;
                         }
                         this.temperature -= 2;
+
+                        if (ticks && ticks % 10 == 0 && this.temperature > 60) {
+                            kins.push(new Kin({ name: "Kin" }));
+                        }
                     },
                 })
             );
@@ -61,7 +65,7 @@ export const actions = [
     }),
     new Action({
         name: "Feed Fire",
-        perform: (inventory, entities, source) => {
+        perform: (inventory, entities, kins, source) => {
             RemoveItem(inventory, "Wood", 1);
             let fire = source;
             if (fire) {
@@ -103,7 +107,7 @@ export const actions = [
     }),
     new Action({
         name: "Heat Stone",
-        perform: (inventory, entities, source) => {
+        perform: (inventory, entities, kins, source) => {
             RemoveItem(inventory, "Stone", 1);
             let fire = source;
             if (fire && fire.name == "Fire") {

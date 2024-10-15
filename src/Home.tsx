@@ -1,7 +1,7 @@
 import { initialize } from "esbuild";
-import { Box, Button, Heading, Text } from "grommet";
+import { Box, Button, Heading, Meter, Text } from "grommet";
 import * as React from "react";
-import { Action, Entity, Item } from "./Classes";
+import { Action, Entity, Item, Kin } from "./Classes";
 import { groupBy } from "lodash";
 import _ from "lodash";
 import { actions } from "./Actions";
@@ -10,19 +10,22 @@ const Home = () => {
     const [inventory, setInventory] = React.useState([] as Item[]);
     const [entities, setEntities] = React.useState([] as Entity[]);
     const [milestones, setMilestones] = React.useState([] as string[]);
+    const [kins, setKins] = React.useState([] as Kin[]);
 
     React.useEffect(() => {}, []);
 
-    const performAction = (action) => {
-        action.perform(inventory, entities);
+    const performAction = (action: Action) => {
+        action.perform(inventory, entities, kins);
         setInventory([...inventory]);
         setEntities([...entities]);
+        setKins([...kins]);
     };
 
-    const performEntityAction = (action, entity) => {
-        action.perform(inventory, entities, entity);
+    const performEntityAction = (action: Action, entity: Entity) => {
+        action.perform(inventory, entities, kins, entity);
         setInventory([...inventory]);
         setEntities([...entities]);
+        setKins([...kins]);
     };
 
     React.useEffect(() => {
@@ -33,28 +36,34 @@ const Home = () => {
         setMilestones(newMilestones);
     }, [inventory, entities]);
 
+    const [ticks, setTicks] = React.useState(0);
+
     React.useEffect(() => {
         const intervalId = setInterval(() => {
-            setEntities((prevEntities) => {
-                // Decrease ttl of each entity
-                const updatedEntities = prevEntities.map((entity) => {
-                    let newEntity = { ...entity };
-                    newEntity.tick();
-                    return newEntity;
-                });
-
-                // Filter out entities with ttl <= 0
-                return updatedEntities.filter((entity) => entity.ttl != 0);
+            // Decrease ttl of each entity
+            const updatedEntities = entities.map((entity) => {
+                let newEntity = { ...entity };
+                newEntity.tick(inventory, entities, kins, ticks);
+                return newEntity;
             });
+            setEntities(updatedEntities.filter((entity) => entity.ttl != 0));
+            setEntities(updatedEntities.filter((entity) => entity.ttl != 0));
+            setTicks((prevTicks) => prevTicks + 1);
         }, 1000);
 
         // Cleanup function to clear interval on unmount
         return () => clearInterval(intervalId);
-    }, []);
+    }, [inventory, entities, kins]);
 
     return (
         <>
-            <Inventory inventory={inventory}></Inventory>
+            <Box style={{ maxHeight: "10px" }}>
+                <Meter value={ticks % 100} max={100}></Meter>
+            </Box>
+            <Box direction="row" gap="small">
+                <Inventory inventory={inventory}></Inventory>
+                <Kins kins={kins}></Kins>
+            </Box>
             <Entities entities={entities} performEntityAction={performEntityAction} inventory={inventory} milestones={milestones}></Entities>
             <Box direction="row" gap="small">
                 <Box gap="small">
@@ -97,7 +106,7 @@ const Inventory = ({ inventory }: { inventory: Item[] }) => {
                     .groupBy((i) => i.name)
                     .toPairs()
                     .map(([key, items]) => (
-                        <li>
+                        <li key={"items" + key}>
                             <Text>
                                 {key}: {items.length}
                             </Text>
@@ -115,8 +124,8 @@ const Entities = ({ entities, performEntityAction, inventory, milestones }: { en
         <Box height={{ min: "200px" }}>
             <Heading level={3}>Entities</Heading>
             <ul>
-                {entities.map((entity) => (
-                    <li>
+                {entities.map((entity, i) => (
+                    <li key={"entitiy" + entity.name + i}>
                         <Box direction="row" gap="small">
                             <Text>{entity.name}</Text>
                             {entity.ttl > 0 && <Text>{entity.ttl.toFixed(0)}s</Text>}
@@ -130,6 +139,27 @@ const Entities = ({ entities, performEntityAction, inventory, milestones }: { en
                         </Box>
                     </li>
                 ))}
+            </ul>
+        </Box>
+    );
+};
+
+const Kins = ({ kins }: { kins: Kin[] }) => {
+    return (
+        <Box height={{ min: "200px" }}>
+            {kins.length > 0 && <Heading level={3}>Kins</Heading>}
+            <ul>
+                {_(kins)
+                    .groupBy((i) => i.name)
+                    .toPairs()
+                    .map(([key, items]) => (
+                        <li key={"kin" + key}>
+                            <Text>
+                                {key}: {items.length}
+                            </Text>
+                        </li>
+                    ))
+                    .value()}
             </ul>
         </Box>
     );

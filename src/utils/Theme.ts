@@ -137,7 +137,11 @@ const ssacovidtheme: ThemeType = {
             size: "32px",
         },
     },
-
+    meter: {
+        extend: {
+            borderRadius: "3px",
+        },
+    },
     /* END: Mapping Colors to Components */
 };
 

@@ -1,6 +1,6 @@
 export interface IAction {
     name: string;
-    perform?: (inventory: Item[], entities: Entity[], source: Entity) => void;
+    perform?: (inventory: Item[], entities: Entity[], kins: Kin[], source?: Entity) => void;
 
     condition?: (inventory: Item[], entities: Entity[], source?: Entity) => boolean;
     milestones?: (inventory: Item[], entities: Entity[], milestones: string[]) => boolean;
@@ -10,7 +10,7 @@ export interface IAction {
 
 export class Action implements IAction {
     name: string;
-    perform: (inventory: Item[], entities: Entity[], source: Entity) => void;
+    perform: (inventory: Item[], entities: Entity[], kins: Kin[], source?: Entity) => void;
 
     condition: (inventory: Item[], entities: Entity[], source?: Entity) => boolean;
     milestones: (inventory: Item[], entities: Entity[], milestones: string[]) => boolean;
@@ -32,14 +32,14 @@ export interface IEntity {
     name: string;
     ttl?: number;
     temperature?: number;
-    tick?: () => void;
+    tick?: (inventory: Item[], entities: Entity[], kins: Kin[], ticks?: number) => void;
 }
 
 export class Entity implements IEntity {
     name: string;
     ttl: number;
     temperature: number;
-    tick: () => void;
+    tick: (inventory: Item[], entities: Entity[], kins: Kin[], ticks?: number) => void;
 
     constructor({ name, ttl, temperature, tick }: IEntity) {
         this.name = name;
@@ -64,5 +64,17 @@ export class Item implements IItem {
         this.name = name;
         this.durability = durability || -1;
         this.maxDurability = maxDurability || durability || -1;
+    }
+}
+
+export interface IKin {
+    name: string;
+}
+
+export class Kin implements IKin {
+    name: string;
+
+    constructor({ name, durability, maxDurability }: IItem) {
+        this.name = name;
     }
 }
