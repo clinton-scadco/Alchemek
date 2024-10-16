@@ -69,12 +69,29 @@ export class Item implements IItem {
 
 export interface IKin {
     name: string;
+    inventory?: Item[];
 }
 
 export class Kin implements IKin {
     name: string;
+    inventory: Item[];
 
-    constructor({ name, durability, maxDurability }: IItem) {
+    constructor({ name, inventory }: IKin) {
         this.name = name;
+        this.inventory = inventory || [];
+    }
+
+    giveItem(item: Item) {
+        this.inventory.push(item);
+    }
+
+    tick(inventory: Item[], entities: Entity[], kins: Kin[], ticks?: number) {
+        if (!this.inventory.some((i) => i.name == "Tool") && inventory.some((i) => i.name == "Tool")) {
+            let tool = inventory.find((i) => i.name == "Tool");
+            if (tool) {
+                inventory.splice(inventory.indexOf(tool), 1);
+                this.giveItem(tool);
+            }
+        }
     }
 }

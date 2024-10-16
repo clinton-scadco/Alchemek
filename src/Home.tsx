@@ -42,12 +42,17 @@ const Home = () => {
         const intervalId = setInterval(() => {
             // Decrease ttl of each entity
             const updatedEntities = entities.map((entity) => {
-                let newEntity = { ...entity };
-                newEntity.tick(inventory, entities, kins, ticks);
-                return newEntity;
+                entity.tick(inventory, entities, kins, ticks);
+                return entity;
+            });
+
+            const updatedKins = kins.map((kin) => {
+                kin.tick(inventory, entities, kins, ticks);
+                return kin;
             });
             setEntities(updatedEntities.filter((entity) => entity.ttl != 0));
-            setEntities(updatedEntities.filter((entity) => entity.ttl != 0));
+            setKins(updatedKins);
+            setInventory([...inventory]);
             setTicks((prevTicks) => prevTicks + 1);
         }, 1000);
 
