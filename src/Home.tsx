@@ -1,5 +1,5 @@
 import { initialize } from "esbuild";
-import { Box, Button, Heading, Meter, Text } from "grommet";
+import { Box, Button, Grid, Heading, Meter, Text } from "grommet";
 import * as React from "react";
 import { Action, Entity, Item, Kin } from "./Classes";
 import { groupBy } from "lodash";
@@ -66,8 +66,14 @@ const Home = () => {
                 <Meter value={ticks % 100} max={100}></Meter>
             </Box>
             <Box direction="row" gap="small">
-                <Inventory inventory={inventory}></Inventory>
-                <Kins kins={kins}></Kins>
+                <Box height={{ min: "200px" }}>
+                    <Heading level={3}>Inventory</Heading>
+                    <Inventory inventory={inventory}></Inventory>
+                </Box>
+                <Box height={{ min: "200px" }}>
+                    {kins.length > 0 && <Heading level={3}>Kins</Heading>}
+                    <Kins kins={kins}></Kins>
+                </Box>
             </Box>
             <Entities entities={entities} performEntityAction={performEntityAction} inventory={inventory} milestones={milestones}></Entities>
             <Box direction="row" gap="small">
@@ -102,25 +108,29 @@ const ActionButton = ({ action, performAction, disabled }) => {
     return <Button label={action.name} onClick={() => performAction(action)} disabled={disabled}></Button>;
 };
 
-const Inventory = ({ inventory }: { inventory: Item[] }) => {
+const Inventory = ({ inventory, compact }: { inventory: Item[]; compact?: boolean }) => {
     return (
-        <Box height={{ min: "200px" }}>
-            <Heading level={3}>Inventory</Heading>
-            <ul>
-                {_(inventory)
-                    .groupBy((i) => i.name)
-                    .toPairs()
-                    .map(([key, items]) => (
-                        <li key={"items" + key}>
-                            <Text>
-                                {key}: {items.length}
-                            </Text>
-                            {items.every((item) => item.durability != -1) && <Text>({_(items).meanBy((i) => i.durability / i.maxDurability) * 100}%)</Text>}
-                        </li>
-                    ))
-                    .value()}
-            </ul>
-        </Box>
+        <Grid columns={{ size: "20px", count: 5 }} gap={"small"}>
+            {_(inventory)
+                .orderBy((i) => i.name)
+                .groupBy((i) => i.name)
+                .toPairs()
+                .map(([key, items]) => (
+                    <Box key={"items" + key} border align="center">
+                        <Text>{items[0].icon}</Text>
+                        {!compact && (
+                            <>
+                                <Text>
+                                    {key}: {items.length}
+                                </Text>
+                                {items.every((item) => item.durability != -1) && <Text>({_(items).meanBy((i) => i.durability / i.maxDurability) * 100}%)</Text>}
+                            </>
+                        )}
+                        
+                    </Box>
+                ))
+                .value()}
+        </Grid>
     );
 };
 
@@ -151,22 +161,22 @@ const Entities = ({ entities, performEntityAction, inventory, milestones }: { en
 
 const Kins = ({ kins }: { kins: Kin[] }) => {
     return (
-        <Box height={{ min: "200px" }}>
-            {kins.length > 0 && <Heading level={3}>Kins</Heading>}
-            <ul>
-                {_(kins)
-                    .groupBy((i) => i.name)
-                    .toPairs()
-                    .map(([key, items]) => (
-                        <li key={"kin" + key}>
-                            <Text>
-                                {key}: {items.length}
-                            </Text>
-                        </li>
-                    ))
-                    .value()}
-            </ul>
-        </Box>
+        <Grid columns={{ size: "20px", count: 5 }} gap={"small"}>
+            {_(kins)
+                .orderBy((i) => i.name)
+                .groupBy((i) => i.name)
+                .toPairs()
+                .map(([key, kins]) => (
+                    <Box key={"kin" + key} border align="center">
+                        <Text>{kins[0].icon}</Text>
+                        <Text>
+                            {key}: {kins.length}
+                        </Text>
+                        <Inventory inventory={kins.flatMap((k) => k.inventory)} compact={true}></Inventory>
+                    </Box>
+                ))
+                .value()}
+        </Grid>
     );
 };
 

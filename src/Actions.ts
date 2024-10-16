@@ -1,4 +1,5 @@
 import { Action, Entity, Item, Kin } from "./Classes";
+import { HeatedStone, Stone, Tool, Wood } from "./Eras/One";
 
 function RemoveItem(inventory: Item[], name, count) {
     let removedCount = 0;
@@ -17,11 +18,11 @@ function RemoveItem(inventory: Item[], name, count) {
 export const actions = [
     new Action({
         name: "Collect Stone",
-        perform: (inventory) => inventory.push(new Item({ name: "Stone", durability: -1 })),
+        perform: (inventory) => inventory.push(new Stone()),
     }),
     new Action({
         name: "Collect Wood",
-        perform: (inventory) => inventory.push(new Item({ name: "Wood", durability: -1 })),
+        perform: (inventory) => inventory.push(new Wood()),
     }),
     new Action({
         name: "Make Fire",
@@ -54,12 +55,7 @@ export const actions = [
         perform: (inventory, entities, source) => {
             RemoveItem(inventory, "Wood", 1);
             RemoveItem(inventory, "Stone", 1);
-            inventory.push(
-                new Item({
-                    name: "Tool",
-                    durability: 10,
-                })
-            );
+            inventory.push(new Tool(10));
         },
         condition: (inventory) => inventory.filter((item) => item.name == "Wood").length >= 1 && inventory.filter((item) => item.name == "Stone").length >= 1,
     }),
@@ -113,7 +109,7 @@ export const actions = [
             if (fire && fire.name == "Fire") {
                 fire.temperature -= 10;
             }
-            inventory.push(new Item({ name: "Heated Stone", durability: -1 }));
+            inventory.push(new HeatedStone());
         },
         condition: (inventory, entities, source) => {
             return inventory.filter((item) => item.name == "Stone").length >= 1 && !!entities.find((entity) => entity.name === "Fire") && !!source && source.temperature >= 150;

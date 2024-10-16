@@ -53,12 +53,15 @@ export interface IItem {
     name: string;
     durability?: number;
     maxDurability?: number;
+    icon: string;
 }
 
 export class Item implements IItem {
     name: string;
     durability: number;
     maxDurability: number;
+
+    icon: string = "📦";
 
     constructor({ name, durability, maxDurability }: IItem) {
         this.name = name;
@@ -75,6 +78,8 @@ export interface IKin {
 export class Kin implements IKin {
     name: string;
     inventory: Item[];
+
+    icon: string = "👤";
 
     constructor({ name, inventory }: IKin) {
         this.name = name;
