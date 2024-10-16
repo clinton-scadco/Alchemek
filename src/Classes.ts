@@ -1,3 +1,5 @@
+import { GetNextId } from "./utils/Data";
+
 export interface IAction {
     name: string;
     perform?: (inventory: Item[], entities: Entity[], kins: Kin[], source?: Entity) => void;
@@ -50,6 +52,7 @@ export class Entity implements IEntity {
 }
 
 export interface IItem {
+    id: number;
     name: string;
     durability?: number;
     maxDurability?: number;
@@ -57,13 +60,15 @@ export interface IItem {
 }
 
 export class Item implements IItem {
+    id: number;
     name: string;
     durability: number;
     maxDurability: number;
 
     icon: string = "📦";
 
-    constructor({ name, durability, maxDurability }: IItem) {
+    constructor({ id, name, durability, maxDurability }: IItem) {
+        this.id = id;
         this.name = name;
         this.durability = durability || -1;
         this.maxDurability = maxDurability || durability || -1;
@@ -71,17 +76,20 @@ export class Item implements IItem {
 }
 
 export interface IKin {
+    id?: number;
     name: string;
     inventory?: Item[];
 }
 
 export class Kin implements IKin {
+    id: number;
     name: string;
     inventory: Item[];
 
     icon: string = "👤";
 
     constructor({ name, inventory }: IKin) {
+        this.id = GetNextId();
         this.name = name;
         this.inventory = inventory || [];
     }

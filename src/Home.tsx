@@ -1,10 +1,11 @@
 import { initialize } from "esbuild";
-import { Box, Button, Grid, Heading, Meter, Text } from "grommet";
+import { Box, Button, Grid, Heading, Meter, Stack, Text } from "grommet";
 import * as React from "react";
 import { Action, Entity, Item, Kin } from "./Classes";
 import { groupBy } from "lodash";
 import _ from "lodash";
 import { actions } from "./Actions";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 
 const Home = () => {
     const [inventory, setInventory] = React.useState([] as Item[]);
@@ -62,44 +63,46 @@ const Home = () => {
 
     return (
         <>
-            <Box style={{ maxHeight: "10px" }}>
-                <Meter value={ticks % 100} max={100}></Meter>
-            </Box>
-            <Box direction="row" gap="small">
-                <Box height={{ min: "200px" }}>
-                    <Heading level={3}>Inventory</Heading>
-                    <Inventory inventory={inventory}></Inventory>
+            <LayoutGroup>
+                <Box style={{ maxHeight: "10px" }}>
+                    <Meter value={ticks % 100} max={100}></Meter>
                 </Box>
-                <Box height={{ min: "200px" }}>
-                    {kins.length > 0 && <Heading level={3}>Kins</Heading>}
-                    <Kins kins={kins}></Kins>
+                <Box direction="row" gap="small">
+                    <Box height={{ min: "200px" }} width={"320px"} border pad={"small"}>
+                        <Heading level={3}>Inventory</Heading>
+                        <Inventory inventory={inventory}></Inventory>
+                    </Box>
+                    <Box height={{ min: "200px" }} width={"320px"}>
+                        {kins.length > 0 && <Heading level={3}>Kins</Heading>}
+                        <Kins kins={kins}></Kins>
+                    </Box>
                 </Box>
-            </Box>
-            <Entities entities={entities} performEntityAction={performEntityAction} inventory={inventory} milestones={milestones}></Entities>
-            <Box direction="row" gap="small">
-                <Box gap="small">
-                    <Text>Actions</Text>
-                    {actions
-                        .filter((action) => action.source?.length == 0)
-                        .filter((action) => action.type?.length == 0)
-                        .filter((action) => action.milestones(inventory, entities, milestones))
-                        .map((action) => (
-                            <ActionButton key={action.name} action={action} performAction={performAction} disabled={!action?.condition(inventory, entities)}></ActionButton>
-                        ))}
-                </Box>
-                {milestones.length > 0 && (
+                <Entities entities={entities} performEntityAction={performEntityAction} inventory={inventory} milestones={milestones}></Entities>
+                <Box direction="row" gap="small">
                     <Box gap="small">
-                        <Text>Rituals</Text>
+                        <Text>Actions</Text>
                         {actions
                             .filter((action) => action.source?.length == 0)
-                            .filter((action) => action.type?.includes("Ritual"))
+                            .filter((action) => action.type?.length == 0)
                             .filter((action) => action.milestones(inventory, entities, milestones))
                             .map((action) => (
                                 <ActionButton key={action.name} action={action} performAction={performAction} disabled={!action?.condition(inventory, entities)}></ActionButton>
                             ))}
                     </Box>
-                )}
-            </Box>
+                    {milestones.length > 0 && (
+                        <Box gap="small">
+                            <Text>Rituals</Text>
+                            {actions
+                                .filter((action) => action.source?.length == 0)
+                                .filter((action) => action.type?.includes("Ritual"))
+                                .filter((action) => action.milestones(inventory, entities, milestones))
+                                .map((action) => (
+                                    <ActionButton key={action.name} action={action} performAction={performAction} disabled={!action?.condition(inventory, entities)}></ActionButton>
+                                ))}
+                        </Box>
+                    )}
+                </Box>
+            </LayoutGroup>
         </>
     );
 };
@@ -110,26 +113,27 @@ const ActionButton = ({ action, performAction, disabled }) => {
 
 const Inventory = ({ inventory, compact }: { inventory: Item[]; compact?: boolean }) => {
     return (
-        <Grid columns={{ size: "20px", count: 5 }} gap={"small"}>
-            {_(inventory)
-                .orderBy((i) => i.name)
-                .groupBy((i) => i.name)
-                .toPairs()
-                .map(([key, items]) => (
-                    <Box key={"items" + key} border align="center">
-                        <Text>{items[0].icon}</Text>
-                        {!compact && (
-                            <>
-                                <Text>
-                                    {key}: {items.length}
-                                </Text>
-                                {items.every((item) => item.durability != -1) && <Text>({_(items).meanBy((i) => i.durability / i.maxDurability) * 100}%)</Text>}
-                            </>
-                        )}
-                        
-                    </Box>
-                ))
-                .value()}
+        <Grid columns={{ size: "auto", count: 5 }} gap={"small"}>
+            <AnimatePresence>
+                {inventory.map((item, i) => (
+                    <motion.div layout layoutId={item.id.toString()} key={item.id} initial={{ opacity: 0, scale: 0 }} exit={{ opacity: [1, 1, 1, 1, 0], scale: [1, 1, 1, 1, 0], rotate: [3, 0, -3, 3, -3] }} animate={{ opacity: 1, scale: [0, 0.8, 1.1, 1] }} transition={{ ease: "easeIn", duration: 0.3 }}>
+                        <Stack anchor="bottom" fill>
+                            <Box border={!compact} align="center" width={"50px"} height={compact ? "30px" : "50px"}>
+                                <Text>{item.icon}</Text>
+                                {!compact && (
+                                    <>
+                                        <Text>{item.name}</Text>
+                                        {/* {item.durability != -1 && <Text>({(item.durability / item.maxDurability) * 100}%)</Text>} */}
+                                    </>
+                                )}
+                            </Box>
+                            <Box fill="horizontal" height={"5px"} width={"50px"}>
+                                {item.durability != -1 && <Meter value={item.durability} max={item.maxDurability}></Meter>}
+                            </Box>
+                        </Stack>
+                    </motion.div>
+                ))}
+            </AnimatePresence>
         </Grid>
     );
 };
@@ -161,22 +165,25 @@ const Entities = ({ entities, performEntityAction, inventory, milestones }: { en
 
 const Kins = ({ kins }: { kins: Kin[] }) => {
     return (
-        <Grid columns={{ size: "20px", count: 5 }} gap={"small"}>
-            {_(kins)
-                .orderBy((i) => i.name)
-                .groupBy((i) => i.name)
-                .toPairs()
-                .map(([key, kins]) => (
-                    <Box key={"kin" + key} border align="center">
-                        <Text>{kins[0].icon}</Text>
-                        <Text>
-                            {key}: {kins.length}
-                        </Text>
-                        <Inventory inventory={kins.flatMap((k) => k.inventory)} compact={true}></Inventory>
-                    </Box>
-                ))
-                .value()}
-        </Grid>
+        <AnimatePresence>
+            <Box gap={"small"}>
+                {kins.map((kin, i) => (
+                    <motion.div layout layoutId={kin.id.toString()} key={kin.id} initial={{ opacity: 0, scale: 0 }} exit={{ opacity: [1, 1, 1, 1, 0], scale: [1, 1, 1, 1, 0], rotate: [3, 0, -3, 3, -3] }} animate={{ opacity: 1, scale: [0, 0.8, 1.1, 1] }} transition={{ ease: "easeIn", duration: 0.3 }}>
+                        <Stack anchor="bottom" fill>
+                            <Box direction="row" border pad={"small"} width={"350px"}>
+                                <Box align="center" height={"50px"}>
+                                    <Text>{kin.icon}</Text>
+                                    <Text>{kin.name}</Text>
+                                </Box>
+                                <Box width={"300px"}>
+                                    <Inventory inventory={kin.inventory} compact={true}></Inventory>
+                                </Box>
+                            </Box>
+                        </Stack>
+                    </motion.div>
+                ))}
+            </Box>
+        </AnimatePresence>
     );
 };
 
