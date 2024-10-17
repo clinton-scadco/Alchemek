@@ -1,11 +1,11 @@
 import { Action, Entity, Item, Kin } from "./Classes";
-import { HeatedStone, Stone, Tool, Wood } from "./Eras/One";
+import { HeatedStone, LanguageRite, Stone, Tool, Wood } from "./Eras/One";
 
-function RemoveItem(inventory: Item[], name, count) {
+export function RemoveItem(inventory: Item[], name, count) {
     let removedCount = 0;
 
     while (removedCount < count) {
-        for (let i = 0; i < inventory.length; i++) {
+        for (let i = inventory.length - 1; i >= 0; i--) {
             if (inventory[i].name === name) {
                 inventory.splice(i, 1);
                 removedCount++;
@@ -19,7 +19,7 @@ export const EvaluateRequirements = (inventory: Item[], entities: Entity[], kins
     let met = true;
     requirements.forEach((requirement) => {
         let [item, count] = requirement;
-        met = met && inventory.filter((i) => i.name == item).length >= count;
+        met = met && (inventory.filter((i) => i.name == item).length >= count || entities.filter((i) => i.name == item).length >= count || kins.filter((i) => i.name == item).length >= count);
     });
     return met;
 };
@@ -73,7 +73,7 @@ export const actions = [
     }),
     new Action({
         name: "Feed Fire",
-        perform: (inventory, entities, kins, source) => {
+        perform: (inventory, entities, kins, rites, source) => {
             RemoveItem(inventory, "Wood", 1);
             let fire = source;
             if (fire) {
@@ -86,15 +86,15 @@ export const actions = [
                 fire.temperature += 10;
             }
         },
-        condition: (inventory, entities) => {
-            return !!entities.find((entity) => entity.name === "Fire");
-        },
         source: ["Fire"],
-        requires: [["Wood", 1]],
+        requires: [
+            ["Wood", 1],
+            ["Fire", 1],
+        ],
     }),
     new Action({
         name: "Emberstone",
-        perform: (inventory, entities, source) => {
+        perform: (inventory, entities) => {
             RemoveItem(inventory, "Heated Stone", 2);
             entities.push(
                 new Entity({
@@ -107,7 +107,7 @@ export const actions = [
             return !!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200);
         },
         requires: [["Heated Stone", 2]],
-        milestones: (inventory, entities, milestones) => {
+        milestones: (inventory, entities, kins, rites, milestones) => {
             if (!!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200) && !milestones.includes("Emberstone")) {
                 milestones.push("Emberstone");
             }
@@ -117,7 +117,7 @@ export const actions = [
     }),
     new Action({
         name: "Heat Stone",
-        perform: (inventory, entities, kins, source) => {
+        perform: (inventory, entities, kins, rites, source) => {
             RemoveItem(inventory, "Stone", 1);
             let fire = source;
             if (fire && fire.name == "Fire") {
@@ -125,10 +125,27 @@ export const actions = [
             }
             inventory.push(new HeatedStone());
         },
-        condition: (inventory, entities, source) => {
+        condition: (inventory, entities, kins, rites, source) => {
             return !!entities.find((entity) => entity.name === "Fire") && !!source && source.temperature >= 150;
         },
         source: ["Fire", "Emberstone"],
         requires: [["Stone", 1]],
+    }),
+    new Action({
+        name: "Language",
+        perform: (inventory, entities, source, rites) => {
+            rites.push(new LanguageRite());
+        },
+        condition: (inventory, entities, kins, rites) => {
+            return kins.filter((kin) => kin.name === "Kin").length >= 5 && !rites.find((rite) => rite.name === "Language");
+        },
+        requires: [["Kin", 5]],
+        milestones: (inventory, entities, kins, rites, milestones) => {
+            if (kins.filter((kin) => kin.name === "Kin").length >= 5 && !milestones.includes("Language")) {
+                milestones.push("Language");
+            }
+            return milestones.includes("Language");
+        },
+        type: ["Rite"],
     }),
 ];

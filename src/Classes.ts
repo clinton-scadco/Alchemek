@@ -2,10 +2,10 @@ import { GetNextId } from "./utils/Data";
 
 export interface IAction {
     name: string;
-    perform?: (inventory: Item[], entities: Entity[], kins: Kin[], source?: Entity) => void;
+    perform?: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], source?: Entity) => void;
 
-    condition?: (inventory: Item[], entities: Entity[], source?: Entity) => boolean;
-    milestones?: (inventory: Item[], entities: Entity[], milestones: string[]) => boolean;
+    condition?: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], source?: Entity) => boolean;
+    milestones?: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], milestones: string[]) => boolean;
     requires?: [string, number][];
     source?: string[];
     type?: string[];
@@ -13,10 +13,10 @@ export interface IAction {
 
 export class Action implements IAction {
     name: string;
-    perform: (inventory: Item[], entities: Entity[], kins: Kin[], source?: Entity) => void;
+    perform: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], source?: Entity) => void;
 
-    condition: (inventory: Item[], entities: Entity[], source?: Entity) => boolean;
-    milestones: (inventory: Item[], entities: Entity[], milestones: string[]) => boolean;
+    condition: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], source?: Entity) => boolean;
+    milestones: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], milestones: string[]) => boolean;
     requires: [string, number][];
     source?: string[];
     type?: string[];
@@ -30,6 +30,41 @@ export class Action implements IAction {
         this.requires = requires || [];
         this.source = source || [];
         this.type = type || [];
+    }
+}
+
+export interface IRite {
+    name: string;
+    ingredients: [string, number][];
+    progress?: [string, number][];
+}
+
+export class Rite {
+    id: number;
+    name: string;
+    ingredients: [string, number][];
+    progress: [string, number][];
+
+    icon: string = "📦";
+
+    constructor({ name, ingredients }: IRite) {
+        this.id = GetNextId();
+        this.name = name;
+        this.ingredients = ingredients || [];
+        this.progress = [];
+    }
+
+    isComplete() {
+        return this.ingredients.every(([name, count]) => {
+            return this.progress.filter(([n, c]) => n == name && c == count).length > 0;
+        });
+    }
+
+    offerItem(item: string) {
+        let p = this.progress.find(([name, count]) => name == item);
+        if (p) {
+            p[1] += 1;
+        } else [this.progress.push([item, 1])];
     }
 }
 
@@ -55,11 +90,9 @@ export class Entity implements IEntity {
 }
 
 export interface IItem {
-    id: number;
     name: string;
     durability?: number;
     maxDurability?: number;
-    icon: string;
 }
 
 export class Item implements IItem {
@@ -70,8 +103,8 @@ export class Item implements IItem {
 
     icon: string = "📦";
 
-    constructor({ id, name, durability, maxDurability }: IItem) {
-        this.id = id;
+    constructor({ name, durability, maxDurability }: IItem) {
+        this.id = GetNextId();
         this.name = name;
         this.durability = durability || -1;
         this.maxDurability = maxDurability || durability || -1;
@@ -79,7 +112,6 @@ export class Item implements IItem {
 }
 
 export interface IKin {
-    id?: number;
     name: string;
     inventory?: Item[];
 }
