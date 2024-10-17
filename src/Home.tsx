@@ -4,7 +4,7 @@ import * as React from "react";
 import { Action, Entity, Item, Kin } from "./Classes";
 import { groupBy } from "lodash";
 import _ from "lodash";
-import { actions } from "./Actions";
+import { actions, EvaluateRequirements } from "./Actions";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 
 const Home = () => {
@@ -77,7 +77,7 @@ const Home = () => {
                         <Kins kins={kins}></Kins>
                     </Box>
                 </Box>
-                <Entities entities={entities} performEntityAction={performEntityAction} inventory={inventory} milestones={milestones}></Entities>
+                <Entities entities={entities} performEntityAction={performEntityAction} inventory={inventory} milestones={milestones} kins={kins}></Entities>
                 <Box direction="row" gap="small">
                     <Box gap="small">
                         <Text>Actions</Text>
@@ -86,7 +86,12 @@ const Home = () => {
                             .filter((action) => action.type?.length == 0)
                             .filter((action) => action.milestones(inventory, entities, milestones))
                             .map((action) => (
-                                <ActionButton key={action.name} action={action} performAction={performAction} disabled={!action?.condition(inventory, entities)}></ActionButton>
+                                <ActionButton
+                                    key={action.name}
+                                    action={action}
+                                    performAction={performAction}
+                                    disabled={!(action?.condition(inventory, entities) && EvaluateRequirements(inventory, entities, kins, action.requires))}
+                                ></ActionButton>
                             ))}
                     </Box>
                     {milestones.length > 0 && (
@@ -97,7 +102,12 @@ const Home = () => {
                                 .filter((action) => action.type?.includes("Ritual"))
                                 .filter((action) => action.milestones(inventory, entities, milestones))
                                 .map((action) => (
-                                    <ActionButton key={action.name} action={action} performAction={performAction} disabled={!action?.condition(inventory, entities)}></ActionButton>
+                                    <ActionButton
+                                        key={action.name}
+                                        action={action}
+                                        performAction={performAction}
+                                        disabled={!(action?.condition(inventory, entities) && EvaluateRequirements(inventory, entities, kins, action.requires))}
+                                    ></ActionButton>
                                 ))}
                         </Box>
                     )}
@@ -116,7 +126,15 @@ const Inventory = ({ inventory, compact }: { inventory: Item[]; compact?: boolea
         <Grid columns={{ size: "auto", count: 5 }} gap={"small"}>
             <AnimatePresence>
                 {inventory.map((item, i) => (
-                    <motion.div layout layoutId={item.id.toString()} key={item.id} initial={{ opacity: 0, scale: 0 }} exit={{ opacity: [1, 1, 1, 1, 0], scale: [1, 1, 1, 1, 0], rotate: [3, 0, -3, 3, -3] }} animate={{ opacity: 1, scale: [0, 0.8, 1.1, 1] }} transition={{ ease: "easeIn", duration: 0.3 }}>
+                    <motion.div
+                        layout
+                        layoutId={item.id.toString()}
+                        key={item.id}
+                        initial={{ opacity: 0, scale: 0 }}
+                        exit={{ opacity: [1, 1, 1, 1, 0], scale: [1, 1, 1, 1, 0], rotate: [3, 0, -3, 3, -3] }}
+                        animate={{ opacity: 1, scale: [0, 0.8, 1.1, 1] }}
+                        transition={{ ease: "easeIn", duration: 0.3 }}
+                    >
                         <Stack anchor="bottom" fill>
                             <Box border={!compact} align="center" width={"50px"} height={compact ? "30px" : "50px"}>
                                 <Text>{item.icon}</Text>
@@ -138,7 +156,7 @@ const Inventory = ({ inventory, compact }: { inventory: Item[]; compact?: boolea
     );
 };
 
-const Entities = ({ entities, performEntityAction, inventory, milestones }: { entities: Entity[]; performEntityAction: Function; inventory: Item[]; milestones: string[] }) => {
+const Entities = ({ entities, performEntityAction, inventory, milestones, kins }: { entities: Entity[]; performEntityAction: Function; inventory: Item[]; milestones: string[]; kins: Kin[] }) => {
     return (
         <Box height={{ min: "200px" }}>
             <Heading level={3}>Entities</Heading>
@@ -153,7 +171,12 @@ const Entities = ({ entities, performEntityAction, inventory, milestones }: { en
                                 .filter((action) => action.source?.includes(entity.name))
                                 .filter((action) => action.milestones(inventory, entities, milestones))
                                 .map((action) => (
-                                    <ActionButton key={action.name} action={action} performAction={() => performEntityAction(action, entity)} disabled={!action?.condition(inventory, entities, entity)}></ActionButton>
+                                    <ActionButton
+                                        key={action.name}
+                                        action={action}
+                                        performAction={() => performEntityAction(action, entity)}
+                                        disabled={!(action?.condition(inventory, entities, entity) && EvaluateRequirements(inventory, entities, kins, action.requires))}
+                                    ></ActionButton>
                                 ))}
                         </Box>
                     </li>
@@ -168,7 +191,15 @@ const Kins = ({ kins }: { kins: Kin[] }) => {
         <AnimatePresence>
             <Box gap={"small"}>
                 {kins.map((kin, i) => (
-                    <motion.div layout layoutId={kin.id.toString()} key={kin.id} initial={{ opacity: 0, scale: 0 }} exit={{ opacity: [1, 1, 1, 1, 0], scale: [1, 1, 1, 1, 0], rotate: [3, 0, -3, 3, -3] }} animate={{ opacity: 1, scale: [0, 0.8, 1.1, 1] }} transition={{ ease: "easeIn", duration: 0.3 }}>
+                    <motion.div
+                        layout
+                        layoutId={kin.id.toString()}
+                        key={kin.id}
+                        initial={{ opacity: 0, scale: 0 }}
+                        exit={{ opacity: [1, 1, 1, 1, 0], scale: [1, 1, 1, 1, 0], rotate: [3, 0, -3, 3, -3] }}
+                        animate={{ opacity: 1, scale: [0, 0.8, 1.1, 1] }}
+                        transition={{ ease: "easeIn", duration: 0.3 }}
+                    >
                         <Stack anchor="bottom" fill>
                             <Box direction="row" border pad={"small"} width={"350px"}>
                                 <Box align="center" height={"50px"}>

@@ -6,6 +6,7 @@ export interface IAction {
 
     condition?: (inventory: Item[], entities: Entity[], source?: Entity) => boolean;
     milestones?: (inventory: Item[], entities: Entity[], milestones: string[]) => boolean;
+    requires?: [string, number][];
     source?: string[];
     type?: string[];
 }
@@ -16,15 +17,17 @@ export class Action implements IAction {
 
     condition: (inventory: Item[], entities: Entity[], source?: Entity) => boolean;
     milestones: (inventory: Item[], entities: Entity[], milestones: string[]) => boolean;
+    requires: [string, number][];
     source?: string[];
     type?: string[];
 
-    constructor({ name, perform, condition, milestones, source, type }: IAction) {
+    constructor({ name, perform, condition, milestones, requires, source, type }: IAction) {
         this.name = name;
         this.perform = perform || (() => {});
 
         this.condition = condition || (() => true);
         this.milestones = milestones || (() => true);
+        this.requires = requires || [];
         this.source = source || [];
         this.type = type || [];
     }

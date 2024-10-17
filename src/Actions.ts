@@ -15,6 +15,15 @@ function RemoveItem(inventory: Item[], name, count) {
     }
 }
 
+export const EvaluateRequirements = (inventory: Item[], entities: Entity[], kins: Kin[], requirements: [string, number][], source?: Entity) => {
+    let met = true;
+    requirements.forEach((requirement) => {
+        let [item, count] = requirement;
+        met = met && inventory.filter((i) => i.name == item).length >= count;
+    });
+    return met;
+};
+
 export const actions = [
     new Action({
         name: "Collect Stone",
@@ -41,14 +50,14 @@ export const actions = [
                         }
                         this.temperature -= 2;
 
-                        if (ticks && ticks % 10 == 0 && this.temperature > 60) {
+                        if (ticks && ticks % 10 == 0 && this.temperature > 60 && kins.length < 5) {
                             kins.push(new Kin({ name: "Kin" }));
                         }
                     },
                 })
             );
         },
-        condition: (inventory) => inventory.filter((item) => item.name == "Wood").length >= 2,
+        requires: [["Wood", 2]],
     }),
     new Action({
         name: "Make Tool",
@@ -57,7 +66,10 @@ export const actions = [
             RemoveItem(inventory, "Stone", 1);
             inventory.push(new Tool(10));
         },
-        condition: (inventory) => inventory.filter((item) => item.name == "Wood").length >= 1 && inventory.filter((item) => item.name == "Stone").length >= 1,
+        requires: [
+            ["Wood", 1],
+            ["Stone", 1],
+        ],
     }),
     new Action({
         name: "Feed Fire",
@@ -75,9 +87,10 @@ export const actions = [
             }
         },
         condition: (inventory, entities) => {
-            return inventory.filter((item) => item.name == "Wood").length >= 1 ? !!entities.find((entity) => entity.name === "Fire") : false;
+            return !!entities.find((entity) => entity.name === "Fire");
         },
         source: ["Fire"],
+        requires: [["Wood", 1]],
     }),
     new Action({
         name: "Emberstone",
@@ -91,8 +104,9 @@ export const actions = [
             );
         },
         condition: (inventory, entities) => {
-            return inventory.filter((item) => item.name == "Heated Stone").length >= 2 ? !!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200) : false;
+            return !!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200);
         },
+        requires: [["Heated Stone", 2]],
         milestones: (inventory, entities, milestones) => {
             if (!!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200) && !milestones.includes("Emberstone")) {
                 milestones.push("Emberstone");
@@ -112,8 +126,9 @@ export const actions = [
             inventory.push(new HeatedStone());
         },
         condition: (inventory, entities, source) => {
-            return inventory.filter((item) => item.name == "Stone").length >= 1 && !!entities.find((entity) => entity.name === "Fire") && !!source && source.temperature >= 150;
+            return !!entities.find((entity) => entity.name === "Fire") && !!source && source.temperature >= 150;
         },
         source: ["Fire", "Emberstone"],
+        requires: [["Stone", 1]],
     }),
 ];
