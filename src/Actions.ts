@@ -35,25 +35,34 @@ export const actions = [
     }),
     new Action({
         name: "Make Fire",
-        perform: (inventory, entities, kins, source) => {
+        perform: (inventory, entities, kins, rites, source) => {
             RemoveItem(inventory, "Wood", 2);
             entities.push(
                 new Entity({
                     name: "Fire",
                     ttl: 30,
                     temperature: 100,
-                    tick: function (inventory, entities, kins, ticks) {
-                        if (this.temperature <= 100) {
-                            this.ttl -= 1;
+                    tick: (inventory, entities, kins, rites, ticks, source) => {
+                        if (source.temperature <= 100) {
+                            source.ttl -= 1;
                         } else {
-                            this.ttl = 30;
+                            source.ttl = 30;
                         }
-                        this.temperature -= 2;
-
-                        if (ticks && ticks % 10 == 0 && this.temperature > 60 && kins.length < 5) {
-                            kins.push(new Kin({ name: "Kin" }));
-                        }
+                        source.temperature -= 2;
                     },
+                    performs: [
+                        {
+                            name: "Gather",
+                            icon: "👤",
+                            ttp: 10,
+                            condition: (inventory, entities, kins, rites, source) => {
+                                return source.temperature > 60 && kins.length < 5;
+                            },
+                            perform: (inventory, entities, kins, rites, source) => {
+                                kins.push(new Kin({ name: "Kin" }));
+                            },
+                        },
+                    ],
                 })
             );
         },

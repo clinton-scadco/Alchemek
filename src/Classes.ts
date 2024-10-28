@@ -68,23 +68,36 @@ export class Rite {
     }
 }
 
+interface IEntityPerform {
+    icon: string;
+    name: string;
+    ttp: number;
+    condition: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], source: Entity) => boolean;
+    perform: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], source: Entity) => void;
+}
+
 export interface IEntity {
     name: string;
     ttl?: number;
     temperature?: number;
-    tick?: (inventory: Item[], entities: Entity[], kins: Kin[], ticks?: number) => void;
+    tick?: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], ticks: number, source: Entity) => void;
+    performs?: IEntityPerform[];
 }
 
 export class Entity implements IEntity {
     name: string;
     ttl: number;
     temperature: number;
-    tick: (inventory: Item[], entities: Entity[], kins: Kin[], ticks?: number) => void;
+    tick: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], ticks: number, source: Entity) => void;
+    performs: IEntityPerform[];
 
-    constructor({ name, ttl, temperature, tick }: IEntity) {
+    constructor({ name, ttl, temperature, tick, performs }: IEntity) {
         this.name = name;
         this.ttl = ttl || -1;
         this.temperature = temperature || 0;
+
+        this.performs = performs || [];
+
         this.tick = tick || (() => {});
     }
 }

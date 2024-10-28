@@ -7,7 +7,7 @@ import _ from "lodash";
 import { actions, EvaluateRequirements, RemoveItem } from "./Actions";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import * as Items from "./Eras/One";
-import { DayNight, DayNightColors } from "./utils/Theme";
+import { DayNightColors } from "./utils/Theme";
 
 const Home = () => {
     const [inventory, setInventory] = React.useState([] as Item[]);
@@ -54,7 +54,12 @@ const Home = () => {
         const intervalId = setInterval(() => {
             // Decrease ttl of each entity
             const updatedEntities = entities.map((entity) => {
-                entity.tick(inventory, entities, kins, ticks);
+                entity.tick(inventory, entities, kins, rites, ticks, entity);
+                entity.performs.forEach((perform) => {
+                    if (perform.ttp && ticks % perform.ttp == 0 && perform.condition(inventory, entities, kins, rites, entity)) {
+                        perform.perform(inventory, entities, kins, rites, entity);
+                    }
+                });
                 return entity;
             });
 
@@ -75,23 +80,11 @@ const Home = () => {
     return (
         <>
             <LayoutGroup>
-                <Box align="center" fill>
+                <Box align="center" fill gap={"xsmall"}>
                     <Box fill>
-                        <Meter color={DayNightColors[Math.floor((ticks % 100) / 100 * DayNightColors.length)]} value={ticks % 100} max={100} size="full" thickness="10px"></Meter>
+                        <Meter color={DayNightColors[Math.floor(((ticks % 100) / 100) * DayNightColors.length)]} value={ticks % 100} max={100} size="full" thickness="10px"></Meter>
                     </Box>
-                    
-                    <Box direction="row" gap="small">
-                        <Box height={{ min: "200px" }} width={"320px"} border pad={"small"}>
-                            <Heading level={3}>Inventory</Heading>
-                            <Inventory inventory={inventory}></Inventory>
-                        </Box>
-                        <Box height={{ min: "200px" }} width={"320px"}>
-                            {kins.length > 0 && <Heading level={3}>Kins</Heading>}
-                            <Kins kins={kins}></Kins>
-                        </Box>
-                    </Box>
-                    <Entities entities={entities} performEntityAction={performEntityAction} inventory={inventory} milestones={milestones} kins={kins} rites={rites}></Entities>
-                    <Box direction="row" gap="small">
+                    <Box direction="row" gap="small" align="start" fill>
                         <Box gap="small">
                             <Text>Actions</Text>
                             {actions
@@ -133,6 +126,7 @@ const Home = () => {
                                     .filter((action) => action.milestones(inventory, entities, kins, rites, milestones))
                                     .map((action) => (
                                         <ActionButton
+                                            primary={rites.find((rite) => rite.name == action.name)?.isComplete()}
                                             key={action.name}
                                             action={action}
                                             performAction={performAction}
@@ -172,14 +166,25 @@ const Home = () => {
                             </Box>
                         )}
                     </Box>
+                    <Entities entities={entities} performEntityAction={performEntityAction} inventory={inventory} milestones={milestones} kins={kins} rites={rites} ticks={ticks}></Entities>
+                    <Box direction="row" gap="small" fill align="start">
+                        <Box height={{ min: "200px" }} width={"320px"} border pad={"small"}>
+                            <Text>Inventory</Text>
+                            <Inventory inventory={inventory}></Inventory>
+                        </Box>
+                        <Box height={{ min: "200px" }} width={"320px"}>
+                            {kins.length > 0 && <Text>Kins</Text>}
+                            <Kins kins={kins}></Kins>
+                        </Box>
+                    </Box>
                 </Box>
             </LayoutGroup>
         </>
     );
 };
 
-const ActionButton = ({ action, performAction, disabled }) => {
-    return <Button label={action.name} onClick={() => performAction(action)} disabled={disabled}></Button>;
+const ActionButton = ({ action, performAction, disabled, ...props }) => {
+    return <Button label={action.name} onClick={() => performAction(action)} disabled={disabled} {...props}></Button>;
 };
 
 const Inventory = ({ inventory, compact }: { inventory: Item[]; compact?: boolean }) => {
@@ -224,6 +229,7 @@ const Entities = ({
     milestones,
     kins,
     rites,
+    ticks,
 }: {
     entities: Entity[];
     performEntityAction: Function;
@@ -231,32 +237,45 @@ const Entities = ({
     milestones: string[];
     kins: Kin[];
     rites: Rite[];
+    ticks: number;
 }) => {
     return (
-        <Box height={{ min: "200px" }}>
-            <Heading level={3}>Entities</Heading>
-            <ul>
+        <Box height={{ min: "200px" }} fill align="start">
+            <Text>Entities</Text>
+            <Box gap={"xsmall"}>
                 {entities.map((entity, i) => (
-                    <li key={"entitiy" + entity.name + i}>
-                        <Box direction="row" gap="small">
-                            <Text>{entity.name}</Text>
-                            {entity.ttl > 0 && <Text>{entity.ttl.toFixed(0)}s</Text>}
-                            <Text>{entity.temperature.toFixed(0)} &#176;C</Text>
-                            {actions
-                                .filter((action) => action.source?.includes(entity.name))
-                                .filter((action) => action.milestones(inventory, entities, kins, rites, milestones))
-                                .map((action) => (
-                                    <ActionButton
-                                        key={action.name}
-                                        action={action}
-                                        performAction={() => performEntityAction(action, entity)}
-                                        disabled={!(action?.condition(inventory, entities, kins, rites, entity) && EvaluateRequirements(inventory, entities, kins, action.requires))}
-                                    ></ActionButton>
-                                ))}
+                    <Box key={"entitiy" + entity.name + i} direction="row" gap="small">
+                        <Box>
+                            <Box direction="row" gap={"small"}>
+                                <Text>{entity.name}</Text>
+                                {entity.ttl > 0 && <Text>{entity.ttl.toFixed(0)}s</Text>}
+                                {entity.temperature != 0 && <Text>{entity.temperature.toFixed(0)} &#176;C</Text>}
+                            </Box>
+                            {entity.performs.map((perform) => (
+                                <Box key={"entitiy" + entity.name + i + "perform" + perform.name} direction="row" gap={"xsmall"} align="center">
+                                    {perform.ttp > 0 && perform.condition(inventory, entities, kins, rites, entity) && (
+                                        <>
+                                            <Text>{perform.icon}</Text>
+                                            <Meter value={(ticks % perform.ttp) - 1} max={perform.ttp} thickness="10px" size="full"></Meter>
+                                        </>
+                                    )}
+                                </Box>
+                            ))}
                         </Box>
-                    </li>
+                        {actions
+                            .filter((action) => action.source?.includes(entity.name))
+                            .filter((action) => action.milestones(inventory, entities, kins, rites, milestones))
+                            .map((action) => (
+                                <ActionButton
+                                    key={action.name}
+                                    action={action}
+                                    performAction={() => performEntityAction(action, entity)}
+                                    disabled={!(action?.condition(inventory, entities, kins, rites, entity) && EvaluateRequirements(inventory, entities, kins, action.requires))}
+                                ></ActionButton>
+                            ))}
+                    </Box>
                 ))}
-            </ul>
+            </Box>
         </Box>
     );
 };
