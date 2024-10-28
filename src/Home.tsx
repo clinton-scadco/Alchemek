@@ -1,7 +1,7 @@
 import { initialize } from "esbuild";
 import { Box, Button, Grid, Heading, Meter, Stack, Text } from "grommet";
 import * as React from "react";
-import { Action, Entity, Item, Kin, Rite } from "./Classes";
+import { Action, Entity, GameState, Item, Kin, Rite } from "./Classes";
 import { groupBy, values } from "lodash";
 import _ from "lodash";
 import { actions, EvaluateRequirements, RemoveItem } from "./Actions";
@@ -27,14 +27,14 @@ const Home = () => {
     };
 
     const performAction = (action: Action) => {
-        action.perform(inventory, entities, kins, rites);
+        action.perform({ inventory, entities, kins, rites, milestones, ticks } as GameState);
         setInventory([...inventory]);
         setEntities([...entities]);
         setKins([...kins]);
     };
 
     const performEntityAction = (action: Action, entity: Entity) => {
-        action.perform(inventory, entities, kins, rites, entity);
+        action.perform({ inventory, entities, kins, rites, milestones, ticks } as GameState, entity);
         setInventory([...inventory]);
         setEntities([...entities]);
         setKins([...kins]);
@@ -43,7 +43,7 @@ const Home = () => {
     React.useEffect(() => {
         let newMilestones = [...milestones];
         actions.forEach((action) => {
-            action.milestones(inventory, entities, kins, rites, newMilestones);
+            action.milestones({ inventory, entities, kins, rites, milestones: newMilestones, ticks } as GameState);
         });
         setMilestones(newMilestones);
     }, [inventory, entities]);
@@ -54,17 +54,17 @@ const Home = () => {
         const intervalId = setInterval(() => {
             // Decrease ttl of each entity
             const updatedEntities = entities.map((entity) => {
-                entity.tick(inventory, entities, kins, rites, ticks, entity);
+                entity.tick({ inventory, entities, kins, rites, ticks } as GameState, entity);
                 entity.performs.forEach((perform) => {
-                    if (perform.ttp && ticks % perform.ttp == 0 && perform.condition(inventory, entities, kins, rites, entity)) {
-                        perform.perform(inventory, entities, kins, rites, entity);
+                    if (perform.ttp && ticks % perform.ttp == 0 && perform.condition({ inventory, entities, kins, rites, milestones, ticks } as GameState, entity)) {
+                        perform.perform({ inventory, entities, kins, rites, milestones, ticks } as GameState, entity);
                     }
                 });
                 return entity;
             });
 
             const updatedKins = kins.map((kin) => {
-                kin.tick(inventory, entities, kins, ticks);
+                kin.tick({ inventory, entities, kins, ticks } as GameState);
                 return kin;
             });
             setEntities(updatedEntities.filter((entity) => entity.ttl != 0));
@@ -90,13 +90,18 @@ const Home = () => {
                             {actions
                                 .filter((action) => action.source?.length == 0)
                                 .filter((action) => action.type?.length == 0)
-                                .filter((action) => action.milestones(inventory, entities, kins, rites, milestones))
+                                .filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks } as GameState))
                                 .map((action) => (
                                     <ActionButton
                                         key={action.name}
                                         action={action}
                                         performAction={performAction}
-                                        disabled={!(action?.condition(inventory, entities, kins, rites) && EvaluateRequirements(inventory, entities, kins, action.requires))}
+                                        disabled={
+                                            !(
+                                                action?.condition({ inventory, entities, kins, rites, milestones, ticks } as GameState) &&
+                                                EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires)
+                                            )
+                                        }
                                     ></ActionButton>
                                 ))}
                         </Box>
@@ -106,13 +111,18 @@ const Home = () => {
                                 {actions
                                     .filter((action) => action.source?.length == 0)
                                     .filter((action) => action.type?.includes("Ritual"))
-                                    .filter((action) => action.milestones(inventory, entities, kins, rites, milestones))
+                                    .filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks } as GameState))
                                     .map((action) => (
                                         <ActionButton
                                             key={action.name}
                                             action={action}
                                             performAction={performAction}
-                                            disabled={!(action?.condition(inventory, entities, kins, rites) && EvaluateRequirements(inventory, entities, kins, action.requires))}
+                                            disabled={
+                                                !(
+                                                    action?.condition({ inventory, entities, kins, rites, milestones, ticks } as GameState) &&
+                                                    EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires)
+                                                )
+                                            }
                                         ></ActionButton>
                                     ))}
                             </Box>
@@ -123,14 +133,19 @@ const Home = () => {
                                 {actions
                                     .filter((action) => action.source?.length == 0)
                                     .filter((action) => action.type?.includes("Rite"))
-                                    .filter((action) => action.milestones(inventory, entities, kins, rites, milestones))
+                                    .filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks } as GameState))
                                     .map((action) => (
                                         <ActionButton
                                             primary={rites.find((rite) => rite.name == action.name)?.isComplete()}
                                             key={action.name}
                                             action={action}
                                             performAction={performAction}
-                                            disabled={!(action?.condition(inventory, entities, kins, rites) && EvaluateRequirements(inventory, entities, kins, action.requires))}
+                                            disabled={
+                                                !(
+                                                    action?.condition({ inventory, entities, kins, rites, milestones, ticks } as GameState) &&
+                                                    EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires)
+                                                )
+                                            }
                                         ></ActionButton>
                                     ))}
                             </Box>
@@ -153,7 +168,7 @@ const Home = () => {
                                                         <Button
                                                             label={"Offer " + name}
                                                             onClick={() => performOffering(rite, name)}
-                                                            disabled={!EvaluateRequirements(inventory, entities, kins, [[name, 1]])}
+                                                            disabled={!EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, [[name, 1]])}
                                                         ></Button>
                                                     </Box>
                                                     <Box fill="horizontal" height={"5px"} width={"50px"}>
@@ -253,7 +268,7 @@ const Entities = ({
                             </Box>
                             {entity.performs.map((perform) => (
                                 <Box key={"entitiy" + entity.name + i + "perform" + perform.name} direction="row" gap={"xsmall"} align="center">
-                                    {perform.ttp > 0 && perform.condition(inventory, entities, kins, rites, entity) && (
+                                    {perform.ttp > 0 && perform.condition({ inventory, entities, kins, rites, milestones, ticks } as GameState, entity) && (
                                         <>
                                             <Text>{perform.icon}</Text>
                                             <Meter value={(ticks % perform.ttp) - 1} max={perform.ttp} thickness="10px" size="full"></Meter>
@@ -264,13 +279,18 @@ const Entities = ({
                         </Box>
                         {actions
                             .filter((action) => action.source?.includes(entity.name))
-                            .filter((action) => action.milestones(inventory, entities, kins, rites, milestones))
+                            .filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks } as GameState))
                             .map((action) => (
                                 <ActionButton
                                     key={action.name}
                                     action={action}
                                     performAction={() => performEntityAction(action, entity)}
-                                    disabled={!(action?.condition(inventory, entities, kins, rites, entity) && EvaluateRequirements(inventory, entities, kins, action.requires))}
+                                    disabled={
+                                        !(
+                                            action?.condition({ inventory, entities, kins, rites, milestones, ticks } as GameState, entity) &&
+                                            EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires)
+                                        )
+                                    }
                                 ></ActionButton>
                             ))}
                     </Box>

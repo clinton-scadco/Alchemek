@@ -67670,11 +67670,11 @@
     giveItem(item) {
       this.inventory.push(item);
     }
-    tick(inventory, entities, kins, ticks) {
-      if (!this.inventory.some((i) => i.name == "Tool") && inventory.some((i) => i.name == "Tool")) {
-        let tool = inventory.find((i) => i.name == "Tool");
+    tick(state) {
+      if (!this.inventory.some((i) => i.name == "Tool") && state.inventory.some((i) => i.name == "Tool")) {
+        let tool = state.inventory.find((i) => i.name == "Tool");
         if (tool) {
-          inventory.splice(inventory.indexOf(tool), 1);
+          state.inventory.splice(state.inventory.indexOf(tool), 1);
           this.giveItem(tool);
         }
       }
@@ -67726,33 +67726,33 @@
       }
     }
   }
-  var EvaluateRequirements = (inventory, entities, kins, requirements, source) => {
+  var EvaluateRequirements = (state, requirements, source) => {
     let met = true;
     requirements.forEach((requirement) => {
       let [item, count] = requirement;
-      met = met && (inventory.filter((i) => i.name == item).length >= count || entities.filter((i) => i.name == item).length >= count || kins.filter((i) => i.name == item).length >= count);
+      met = met && (state.inventory.filter((i) => i.name == item).length >= count || state.entities.filter((i) => i.name == item).length >= count || state.kins.filter((i) => i.name == item).length >= count);
     });
     return met;
   };
   var actions = [
     new Action2({
       name: "Collect Stone",
-      perform: (inventory) => inventory.push(new Stone())
+      perform: ({ inventory }) => inventory.push(new Stone())
     }),
     new Action2({
       name: "Collect Wood",
-      perform: (inventory) => inventory.push(new Wood())
+      perform: ({ inventory }) => inventory.push(new Wood())
     }),
     new Action2({
       name: "Make Fire",
-      perform: (inventory, entities, kins, rites, source) => {
+      perform: ({ inventory, entities, kins, rites }, source) => {
         RemoveItem(inventory, "Wood", 2);
         entities.push(
           new Entity({
             name: "Fire",
             ttl: 30,
             temperature: 100,
-            tick: (inventory2, entities2, kins2, rites2, ticks, source2) => {
+            tick: ({}, source2) => {
               if (source2.temperature <= 100) {
                 source2.ttl -= 1;
               } else {
@@ -67765,10 +67765,10 @@
                 name: "Gather",
                 icon: "\u{1F464}",
                 ttp: 10,
-                condition: (inventory2, entities2, kins2, rites2, source2) => {
+                condition: ({ kins: kins2 }, source2) => {
                   return source2.temperature > 60 && kins2.length < 5;
                 },
-                perform: (inventory2, entities2, kins2, rites2, source2) => {
+                perform: ({ kins: kins2 }, source2) => {
                   kins2.push(new Kin({ name: "Kin" }));
                 }
               }
@@ -67780,7 +67780,7 @@
     }),
     new Action2({
       name: "Make Tool",
-      perform: (inventory, entities, source) => {
+      perform: ({ inventory }, source) => {
         RemoveItem(inventory, "Wood", 1);
         RemoveItem(inventory, "Stone", 1);
         inventory.push(new Tool(10));
@@ -67792,7 +67792,7 @@
     }),
     new Action2({
       name: "Feed Fire",
-      perform: (inventory, entities, kins, rites, source) => {
+      perform: ({ inventory }, source) => {
         RemoveItem(inventory, "Wood", 1);
         let fire = source;
         if (fire) {
@@ -67811,7 +67811,7 @@
     }),
     new Action2({
       name: "Emberstone",
-      perform: (inventory, entities) => {
+      perform: ({ inventory, entities }) => {
         RemoveItem(inventory, "Heated Stone", 2);
         entities.push(
           new Entity({
@@ -67820,11 +67820,11 @@
           })
         );
       },
-      condition: (inventory, entities) => {
+      condition: ({ inventory, entities }) => {
         return !!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200);
       },
       requires: [["Heated Stone", 2]],
-      milestones: (inventory, entities, kins, rites, milestones) => {
+      milestones: ({ inventory, entities, kins, rites, milestones }) => {
         if (!!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200) && !milestones.includes("Emberstone")) {
           milestones.push("Emberstone");
         }
@@ -67834,7 +67834,7 @@
     }),
     new Action2({
       name: "Heat Stone",
-      perform: (inventory, entities, kins, rites, source) => {
+      perform: ({ inventory, entities, kins, rites }, source) => {
         RemoveItem(inventory, "Stone", 1);
         let fire = source;
         if (fire && fire.name == "Fire") {
@@ -67842,7 +67842,7 @@
         }
         inventory.push(new HeatedStone());
       },
-      condition: (inventory, entities, kins, rites, source) => {
+      condition: ({ inventory, entities, kins, rites }, source) => {
         return !!entities.find((entity) => entity.name === "Fire") && !!source && source.temperature >= 150;
       },
       source: ["Fire", "Emberstone"],
@@ -67850,14 +67850,14 @@
     }),
     new Action2({
       name: "Language",
-      perform: (inventory, entities, source, rites) => {
+      perform: ({ rites }) => {
         rites.push(new LanguageRite());
       },
-      condition: (inventory, entities, kins, rites) => {
+      condition: ({ kins, rites }) => {
         return kins.filter((kin) => kin.name === "Kin").length >= 5 && !rites.find((rite) => rite.name === "Language");
       },
       requires: [["Kin", 5]],
-      milestones: (inventory, entities, kins, rites, milestones) => {
+      milestones: ({ inventory, entities, kins, rites, milestones }) => {
         if (kins.filter((kin) => kin.name === "Kin").length >= 5 && !milestones.includes("Language")) {
           milestones.push("Language");
         }
@@ -75744,13 +75744,13 @@
       setRites([...rites]);
     };
     const performAction = (action) => {
-      action.perform(inventory, entities, kins, rites);
+      action.perform({ inventory, entities, kins, rites, milestones, ticks });
       setInventory([...inventory]);
       setEntities([...entities]);
       setKins([...kins]);
     };
     const performEntityAction = (action, entity) => {
-      action.perform(inventory, entities, kins, rites, entity);
+      action.perform({ inventory, entities, kins, rites, milestones, ticks }, entity);
       setInventory([...inventory]);
       setEntities([...entities]);
       setKins([...kins]);
@@ -75758,7 +75758,7 @@
     React38.useEffect(() => {
       let newMilestones = [...milestones];
       actions.forEach((action) => {
-        action.milestones(inventory, entities, kins, rites, newMilestones);
+        action.milestones({ inventory, entities, kins, rites, milestones: newMilestones, ticks });
       });
       setMilestones(newMilestones);
     }, [inventory, entities]);
@@ -75766,16 +75766,16 @@
     React38.useEffect(() => {
       const intervalId = setInterval(() => {
         const updatedEntities = entities.map((entity) => {
-          entity.tick(inventory, entities, kins, rites, ticks, entity);
+          entity.tick({ inventory, entities, kins, rites, ticks }, entity);
           entity.performs.forEach((perform2) => {
-            if (perform2.ttp && ticks % perform2.ttp == 0 && perform2.condition(inventory, entities, kins, rites, entity)) {
-              perform2.perform(inventory, entities, kins, rites, entity);
+            if (perform2.ttp && ticks % perform2.ttp == 0 && perform2.condition({ inventory, entities, kins, rites, milestones, ticks }, entity)) {
+              perform2.perform({ inventory, entities, kins, rites, milestones, ticks }, entity);
             }
           });
           return entity;
         });
         const updatedKins = kins.map((kin) => {
-          kin.tick(inventory, entities, kins, ticks);
+          kin.tick({ inventory, entities, kins, ticks });
           return kin;
         });
         setEntities(updatedEntities.filter((entity) => entity.ttl != 0));
@@ -75785,37 +75785,37 @@
       }, 1e3);
       return () => clearInterval(intervalId);
     }, [inventory, entities, kins]);
-    return /* @__PURE__ */ React38.createElement(React38.Fragment, null, /* @__PURE__ */ React38.createElement(LayoutGroup, null, /* @__PURE__ */ React38.createElement(Box, { align: "center", fill: true, gap: "xsmall" }, /* @__PURE__ */ React38.createElement(Box, { fill: true }, /* @__PURE__ */ React38.createElement(Meter, { color: DayNightColors[Math.floor(ticks % 100 / 100 * DayNightColors.length)], value: ticks % 100, max: 100, size: "full", thickness: "10px" })), /* @__PURE__ */ React38.createElement(Box, { direction: "row", gap: "small", align: "start", fill: true }, /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Actions"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.length == 0).filter((action) => action.milestones(inventory, entities, kins, rites, milestones)).map((action) => /* @__PURE__ */ React38.createElement(
+    return /* @__PURE__ */ React38.createElement(React38.Fragment, null, /* @__PURE__ */ React38.createElement(LayoutGroup, null, /* @__PURE__ */ React38.createElement(Box, { align: "center", fill: true, gap: "xsmall" }, /* @__PURE__ */ React38.createElement(Box, { fill: true }, /* @__PURE__ */ React38.createElement(Meter, { color: DayNightColors[Math.floor(ticks % 100 / 100 * DayNightColors.length)], value: ticks % 100, max: 100, size: "full", thickness: "10px" })), /* @__PURE__ */ React38.createElement(Box, { direction: "row", gap: "small", align: "start", fill: true }, /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Actions"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.length == 0).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React38.createElement(
       ActionButton,
       {
         key: action.name,
         action,
         performAction,
-        disabled: !(action?.condition(inventory, entities, kins, rites) && EvaluateRequirements(inventory, entities, kins, action.requires))
+        disabled: !(action?.condition({ inventory, entities, kins, rites, milestones, ticks }) && EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, action.requires))
       }
-    ))), milestones.length > 0 && /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Rituals"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.includes("Ritual")).filter((action) => action.milestones(inventory, entities, kins, rites, milestones)).map((action) => /* @__PURE__ */ React38.createElement(
+    ))), milestones.length > 0 && /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Rituals"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.includes("Ritual")).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React38.createElement(
       ActionButton,
       {
         key: action.name,
         action,
         performAction,
-        disabled: !(action?.condition(inventory, entities, kins, rites) && EvaluateRequirements(inventory, entities, kins, action.requires))
+        disabled: !(action?.condition({ inventory, entities, kins, rites, milestones, ticks }) && EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, action.requires))
       }
-    ))), milestones.length > 0 && /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Rites"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.includes("Rite")).filter((action) => action.milestones(inventory, entities, kins, rites, milestones)).map((action) => /* @__PURE__ */ React38.createElement(
+    ))), milestones.length > 0 && /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Rites"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.includes("Rite")).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React38.createElement(
       ActionButton,
       {
         primary: rites.find((rite) => rite.name == action.name)?.isComplete(),
         key: action.name,
         action,
         performAction,
-        disabled: !(action?.condition(inventory, entities, kins, rites) && EvaluateRequirements(inventory, entities, kins, action.requires))
+        disabled: !(action?.condition({ inventory, entities, kins, rites, milestones, ticks }) && EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, action.requires))
       }
     ))), milestones.length > 0 && /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Active Rites"), rites.filter((rite) => !rite.isComplete()).map((rite) => /* @__PURE__ */ React38.createElement(Box, { key: rite.id }, /* @__PURE__ */ React38.createElement(Text, null, rite.icon), /* @__PURE__ */ React38.createElement(Text, null, rite.name), rite.ingredients.map(([name, count]) => /* @__PURE__ */ React38.createElement(Box, { key: "rite" + rite.id + "ingredient" + name }, /* @__PURE__ */ React38.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, name, " x", count), /* @__PURE__ */ React38.createElement(
       Button,
       {
         label: "Offer " + name,
         onClick: () => performOffering(rite, name),
-        disabled: !EvaluateRequirements(inventory, entities, kins, [[name, 1]])
+        disabled: !EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, [[name, 1]])
       }
     )), /* @__PURE__ */ React38.createElement(Box, { fill: "horizontal", height: "5px", width: "50px" }, /* @__PURE__ */ React38.createElement(Meter, { value: rite.progress.find(([n, c]) => n == name)?.[1], max: count })))))))), /* @__PURE__ */ React38.createElement(Entities, { entities, performEntityAction, inventory, milestones, kins, rites, ticks }), /* @__PURE__ */ React38.createElement(Box, { direction: "row", gap: "small", fill: true, align: "start" }, /* @__PURE__ */ React38.createElement(Box, { height: { min: "200px" }, width: "320px", border: true, pad: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Inventory"), /* @__PURE__ */ React38.createElement(Inventory, { inventory })), /* @__PURE__ */ React38.createElement(Box, { height: { min: "200px" }, width: "320px" }, kins.length > 0 && /* @__PURE__ */ React38.createElement(Text, null, "Kins"), /* @__PURE__ */ React38.createElement(Kins, { kins }))))));
   };
@@ -75846,13 +75846,13 @@
     rites,
     ticks
   }) => {
-    return /* @__PURE__ */ React38.createElement(Box, { height: { min: "200px" }, fill: true, align: "start" }, /* @__PURE__ */ React38.createElement(Text, null, "Entities"), /* @__PURE__ */ React38.createElement(Box, { gap: "xsmall" }, entities.map((entity, i) => /* @__PURE__ */ React38.createElement(Box, { key: "entitiy" + entity.name + i, direction: "row", gap: "small" }, /* @__PURE__ */ React38.createElement(Box, null, /* @__PURE__ */ React38.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, entity.name), entity.ttl > 0 && /* @__PURE__ */ React38.createElement(Text, null, entity.ttl.toFixed(0), "s"), entity.temperature != 0 && /* @__PURE__ */ React38.createElement(Text, null, entity.temperature.toFixed(0), " \xB0C")), entity.performs.map((perform2) => /* @__PURE__ */ React38.createElement(Box, { key: "entitiy" + entity.name + i + "perform" + perform2.name, direction: "row", gap: "xsmall", align: "center" }, perform2.ttp > 0 && perform2.condition(inventory, entities, kins, rites, entity) && /* @__PURE__ */ React38.createElement(React38.Fragment, null, /* @__PURE__ */ React38.createElement(Text, null, perform2.icon), /* @__PURE__ */ React38.createElement(Meter, { value: ticks % perform2.ttp - 1, max: perform2.ttp, thickness: "10px", size: "full" }))))), actions.filter((action) => action.source?.includes(entity.name)).filter((action) => action.milestones(inventory, entities, kins, rites, milestones)).map((action) => /* @__PURE__ */ React38.createElement(
+    return /* @__PURE__ */ React38.createElement(Box, { height: { min: "200px" }, fill: true, align: "start" }, /* @__PURE__ */ React38.createElement(Text, null, "Entities"), /* @__PURE__ */ React38.createElement(Box, { gap: "xsmall" }, entities.map((entity, i) => /* @__PURE__ */ React38.createElement(Box, { key: "entitiy" + entity.name + i, direction: "row", gap: "small" }, /* @__PURE__ */ React38.createElement(Box, null, /* @__PURE__ */ React38.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, entity.name), entity.ttl > 0 && /* @__PURE__ */ React38.createElement(Text, null, entity.ttl.toFixed(0), "s"), entity.temperature != 0 && /* @__PURE__ */ React38.createElement(Text, null, entity.temperature.toFixed(0), " \xB0C")), entity.performs.map((perform2) => /* @__PURE__ */ React38.createElement(Box, { key: "entitiy" + entity.name + i + "perform" + perform2.name, direction: "row", gap: "xsmall", align: "center" }, perform2.ttp > 0 && perform2.condition({ inventory, entities, kins, rites, milestones, ticks }, entity) && /* @__PURE__ */ React38.createElement(React38.Fragment, null, /* @__PURE__ */ React38.createElement(Text, null, perform2.icon), /* @__PURE__ */ React38.createElement(Meter, { value: ticks % perform2.ttp - 1, max: perform2.ttp, thickness: "10px", size: "full" }))))), actions.filter((action) => action.source?.includes(entity.name)).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React38.createElement(
       ActionButton,
       {
         key: action.name,
         action,
         performAction: () => performEntityAction(action, entity),
-        disabled: !(action?.condition(inventory, entities, kins, rites, entity) && EvaluateRequirements(inventory, entities, kins, action.requires))
+        disabled: !(action?.condition({ inventory, entities, kins, rites, milestones, ticks }, entity) && EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, action.requires))
       }
     ))))));
   };

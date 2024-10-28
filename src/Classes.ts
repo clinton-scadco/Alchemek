@@ -2,10 +2,10 @@ import { GetNextId } from "./utils/Data";
 
 export interface IAction {
     name: string;
-    perform?: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], source?: Entity) => void;
+    perform?: (state: GameState, source?: Entity) => void;
 
-    condition?: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], source?: Entity) => boolean;
-    milestones?: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], milestones: string[]) => boolean;
+    condition?: (state: GameState, source?: Entity) => boolean;
+    milestones?: (state: GameState) => boolean;
     requires?: [string, number][];
     source?: string[];
     type?: string[];
@@ -13,10 +13,10 @@ export interface IAction {
 
 export class Action implements IAction {
     name: string;
-    perform: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], source?: Entity) => void;
+    perform: (state: GameState, source?: Entity) => void;
 
-    condition: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], source?: Entity) => boolean;
-    milestones: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], milestones: string[]) => boolean;
+    condition: (state: GameState, source?: Entity) => boolean;
+    milestones: (state: GameState) => boolean;
     requires: [string, number][];
     source?: string[];
     type?: string[];
@@ -72,15 +72,15 @@ interface IEntityPerform {
     icon: string;
     name: string;
     ttp: number;
-    condition: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], source: Entity) => boolean;
-    perform: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], source: Entity) => void;
+    condition: (state: GameState, source: Entity) => boolean;
+    perform: (state: GameState, source: Entity) => void;
 }
 
 export interface IEntity {
     name: string;
     ttl?: number;
     temperature?: number;
-    tick?: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], ticks: number, source: Entity) => void;
+    tick?: (state: GameState, source: Entity) => void;
     performs?: IEntityPerform[];
 }
 
@@ -88,7 +88,7 @@ export class Entity implements IEntity {
     name: string;
     ttl: number;
     temperature: number;
-    tick: (inventory: Item[], entities: Entity[], kins: Kin[], rites: Rite[], ticks: number, source: Entity) => void;
+    tick: (state: GameState, source: Entity) => void;
     performs: IEntityPerform[];
 
     constructor({ name, ttl, temperature, tick, performs }: IEntity) {
@@ -146,13 +146,22 @@ export class Kin implements IKin {
         this.inventory.push(item);
     }
 
-    tick(inventory: Item[], entities: Entity[], kins: Kin[], ticks?: number) {
-        if (!this.inventory.some((i) => i.name == "Tool") && inventory.some((i) => i.name == "Tool")) {
-            let tool = inventory.find((i) => i.name == "Tool");
+    tick(state: GameState) {
+        if (!this.inventory.some((i) => i.name == "Tool") && state.inventory.some((i) => i.name == "Tool")) {
+            let tool = state.inventory.find((i) => i.name == "Tool");
             if (tool) {
-                inventory.splice(inventory.indexOf(tool), 1);
+                state.inventory.splice(state.inventory.indexOf(tool), 1);
                 this.giveItem(tool);
             }
         }
     }
+}
+
+export interface GameState {
+    inventory: Item[];
+    entities: Entity[];
+    kins: Kin[];
+    rites: Rite[];
+    milestones: string[];
+    ticks: number;
 }

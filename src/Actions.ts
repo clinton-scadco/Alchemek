@@ -1,4 +1,4 @@
-import { Action, Entity, Item, Kin } from "./Classes";
+import { Action, Entity, GameState, Item, Kin } from "./Classes";
 import { HeatedStone, LanguageRite, Stone, Tool, Wood } from "./Eras/One";
 
 export function RemoveItem(inventory: Item[], name, count) {
@@ -15,11 +15,13 @@ export function RemoveItem(inventory: Item[], name, count) {
     }
 }
 
-export const EvaluateRequirements = (inventory: Item[], entities: Entity[], kins: Kin[], requirements: [string, number][], source?: Entity) => {
+export const EvaluateRequirements = (state: GameState, requirements: [string, number][], source?: Entity) => {
     let met = true;
     requirements.forEach((requirement) => {
         let [item, count] = requirement;
-        met = met && (inventory.filter((i) => i.name == item).length >= count || entities.filter((i) => i.name == item).length >= count || kins.filter((i) => i.name == item).length >= count);
+        met =
+            met &&
+            (state.inventory.filter((i) => i.name == item).length >= count || state.entities.filter((i) => i.name == item).length >= count || state.kins.filter((i) => i.name == item).length >= count);
     });
     return met;
 };
@@ -27,22 +29,22 @@ export const EvaluateRequirements = (inventory: Item[], entities: Entity[], kins
 export const actions = [
     new Action({
         name: "Collect Stone",
-        perform: (inventory) => inventory.push(new Stone()),
+        perform: ({ inventory }) => inventory.push(new Stone()),
     }),
     new Action({
         name: "Collect Wood",
-        perform: (inventory) => inventory.push(new Wood()),
+        perform: ({ inventory }) => inventory.push(new Wood()),
     }),
     new Action({
         name: "Make Fire",
-        perform: (inventory, entities, kins, rites, source) => {
+        perform: ({ inventory, entities, kins, rites }, source) => {
             RemoveItem(inventory, "Wood", 2);
             entities.push(
                 new Entity({
                     name: "Fire",
                     ttl: 30,
                     temperature: 100,
-                    tick: (inventory, entities, kins, rites, ticks, source) => {
+                    tick: ({}, source) => {
                         if (source.temperature <= 100) {
                             source.ttl -= 1;
                         } else {
@@ -55,10 +57,10 @@ export const actions = [
                             name: "Gather",
                             icon: "👤",
                             ttp: 10,
-                            condition: (inventory, entities, kins, rites, source) => {
+                            condition: ({ kins }, source) => {
                                 return source.temperature > 60 && kins.length < 5;
                             },
-                            perform: (inventory, entities, kins, rites, source) => {
+                            perform: ({ kins }, source) => {
                                 kins.push(new Kin({ name: "Kin" }));
                             },
                         },
@@ -70,7 +72,7 @@ export const actions = [
     }),
     new Action({
         name: "Make Tool",
-        perform: (inventory, entities, source) => {
+        perform: ({ inventory }, source) => {
             RemoveItem(inventory, "Wood", 1);
             RemoveItem(inventory, "Stone", 1);
             inventory.push(new Tool(10));
@@ -82,7 +84,7 @@ export const actions = [
     }),
     new Action({
         name: "Feed Fire",
-        perform: (inventory, entities, kins, rites, source) => {
+        perform: ({ inventory }, source) => {
             RemoveItem(inventory, "Wood", 1);
             let fire = source;
             if (fire) {
@@ -103,7 +105,7 @@ export const actions = [
     }),
     new Action({
         name: "Emberstone",
-        perform: (inventory, entities) => {
+        perform: ({ inventory, entities }) => {
             RemoveItem(inventory, "Heated Stone", 2);
             entities.push(
                 new Entity({
@@ -112,11 +114,11 @@ export const actions = [
                 })
             );
         },
-        condition: (inventory, entities) => {
+        condition: ({ inventory, entities }) => {
             return !!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200);
         },
         requires: [["Heated Stone", 2]],
-        milestones: (inventory, entities, kins, rites, milestones) => {
+        milestones: ({ inventory, entities, kins, rites, milestones }) => {
             if (!!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200) && !milestones.includes("Emberstone")) {
                 milestones.push("Emberstone");
             }
@@ -126,7 +128,7 @@ export const actions = [
     }),
     new Action({
         name: "Heat Stone",
-        perform: (inventory, entities, kins, rites, source) => {
+        perform: ({ inventory, entities, kins, rites }, source) => {
             RemoveItem(inventory, "Stone", 1);
             let fire = source;
             if (fire && fire.name == "Fire") {
@@ -134,7 +136,7 @@ export const actions = [
             }
             inventory.push(new HeatedStone());
         },
-        condition: (inventory, entities, kins, rites, source) => {
+        condition: ({ inventory, entities, kins, rites }, source) => {
             return !!entities.find((entity) => entity.name === "Fire") && !!source && source.temperature >= 150;
         },
         source: ["Fire", "Emberstone"],
@@ -142,14 +144,14 @@ export const actions = [
     }),
     new Action({
         name: "Language",
-        perform: (inventory, entities, source, rites) => {
+        perform: ({ rites }) => {
             rites.push(new LanguageRite());
         },
-        condition: (inventory, entities, kins, rites) => {
+        condition: ({ kins, rites }) => {
             return kins.filter((kin) => kin.name === "Kin").length >= 5 && !rites.find((rite) => rite.name === "Language");
         },
         requires: [["Kin", 5]],
-        milestones: (inventory, entities, kins, rites, milestones) => {
+        milestones: ({ inventory, entities, kins, rites, milestones }) => {
             if (kins.filter((kin) => kin.name === "Kin").length >= 5 && !milestones.includes("Language")) {
                 milestones.push("Language");
             }
