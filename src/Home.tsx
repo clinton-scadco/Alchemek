@@ -7,6 +7,7 @@ import _ from "lodash";
 import { actions, EvaluateRequirements, RemoveItem } from "./Actions";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import * as Items from "./Eras/One";
+import { DayNight, DayNightColors } from "./utils/Theme";
 
 const Home = () => {
     const [inventory, setInventory] = React.useState([] as Item[]);
@@ -74,42 +75,28 @@ const Home = () => {
     return (
         <>
             <LayoutGroup>
-                <Box style={{ maxHeight: "10px" }}>
-                    <Meter value={ticks % 100} max={100}></Meter>
-                </Box>
-                <Box direction="row" gap="small">
-                    <Box height={{ min: "200px" }} width={"320px"} border pad={"small"}>
-                        <Heading level={3}>Inventory</Heading>
-                        <Inventory inventory={inventory}></Inventory>
+                <Box align="center" fill>
+                    <Box fill>
+                        <Meter color={DayNightColors[Math.floor((ticks % 100) / 100 * DayNightColors.length)]} value={ticks % 100} max={100} size="full" thickness="10px"></Meter>
                     </Box>
-                    <Box height={{ min: "200px" }} width={"320px"}>
-                        {kins.length > 0 && <Heading level={3}>Kins</Heading>}
-                        <Kins kins={kins}></Kins>
+                    
+                    <Box direction="row" gap="small">
+                        <Box height={{ min: "200px" }} width={"320px"} border pad={"small"}>
+                            <Heading level={3}>Inventory</Heading>
+                            <Inventory inventory={inventory}></Inventory>
+                        </Box>
+                        <Box height={{ min: "200px" }} width={"320px"}>
+                            {kins.length > 0 && <Heading level={3}>Kins</Heading>}
+                            <Kins kins={kins}></Kins>
+                        </Box>
                     </Box>
-                </Box>
-                <Entities entities={entities} performEntityAction={performEntityAction} inventory={inventory} milestones={milestones} kins={kins} rites={rites}></Entities>
-                <Box direction="row" gap="small">
-                    <Box gap="small">
-                        <Text>Actions</Text>
-                        {actions
-                            .filter((action) => action.source?.length == 0)
-                            .filter((action) => action.type?.length == 0)
-                            .filter((action) => action.milestones(inventory, entities, kins, rites, milestones))
-                            .map((action) => (
-                                <ActionButton
-                                    key={action.name}
-                                    action={action}
-                                    performAction={performAction}
-                                    disabled={!(action?.condition(inventory, entities, kins, rites) && EvaluateRequirements(inventory, entities, kins, action.requires))}
-                                ></ActionButton>
-                            ))}
-                    </Box>
-                    {milestones.length > 0 && (
+                    <Entities entities={entities} performEntityAction={performEntityAction} inventory={inventory} milestones={milestones} kins={kins} rites={rites}></Entities>
+                    <Box direction="row" gap="small">
                         <Box gap="small">
-                            <Text>Rituals</Text>
+                            <Text>Actions</Text>
                             {actions
                                 .filter((action) => action.source?.length == 0)
-                                .filter((action) => action.type?.includes("Ritual"))
+                                .filter((action) => action.type?.length == 0)
                                 .filter((action) => action.milestones(inventory, entities, kins, rites, milestones))
                                 .map((action) => (
                                     <ActionButton
@@ -120,54 +107,71 @@ const Home = () => {
                                     ></ActionButton>
                                 ))}
                         </Box>
-                    )}
-                    {milestones.length > 0 && (
-                        <Box gap="small">
-                            <Text>Rites</Text>
-                            {actions
-                                .filter((action) => action.source?.length == 0)
-                                .filter((action) => action.type?.includes("Rite"))
-                                .filter((action) => action.milestones(inventory, entities, kins, rites, milestones))
-                                .map((action) => (
-                                    <ActionButton
-                                        key={action.name}
-                                        action={action}
-                                        performAction={performAction}
-                                        disabled={!(action?.condition(inventory, entities, kins, rites) && EvaluateRequirements(inventory, entities, kins, action.requires))}
-                                    ></ActionButton>
-                                ))}
-                        </Box>
-                    )}
-                    {milestones.length > 0 && (
-                        <Box gap="small">
-                            <Text>Active Rites</Text>
-                            {rites
-                                .filter((rite) => !rite.isComplete())
-                                .map((rite) => (
-                                    <Box key={rite.id}>
-                                        <Text>{rite.icon}</Text>
-                                        <Text>{rite.name}</Text>
-                                        {rite.ingredients.map(([name, count]) => (
-                                            <Box key={"rite" + rite.id + "ingredient" + name}>
-                                                <Box direction="row" gap={"small"}>
-                                                    <Text>
-                                                        {name} x{count}
-                                                    </Text>
-                                                    <Button
-                                                        label={"Offer " + name}
-                                                        onClick={() => performOffering(rite, name)}
-                                                        disabled={!EvaluateRequirements(inventory, entities, kins, [[name, 1]])}
-                                                    ></Button>
+                        {milestones.length > 0 && (
+                            <Box gap="small">
+                                <Text>Rituals</Text>
+                                {actions
+                                    .filter((action) => action.source?.length == 0)
+                                    .filter((action) => action.type?.includes("Ritual"))
+                                    .filter((action) => action.milestones(inventory, entities, kins, rites, milestones))
+                                    .map((action) => (
+                                        <ActionButton
+                                            key={action.name}
+                                            action={action}
+                                            performAction={performAction}
+                                            disabled={!(action?.condition(inventory, entities, kins, rites) && EvaluateRequirements(inventory, entities, kins, action.requires))}
+                                        ></ActionButton>
+                                    ))}
+                            </Box>
+                        )}
+                        {milestones.length > 0 && (
+                            <Box gap="small">
+                                <Text>Rites</Text>
+                                {actions
+                                    .filter((action) => action.source?.length == 0)
+                                    .filter((action) => action.type?.includes("Rite"))
+                                    .filter((action) => action.milestones(inventory, entities, kins, rites, milestones))
+                                    .map((action) => (
+                                        <ActionButton
+                                            key={action.name}
+                                            action={action}
+                                            performAction={performAction}
+                                            disabled={!(action?.condition(inventory, entities, kins, rites) && EvaluateRequirements(inventory, entities, kins, action.requires))}
+                                        ></ActionButton>
+                                    ))}
+                            </Box>
+                        )}
+                        {milestones.length > 0 && (
+                            <Box gap="small">
+                                <Text>Active Rites</Text>
+                                {rites
+                                    .filter((rite) => !rite.isComplete())
+                                    .map((rite) => (
+                                        <Box key={rite.id}>
+                                            <Text>{rite.icon}</Text>
+                                            <Text>{rite.name}</Text>
+                                            {rite.ingredients.map(([name, count]) => (
+                                                <Box key={"rite" + rite.id + "ingredient" + name}>
+                                                    <Box direction="row" gap={"small"}>
+                                                        <Text>
+                                                            {name} x{count}
+                                                        </Text>
+                                                        <Button
+                                                            label={"Offer " + name}
+                                                            onClick={() => performOffering(rite, name)}
+                                                            disabled={!EvaluateRequirements(inventory, entities, kins, [[name, 1]])}
+                                                        ></Button>
+                                                    </Box>
+                                                    <Box fill="horizontal" height={"5px"} width={"50px"}>
+                                                        <Meter value={rite.progress.find(([n, c]) => n == name)?.[1]} max={count}></Meter>
+                                                    </Box>
                                                 </Box>
-                                                <Box fill="horizontal" height={"5px"} width={"50px"}>
-                                                    <Meter value={rite.progress.find(([n, c]) => n == name)?.[1]} max={count}></Meter>
-                                                </Box>
-                                            </Box>
-                                        ))}
-                                    </Box>
-                                ))}
-                        </Box>
-                    )}
+                                            ))}
+                                        </Box>
+                                    ))}
+                            </Box>
+                        )}
+                    </Box>
                 </Box>
             </LayoutGroup>
         </>

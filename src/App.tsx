@@ -24,7 +24,7 @@ function App() {
                 <DarkModeSwitch></DarkModeSwitch>
 
                 <Box style={{ backgroundSize: "cover" }} height={{ min: "100vh" }} pad={{ top: "small" }}>
-                    <Box width={{ max: "1100px" }} pad={{ left: "medium", right: "medium" }} style={{ position: "relative" }}>
+                    <Box pad={{ left: "medium", right: "medium" }} style={{ position: "relative" }}>
                         <ErrorBoundary>
                             <Routes>
                                 <Route path="/*" element={<Home></Home>}></Route>

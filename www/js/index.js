@@ -67723,6 +67723,36 @@
   };
   var Theme = (0, import_utils27.deepMerge)(grommet, ssacovidtheme);
   var Theme_default = Theme;
+  var GetLinearGradient = (colors2) => {
+    return `linear-gradient(90deg, ${colors2.join(",")})`;
+  };
+  var DayNightColors = [
+    "#012459",
+    "#003972",
+    "#003972",
+    "#004372",
+    "#004372",
+    "#016792",
+    "#07729f",
+    "#12a1c0",
+    "#74d4cc",
+    "#efeebc",
+    "#fee154",
+    "#fdc352",
+    "#ffac6f",
+    "#fda65a",
+    "#fd9e58",
+    "#f18448",
+    "#f06b7e",
+    "#ca5a92",
+    "#5b2c83",
+    "#371a79",
+    "#28166b",
+    "#192861",
+    "#040b3c",
+    "#040b3c"
+  ];
+  var DayNightGradient = GetLinearGradient(DayNightColors);
 
   // src/components/ErrorBoundary.tsx
   var import_react42 = __toESM(require_react(), 1);
@@ -75917,7 +75947,7 @@
       }, 1e3);
       return () => clearInterval(intervalId);
     }, [inventory, entities, kins]);
-    return /* @__PURE__ */ React40.createElement(React40.Fragment, null, /* @__PURE__ */ React40.createElement(LayoutGroup, null, /* @__PURE__ */ React40.createElement(Box, { style: { maxHeight: "10px" } }, /* @__PURE__ */ React40.createElement(Meter, { value: ticks % 100, max: 100 })), /* @__PURE__ */ React40.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React40.createElement(Box, { height: { min: "200px" }, width: "320px", border: true, pad: "small" }, /* @__PURE__ */ React40.createElement(Heading, { level: 3 }, "Inventory"), /* @__PURE__ */ React40.createElement(Inventory, { inventory })), /* @__PURE__ */ React40.createElement(Box, { height: { min: "200px" }, width: "320px" }, kins.length > 0 && /* @__PURE__ */ React40.createElement(Heading, { level: 3 }, "Kins"), /* @__PURE__ */ React40.createElement(Kins, { kins }))), /* @__PURE__ */ React40.createElement(Entities, { entities, performEntityAction, inventory, milestones, kins, rites }), /* @__PURE__ */ React40.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React40.createElement(Box, { gap: "small" }, /* @__PURE__ */ React40.createElement(Text, null, "Actions"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.length == 0).filter((action) => action.milestones(inventory, entities, kins, rites, milestones)).map((action) => /* @__PURE__ */ React40.createElement(
+    return /* @__PURE__ */ React40.createElement(React40.Fragment, null, /* @__PURE__ */ React40.createElement(LayoutGroup, null, /* @__PURE__ */ React40.createElement(Box, { align: "center", fill: true }, /* @__PURE__ */ React40.createElement(Box, { fill: true }, /* @__PURE__ */ React40.createElement(Meter, { color: DayNightColors[Math.floor(ticks % 100 / 100 * DayNightColors.length)], value: ticks % 100, max: 100, size: "full", thickness: "10px" })), /* @__PURE__ */ React40.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React40.createElement(Box, { height: { min: "200px" }, width: "320px", border: true, pad: "small" }, /* @__PURE__ */ React40.createElement(Heading, { level: 3 }, "Inventory"), /* @__PURE__ */ React40.createElement(Inventory, { inventory })), /* @__PURE__ */ React40.createElement(Box, { height: { min: "200px" }, width: "320px" }, kins.length > 0 && /* @__PURE__ */ React40.createElement(Heading, { level: 3 }, "Kins"), /* @__PURE__ */ React40.createElement(Kins, { kins }))), /* @__PURE__ */ React40.createElement(Entities, { entities, performEntityAction, inventory, milestones, kins, rites }), /* @__PURE__ */ React40.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React40.createElement(Box, { gap: "small" }, /* @__PURE__ */ React40.createElement(Text, null, "Actions"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.length == 0).filter((action) => action.milestones(inventory, entities, kins, rites, milestones)).map((action) => /* @__PURE__ */ React40.createElement(
       ActionButton,
       {
         key: action.name,
@@ -75948,7 +75978,7 @@
         onClick: () => performOffering(rite, name),
         disabled: !EvaluateRequirements(inventory, entities, kins, [[name, 1]])
       }
-    )), /* @__PURE__ */ React40.createElement(Box, { fill: "horizontal", height: "5px", width: "50px" }, /* @__PURE__ */ React40.createElement(Meter, { value: rite.progress.find(([n, c]) => n == name)?.[1], max: count }))))))))));
+    )), /* @__PURE__ */ React40.createElement(Box, { fill: "horizontal", height: "5px", width: "50px" }, /* @__PURE__ */ React40.createElement(Meter, { value: rite.progress.find(([n, c]) => n == name)?.[1], max: count })))))))))));
   };
   var ActionButton = ({ action, performAction, disabled: disabled2 }) => {
     return /* @__PURE__ */ React40.createElement(Button, { label: action.name, onClick: () => performAction(action), disabled: disabled2 });
@@ -76010,7 +76040,7 @@
     const [grommetProps, setGrommetProps] = React41.useState({});
     React41.useEffect(() => {
     }, []);
-    return /* @__PURE__ */ React41.createElement(Grommet, { ...grommetProps, full: true, theme: Theme_default, themeMode: isDarkMode ? "dark" : "light" }, /* @__PURE__ */ React41.createElement(Box, { background: { color: "background" } }, /* @__PURE__ */ React41.createElement(DarkModeSwitch_default, null), /* @__PURE__ */ React41.createElement(Box, { style: { backgroundSize: "cover" }, height: { min: "100vh" }, pad: { top: "small" } }, /* @__PURE__ */ React41.createElement(Box, { width: { max: "1100px" }, pad: { left: "medium", right: "medium" }, style: { position: "relative" } }, /* @__PURE__ */ React41.createElement(ErrorBoundary_default, null, /* @__PURE__ */ React41.createElement(Routes, null, /* @__PURE__ */ React41.createElement(Route, { path: "/*", element: /* @__PURE__ */ React41.createElement(Home_default, null) })))))));
+    return /* @__PURE__ */ React41.createElement(Grommet, { ...grommetProps, full: true, theme: Theme_default, themeMode: isDarkMode ? "dark" : "light" }, /* @__PURE__ */ React41.createElement(Box, { background: { color: "background" } }, /* @__PURE__ */ React41.createElement(DarkModeSwitch_default, null), /* @__PURE__ */ React41.createElement(Box, { style: { backgroundSize: "cover" }, height: { min: "100vh" }, pad: { top: "small" } }, /* @__PURE__ */ React41.createElement(Box, { pad: { left: "medium", right: "medium" }, style: { position: "relative" } }, /* @__PURE__ */ React41.createElement(ErrorBoundary_default, null, /* @__PURE__ */ React41.createElement(Routes, null, /* @__PURE__ */ React41.createElement(Route, { path: "/*", element: /* @__PURE__ */ React41.createElement(Home_default, null) })))))));
   }
   var App_default = App;
 
