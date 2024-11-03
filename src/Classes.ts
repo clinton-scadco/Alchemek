@@ -13,7 +13,7 @@ export class Requirement implements IRequirement {
     value: number;
     operator: string;
     name?: string;
-    
+
     requires: Requirement[];
 
     constructor({ type, name, value, operator, requires }: IRequirement) {
@@ -47,10 +47,10 @@ export class Action implements IAction {
     source?: string[];
     type?: string[];
 
-    constructor({ name, perform,  milestones, requires, source, type }: IAction) {
+    constructor({ name, perform, milestones, requires, source, type }: IAction) {
         this.name = name;
         this.perform = perform || (() => {});
-        
+
         this.milestones = milestones || (() => true);
         this.requires = requires || [];
         this.source = source || [];

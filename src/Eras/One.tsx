@@ -39,3 +39,26 @@ export class LanguageRite extends Rite {
         super({ name: "Language", ingredients: [["Tool", 10]] });
     }
 }
+
+export const ItemDefinitions = {
+    Stone: {
+        icon: "🪨",
+        class: Stone,
+    },
+    Wood: {
+        icon: "🪵",
+        class: Wood,
+    },
+    Tool: {
+        icon: "🛠️",
+        class: Tool,
+    },
+    "Heated Stone": {
+        icon: "🔥🪨",
+        class: HeatedStone,
+    },
+    "Language Rite": {
+        icon: "🔤",
+        class: LanguageRite,
+    },
+};

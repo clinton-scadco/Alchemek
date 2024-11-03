@@ -1,7 +1,7 @@
 import { initialize } from "esbuild";
-import { Box, Button, Grid, Heading, Meter, Stack, Text } from "grommet";
+import { Box, Button, Grid, Heading, Meter, Stack, Text, Tip } from "grommet";
 import * as React from "react";
-import { Action, Entity, GameState, Item, ItemRequirement, Kin, Rite } from "./Classes";
+import { Action, Entity, GameState, Item, ItemRequirement, Kin, Rite, Requirement } from "./Classes";
 import { groupBy, values } from "lodash";
 import _ from "lodash";
 import { actions, EvaluateRequirements, RemoveItem } from "./Actions";
@@ -184,7 +184,15 @@ const Home = () => {
 };
 
 const ActionButton = ({ action, performAction, disabled, ...props }) => {
-    return <Button label={action.name} onClick={() => performAction(action)} disabled={disabled} {...props}></Button>;
+    return action.requires.length > 0 ? (
+        <Tip key={action.name} content={<RenderRequirements requirements={action.requires}></RenderRequirements>}>
+            <Box>
+                <Button label={action.name} onClick={() => performAction(action)} disabled={disabled} {...props}></Button>
+            </Box>
+        </Tip>
+    ) : (
+        <Button label={action.name} onClick={() => performAction(action)} disabled={disabled} {...props}></Button>
+    );
 };
 
 const Inventory = ({ inventory, compact }: { inventory: Item[]; compact?: boolean }) => {
@@ -309,6 +317,24 @@ const Kins = ({ kins }: { kins: Kin[] }) => {
                 ))}
             </Box>
         </AnimatePresence>
+    );
+};
+
+const RenderRequirements = ({ requirements }: { requirements: Requirement[] }) => {
+    return (
+        <Box gap={"small"}>
+            {requirements.map((requirement, i) => (
+                <Box key={i} gap={"xsmall"}>
+                    <Box direction="row" gap={"xsmall"}>
+                        {requirement.name && <Text>{Items.ItemDefinitions[requirement.name]?.icon || requirement.name}</Text>}
+                        {!requirement.name && <Text>{requirement.type}</Text>}
+                        <Text>{requirement.operator}</Text>
+                        <Text>{requirement.value}</Text>
+                    </Box>
+                    {requirement.requires.length > 0 && <RenderRequirements requirements={requirement.requires}></RenderRequirements>}
+                </Box>
+            ))}
+        </Box>
     );
 };
 

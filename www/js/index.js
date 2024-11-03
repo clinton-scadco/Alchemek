@@ -67723,6 +67723,28 @@
       this.icon = "\u{1F524}";
     }
   };
+  var ItemDefinitions = {
+    Stone: {
+      icon: "\u{1FAA8}",
+      class: Stone
+    },
+    Wood: {
+      icon: "\u{1FAB5}",
+      class: Wood
+    },
+    Tool: {
+      icon: "\u{1F6E0}\uFE0F",
+      class: Tool
+    },
+    "Heated Stone": {
+      icon: "\u{1F525}\u{1FAA8}",
+      class: HeatedStone
+    },
+    "Language Rite": {
+      icon: "\u{1F524}",
+      class: LanguageRite
+    }
+  };
 
   // src/Actions.ts
   function RemoveItem(inventory, name, count) {
@@ -75859,7 +75881,7 @@
     )), /* @__PURE__ */ React38.createElement(Box, { fill: "horizontal", height: "5px", width: "50px" }, /* @__PURE__ */ React38.createElement(Meter, { value: rite.progress.find(([n, c]) => n == name)?.[1], max: count })))))))), /* @__PURE__ */ React38.createElement(Entities, { entities, performEntityAction, inventory, milestones, kins, rites, ticks }), /* @__PURE__ */ React38.createElement(Box, { direction: "row", gap: "small", fill: true, align: "start" }, /* @__PURE__ */ React38.createElement(Box, { height: { min: "200px" }, width: "320px", border: true, pad: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Inventory"), /* @__PURE__ */ React38.createElement(Inventory, { inventory })), /* @__PURE__ */ React38.createElement(Box, { height: { min: "200px" }, width: "320px" }, kins.length > 0 && /* @__PURE__ */ React38.createElement(Text, null, "Kins"), /* @__PURE__ */ React38.createElement(Kins, { kins }))))));
   };
   var ActionButton = ({ action, performAction, disabled: disabled2, ...props }) => {
-    return /* @__PURE__ */ React38.createElement(Button, { label: action.name, onClick: () => performAction(action), disabled: disabled2, ...props });
+    return action.requires.length > 0 ? /* @__PURE__ */ React38.createElement(Tip, { key: action.name, content: /* @__PURE__ */ React38.createElement(RenderRequirements, { requirements: action.requires }) }, /* @__PURE__ */ React38.createElement(Box, null, /* @__PURE__ */ React38.createElement(Button, { label: action.name, onClick: () => performAction(action), disabled: disabled2, ...props }))) : /* @__PURE__ */ React38.createElement(Button, { label: action.name, onClick: () => performAction(action), disabled: disabled2, ...props });
   };
   var Inventory = ({ inventory, compact }) => {
     return /* @__PURE__ */ React38.createElement(Grid, { columns: { size: "auto", count: 5 }, gap: "small" }, /* @__PURE__ */ React38.createElement(AnimatePresence, null, inventory.map((item, i) => /* @__PURE__ */ React38.createElement(
@@ -75909,6 +75931,9 @@
       },
       /* @__PURE__ */ React38.createElement(Stack, { anchor: "bottom", fill: true }, /* @__PURE__ */ React38.createElement(Box, { direction: "row", border: true, pad: "small", width: "350px" }, /* @__PURE__ */ React38.createElement(Box, { align: "center", height: "50px" }, /* @__PURE__ */ React38.createElement(Text, null, kin.icon), /* @__PURE__ */ React38.createElement(Text, null, kin.name)), /* @__PURE__ */ React38.createElement(Box, { width: "300px" }, /* @__PURE__ */ React38.createElement(Inventory, { inventory: kin.inventory, compact: true }))))
     ))));
+  };
+  var RenderRequirements = ({ requirements }) => {
+    return /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, requirements.map((requirement, i) => /* @__PURE__ */ React38.createElement(Box, { key: i, gap: "xsmall" }, /* @__PURE__ */ React38.createElement(Box, { direction: "row", gap: "xsmall" }, requirement.name && /* @__PURE__ */ React38.createElement(Text, null, ItemDefinitions[requirement.name]?.icon || requirement.name), !requirement.name && /* @__PURE__ */ React38.createElement(Text, null, requirement.type), /* @__PURE__ */ React38.createElement(Text, null, requirement.operator), /* @__PURE__ */ React38.createElement(Text, null, requirement.value)), requirement.requires.length > 0 && /* @__PURE__ */ React38.createElement(RenderRequirements, { requirements: requirement.requires }))));
   };
   var Home_default = Home;
 
