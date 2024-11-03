@@ -1,7 +1,7 @@
 import { initialize } from "esbuild";
 import { Box, Button, Grid, Heading, Meter, Stack, Text } from "grommet";
 import * as React from "react";
-import { Action, Entity, GameState, Item, Kin, Rite } from "./Classes";
+import { Action, Entity, GameState, Item, ItemRequirement, Kin, Rite } from "./Classes";
 import { groupBy, values } from "lodash";
 import _ from "lodash";
 import { actions, EvaluateRequirements, RemoveItem } from "./Actions";
@@ -96,12 +96,7 @@ const Home = () => {
                                         key={action.name}
                                         action={action}
                                         performAction={performAction}
-                                        disabled={
-                                            !(
-                                                action?.condition({ inventory, entities, kins, rites, milestones, ticks } as GameState) &&
-                                                EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires)
-                                            )
-                                        }
+                                        disabled={!EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires)}
                                     ></ActionButton>
                                 ))}
                         </Box>
@@ -117,12 +112,7 @@ const Home = () => {
                                             key={action.name}
                                             action={action}
                                             performAction={performAction}
-                                            disabled={
-                                                !(
-                                                    action?.condition({ inventory, entities, kins, rites, milestones, ticks } as GameState) &&
-                                                    EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires)
-                                                )
-                                            }
+                                            disabled={!EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires)}
                                         ></ActionButton>
                                     ))}
                             </Box>
@@ -140,12 +130,7 @@ const Home = () => {
                                             key={action.name}
                                             action={action}
                                             performAction={performAction}
-                                            disabled={
-                                                !(
-                                                    action?.condition({ inventory, entities, kins, rites, milestones, ticks } as GameState) &&
-                                                    EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires)
-                                                )
-                                            }
+                                            disabled={!EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires)}
                                         ></ActionButton>
                                     ))}
                             </Box>
@@ -168,7 +153,7 @@ const Home = () => {
                                                         <Button
                                                             label={"Offer " + name}
                                                             onClick={() => performOffering(rite, name)}
-                                                            disabled={!EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, [[name, 1]])}
+                                                            disabled={!EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, [ItemRequirement([name, 1])])}
                                                         ></Button>
                                                     </Box>
                                                     <Box fill="horizontal" height={"5px"} width={"50px"}>
@@ -285,12 +270,7 @@ const Entities = ({
                                     key={action.name}
                                     action={action}
                                     performAction={() => performEntityAction(action, entity)}
-                                    disabled={
-                                        !(
-                                            action?.condition({ inventory, entities, kins, rites, milestones, ticks } as GameState, entity) &&
-                                            EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires)
-                                        )
-                                    }
+                                    disabled={!EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires)}
                                 ></ActionButton>
                             ))}
                     </Box>

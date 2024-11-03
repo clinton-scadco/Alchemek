@@ -1,4 +1,4 @@
-import { Action, Entity, GameState, Item, Kin } from "./Classes";
+import { Action, Entity, GameState, Item, ItemRequirement, Kin, Requirement, Rite } from "./Classes";
 import { HeatedStone, LanguageRite, Stone, Tool, Wood } from "./Eras/One";
 
 export function RemoveItem(inventory: Item[], name, count) {
@@ -15,13 +15,60 @@ export function RemoveItem(inventory: Item[], name, count) {
     }
 }
 
-export const EvaluateRequirements = (state: GameState, requirements: [string, number][], source?: Entity) => {
+const Compare = (a, b, operator) => {
+    switch (operator) {
+        case ">":
+            return a > b;
+        case "<":
+            return a < b;
+        case "=":
+            return a === b;
+        case ">=":
+            return a >= b;
+        case "<=":
+            return a <= b;
+        default:
+            return false;
+    }
+};
+
+const MeetsRequirement = (requirement: Requirement, source: Item | Entity | Kin | Rite) => {
+    let met = true;
+    console.log(requirement);
+
+    if (requirement.name) {
+        met = met && source.name === requirement.name;
+        console.log("name match", met);
+    }
+
+    if (requirement.type == "temperature") {
+        met = met && Compare(source[requirement.type], requirement.value, requirement.operator);
+        console.log("temperature match", met);
+    }
+
+    if (requirement.requires.length > 0) {
+        met = met && requirement.requires.every((r) => MeetsRequirement(r, source));
+        console.log("nested match", met);
+    }
+
+    return met;
+};
+
+export const EvaluateRequirements = (state: GameState, requirements: Requirement[]) => {
     let met = true;
     requirements.forEach((requirement) => {
-        let [item, count] = requirement;
-        met =
-            met &&
-            (state.inventory.filter((i) => i.name == item).length >= count || state.entities.filter((i) => i.name == item).length >= count || state.kins.filter((i) => i.name == item).length >= count);
+        if (requirement.type === "item") {
+            met = met && Compare(state.inventory.filter((i) => MeetsRequirement(requirement, i)).length, requirement.value, requirement.operator);
+        }
+        if (requirement.type === "entity") {
+            met = met && Compare(state.entities.filter((i) => MeetsRequirement(requirement, i)).length, requirement.value, requirement.operator);
+        }
+        if (requirement.type === "kin") {
+            met = met && Compare(state.kins.filter((i) => MeetsRequirement(requirement, i)).length, requirement.value, requirement.operator);
+        }
+        if (requirement.type === "rite") {
+            met = met && Compare(state.rites.filter((i) => MeetsRequirement(requirement, i)).length, requirement.value, requirement.operator);
+        }
     });
     return met;
 };
@@ -68,7 +115,7 @@ export const actions = [
                 })
             );
         },
-        requires: [["Wood", 2]],
+        requires: [ItemRequirement(["Wood", 2])],
     }),
     new Action({
         name: "Make Tool",
@@ -77,10 +124,7 @@ export const actions = [
             RemoveItem(inventory, "Stone", 1);
             inventory.push(new Tool(10));
         },
-        requires: [
-            ["Wood", 1],
-            ["Stone", 1],
-        ],
+        requires: [ItemRequirement(["Wood", 1]), ItemRequirement(["Stone", 1])],
     }),
     new Action({
         name: "Feed Fire",
@@ -98,10 +142,7 @@ export const actions = [
             }
         },
         source: ["Fire"],
-        requires: [
-            ["Wood", 1],
-            ["Fire", 1],
-        ],
+        requires: [ItemRequirement(["Wood", 1]), new Requirement({ type: "entity", name: "Fire", value: 1 })],
     }),
     new Action({
         name: "Emberstone",
@@ -114,10 +155,7 @@ export const actions = [
                 })
             );
         },
-        condition: ({ inventory, entities }) => {
-            return !!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200);
-        },
-        requires: [["Heated Stone", 2]],
+        requires: [ItemRequirement(["Heated Stone", 2]), new Requirement({ type: "entity", name: "Fire", value: 1, requires: [new Requirement({ type: "temperature", value: 200, operator: ">" })] })],
         milestones: ({ inventory, entities, kins, rites, milestones }) => {
             if (!!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200) && !milestones.includes("Emberstone")) {
                 milestones.push("Emberstone");
@@ -136,21 +174,15 @@ export const actions = [
             }
             inventory.push(new HeatedStone());
         },
-        condition: ({ inventory, entities, kins, rites }, source) => {
-            return !!entities.find((entity) => entity.name === "Fire") && !!source && source.temperature >= 150;
-        },
         source: ["Fire", "Emberstone"],
-        requires: [["Stone", 1]],
+        requires: [ItemRequirement(["Stone", 1]), new Requirement({ type: "entity", name: "Fire", value: 1, requires: [new Requirement({ type: "temperature", value: 150, operator: ">=" })] })],
     }),
     new Action({
         name: "Language",
         perform: ({ rites }) => {
             rites.push(new LanguageRite());
         },
-        condition: ({ kins, rites }) => {
-            return kins.filter((kin) => kin.name === "Kin").length >= 5 && !rites.find((rite) => rite.name === "Language");
-        },
-        requires: [["Kin", 5]],
+        requires: [new Requirement({ type: "kin", name: "Kin", value: 5, operator: ">=" }), new Requirement({ type: "rite", name: "Language", value: 1, operator: "<" })],
         milestones: ({ inventory, entities, kins, rites, milestones }) => {
             if (kins.filter((kin) => kin.name === "Kin").length >= 5 && !milestones.includes("Language")) {
                 milestones.push("Language");

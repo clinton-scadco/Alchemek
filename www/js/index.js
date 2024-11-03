@@ -54469,10 +54469,10 @@
     return _extends.apply(this, arguments);
   }
   var Action;
-  (function(Action3) {
-    Action3["Pop"] = "POP";
-    Action3["Push"] = "PUSH";
-    Action3["Replace"] = "REPLACE";
+  (function(Action4) {
+    Action4["Pop"] = "POP";
+    Action4["Push"] = "PUSH";
+    Action4["Replace"] = "REPLACE";
   })(Action || (Action = {}));
   var PopStateEventType = "popstate";
   function createBrowserHistory(options) {
@@ -67608,12 +67608,23 @@
   };
 
   // src/Classes.ts
+  var Requirement = class {
+    constructor({ type, name, value, operator, requires }) {
+      this.type = type;
+      this.name = name;
+      this.value = value;
+      this.operator = operator || ">=";
+      this.requires = requires || [];
+    }
+  };
+  var ItemRequirement = ([item, amount]) => {
+    return new Requirement({ type: "item", name: item, value: amount });
+  };
   var Action2 = class {
-    constructor({ name, perform: perform2, condition, milestones, requires, source, type }) {
+    constructor({ name, perform: perform2, milestones, requires, source, type }) {
       this.name = name;
       this.perform = perform2 || (() => {
       });
-      this.condition = condition || (() => true);
       this.milestones = milestones || (() => true);
       this.requires = requires || [];
       this.source = source || [];
@@ -67726,11 +67737,54 @@
       }
     }
   }
-  var EvaluateRequirements = (state, requirements, source) => {
+  var Compare = (a, b, operator) => {
+    switch (operator) {
+      case ">":
+        return a > b;
+      case "<":
+        return a < b;
+      case "=":
+        return a === b;
+      case ">=":
+        return a >= b;
+      case "<=":
+        return a <= b;
+      default:
+        return false;
+    }
+  };
+  var MeetsRequirement = (requirement, source) => {
+    let met = true;
+    console.log(requirement);
+    if (requirement.name) {
+      met = met && source.name === requirement.name;
+      console.log("name match", met);
+    }
+    if (requirement.type == "temperature") {
+      met = met && Compare(source[requirement.type], requirement.value, requirement.operator);
+      console.log("temperature match", met);
+    }
+    if (requirement.requires.length > 0) {
+      met = met && requirement.requires.every((r) => MeetsRequirement(r, source));
+      console.log("nested match", met);
+    }
+    return met;
+  };
+  var EvaluateRequirements = (state, requirements) => {
     let met = true;
     requirements.forEach((requirement) => {
-      let [item, count] = requirement;
-      met = met && (state.inventory.filter((i) => i.name == item).length >= count || state.entities.filter((i) => i.name == item).length >= count || state.kins.filter((i) => i.name == item).length >= count);
+      if (requirement.type === "item") {
+        met = met && Compare(state.inventory.filter((i) => MeetsRequirement(requirement, i)).length, requirement.value, requirement.operator);
+      }
+      if (requirement.type === "entity") {
+        met = met && Compare(state.entities.filter((i) => MeetsRequirement(requirement, i)).length, requirement.value, requirement.operator);
+      }
+      if (requirement.type === "kin") {
+        met = met && Compare(state.kins.filter((i) => MeetsRequirement(requirement, i)).length, requirement.value, requirement.operator);
+      }
+      if (requirement.type === "rite") {
+        met = met && Compare(state.rites.filter((i) => MeetsRequirement(requirement, i)).length, requirement.value, requirement.operator);
+      }
     });
     return met;
   };
@@ -67776,7 +67830,7 @@
           })
         );
       },
-      requires: [["Wood", 2]]
+      requires: [ItemRequirement(["Wood", 2])]
     }),
     new Action2({
       name: "Make Tool",
@@ -67785,10 +67839,7 @@
         RemoveItem(inventory, "Stone", 1);
         inventory.push(new Tool(10));
       },
-      requires: [
-        ["Wood", 1],
-        ["Stone", 1]
-      ]
+      requires: [ItemRequirement(["Wood", 1]), ItemRequirement(["Stone", 1])]
     }),
     new Action2({
       name: "Feed Fire",
@@ -67804,10 +67855,7 @@
         }
       },
       source: ["Fire"],
-      requires: [
-        ["Wood", 1],
-        ["Fire", 1]
-      ]
+      requires: [ItemRequirement(["Wood", 1]), new Requirement({ type: "entity", name: "Fire", value: 1 })]
     }),
     new Action2({
       name: "Emberstone",
@@ -67820,10 +67868,7 @@
           })
         );
       },
-      condition: ({ inventory, entities }) => {
-        return !!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200);
-      },
-      requires: [["Heated Stone", 2]],
+      requires: [ItemRequirement(["Heated Stone", 2]), new Requirement({ type: "entity", name: "Fire", value: 1, requires: [new Requirement({ type: "temperature", value: 200, operator: ">" })] })],
       milestones: ({ inventory, entities, kins, rites, milestones }) => {
         if (!!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200) && !milestones.includes("Emberstone")) {
           milestones.push("Emberstone");
@@ -67842,21 +67887,15 @@
         }
         inventory.push(new HeatedStone());
       },
-      condition: ({ inventory, entities, kins, rites }, source) => {
-        return !!entities.find((entity) => entity.name === "Fire") && !!source && source.temperature >= 150;
-      },
       source: ["Fire", "Emberstone"],
-      requires: [["Stone", 1]]
+      requires: [ItemRequirement(["Stone", 1]), new Requirement({ type: "entity", name: "Fire", value: 1, requires: [new Requirement({ type: "temperature", value: 150, operator: ">=" })] })]
     }),
     new Action2({
       name: "Language",
       perform: ({ rites }) => {
         rites.push(new LanguageRite());
       },
-      condition: ({ kins, rites }) => {
-        return kins.filter((kin) => kin.name === "Kin").length >= 5 && !rites.find((rite) => rite.name === "Language");
-      },
-      requires: [["Kin", 5]],
+      requires: [new Requirement({ type: "kin", name: "Kin", value: 5, operator: ">=" }), new Requirement({ type: "rite", name: "Language", value: 1, operator: "<" })],
       milestones: ({ inventory, entities, kins, rites, milestones }) => {
         if (kins.filter((kin) => kin.name === "Kin").length >= 5 && !milestones.includes("Language")) {
           milestones.push("Language");
@@ -75791,7 +75830,7 @@
         key: action.name,
         action,
         performAction,
-        disabled: !(action?.condition({ inventory, entities, kins, rites, milestones, ticks }) && EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, action.requires))
+        disabled: !EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, action.requires)
       }
     ))), milestones.length > 0 && /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Rituals"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.includes("Ritual")).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React38.createElement(
       ActionButton,
@@ -75799,7 +75838,7 @@
         key: action.name,
         action,
         performAction,
-        disabled: !(action?.condition({ inventory, entities, kins, rites, milestones, ticks }) && EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, action.requires))
+        disabled: !EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, action.requires)
       }
     ))), milestones.length > 0 && /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Rites"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.includes("Rite")).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React38.createElement(
       ActionButton,
@@ -75808,14 +75847,14 @@
         key: action.name,
         action,
         performAction,
-        disabled: !(action?.condition({ inventory, entities, kins, rites, milestones, ticks }) && EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, action.requires))
+        disabled: !EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, action.requires)
       }
     ))), milestones.length > 0 && /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Active Rites"), rites.filter((rite) => !rite.isComplete()).map((rite) => /* @__PURE__ */ React38.createElement(Box, { key: rite.id }, /* @__PURE__ */ React38.createElement(Text, null, rite.icon), /* @__PURE__ */ React38.createElement(Text, null, rite.name), rite.ingredients.map(([name, count]) => /* @__PURE__ */ React38.createElement(Box, { key: "rite" + rite.id + "ingredient" + name }, /* @__PURE__ */ React38.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, name, " x", count), /* @__PURE__ */ React38.createElement(
       Button,
       {
         label: "Offer " + name,
         onClick: () => performOffering(rite, name),
-        disabled: !EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, [[name, 1]])
+        disabled: !EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, [ItemRequirement([name, 1])])
       }
     )), /* @__PURE__ */ React38.createElement(Box, { fill: "horizontal", height: "5px", width: "50px" }, /* @__PURE__ */ React38.createElement(Meter, { value: rite.progress.find(([n, c]) => n == name)?.[1], max: count })))))))), /* @__PURE__ */ React38.createElement(Entities, { entities, performEntityAction, inventory, milestones, kins, rites, ticks }), /* @__PURE__ */ React38.createElement(Box, { direction: "row", gap: "small", fill: true, align: "start" }, /* @__PURE__ */ React38.createElement(Box, { height: { min: "200px" }, width: "320px", border: true, pad: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Inventory"), /* @__PURE__ */ React38.createElement(Inventory, { inventory })), /* @__PURE__ */ React38.createElement(Box, { height: { min: "200px" }, width: "320px" }, kins.length > 0 && /* @__PURE__ */ React38.createElement(Text, null, "Kins"), /* @__PURE__ */ React38.createElement(Kins, { kins }))))));
   };
@@ -75852,7 +75891,7 @@
         key: action.name,
         action,
         performAction: () => performEntityAction(action, entity),
-        disabled: !(action?.condition({ inventory, entities, kins, rites, milestones, ticks }, entity) && EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, action.requires))
+        disabled: !EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, action.requires)
       }
     ))))));
   };

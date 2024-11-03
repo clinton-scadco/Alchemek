@@ -1,12 +1,40 @@
 import { GetNextId } from "./utils/Data";
 
+export interface IRequirement {
+    type: string;
+    name?: string;
+    value: number;
+    operator?: string;
+    requires?: Requirement[];
+}
+
+export class Requirement implements IRequirement {
+    type: string;
+    value: number;
+    operator: string;
+    name?: string;
+    
+    requires: Requirement[];
+
+    constructor({ type, name, value, operator, requires }: IRequirement) {
+        this.type = type;
+        this.name = name;
+        this.value = value;
+        this.operator = operator || ">=";
+        this.requires = requires || [];
+    }
+}
+
+export const ItemRequirement = ([item, amount]) => {
+    return new Requirement({ type: "item", name: item, value: amount });
+};
+
 export interface IAction {
     name: string;
     perform?: (state: GameState, source?: Entity) => void;
 
-    condition?: (state: GameState, source?: Entity) => boolean;
     milestones?: (state: GameState) => boolean;
-    requires?: [string, number][];
+    requires?: Requirement[];
     source?: string[];
     type?: string[];
 }
@@ -14,18 +42,15 @@ export interface IAction {
 export class Action implements IAction {
     name: string;
     perform: (state: GameState, source?: Entity) => void;
-
-    condition: (state: GameState, source?: Entity) => boolean;
     milestones: (state: GameState) => boolean;
-    requires: [string, number][];
+    requires: Requirement[];
     source?: string[];
     type?: string[];
 
-    constructor({ name, perform, condition, milestones, requires, source, type }: IAction) {
+    constructor({ name, perform,  milestones, requires, source, type }: IAction) {
         this.name = name;
         this.perform = perform || (() => {});
-
-        this.condition = condition || (() => true);
+        
         this.milestones = milestones || (() => true);
         this.requires = requires || [];
         this.source = source || [];
