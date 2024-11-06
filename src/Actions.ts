@@ -1,5 +1,6 @@
 import { Action, Entity, GameState, Item, ItemRequirement, Kin, Requirement, Rite } from "./Classes";
 import { HeatedStone, LanguageRite, Stone, Tool, Wood } from "./Eras/One";
+import { GetRandom } from "./utils/Random";
 
 export function RemoveItem(inventory: Item[], name, count) {
     let removedCount = 0;
@@ -34,21 +35,17 @@ const Compare = (a, b, operator) => {
 
 const MeetsRequirement = (requirement: Requirement, source: Item | Entity | Kin | Rite) => {
     let met = true;
-    console.log(requirement);
 
     if (requirement.name) {
         met = met && source.name === requirement.name;
-        console.log("name match", met);
     }
 
     if (requirement.type == "temperature") {
         met = met && Compare(source[requirement.type], requirement.value, requirement.operator);
-        console.log("temperature match", met);
     }
 
     if (requirement.requires.length > 0) {
         met = met && requirement.requires.every((r) => MeetsRequirement(r, source));
-        console.log("nested match", met);
     }
 
     return met;
@@ -77,10 +74,12 @@ export const actions = [
     new Action({
         name: "Collect Stone",
         perform: ({ inventory }) => inventory.push(new Stone()),
+        duration: 2,
     }),
     new Action({
         name: "Collect Wood",
         perform: ({ inventory }) => inventory.push(new Wood()),
+        duration: 2,
     }),
     new Action({
         name: "Make Fire",
@@ -116,15 +115,23 @@ export const actions = [
             );
         },
         requires: [ItemRequirement(["Wood", 2])],
+        duration: 10,
     }),
     new Action({
         name: "Make Tool",
-        perform: ({ inventory }, source) => {
-            RemoveItem(inventory, "Wood", 1);
+        perform: function ({ inventory, milestones }, source) {
+            let random = GetRandom(this.id, 1 / 6);
+            if (random.next()) {
+                if (!milestones.includes("Hafting")) {
+                    milestones.push("Hafting");
+                }
+            }
             RemoveItem(inventory, "Stone", 1);
+
             inventory.push(new Tool(10));
         },
-        requires: [ItemRequirement(["Wood", 1]), ItemRequirement(["Stone", 1])],
+        requires: [ItemRequirement(["Stone", 1])],
+        duration: 8,
     }),
     new Action({
         name: "Feed Fire",

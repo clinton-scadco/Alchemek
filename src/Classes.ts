@@ -32,22 +32,25 @@ export const ItemRequirement = ([item, amount]) => {
 export interface IAction {
     name: string;
     perform?: (state: GameState, source?: Entity) => void;
-
     milestones?: (state: GameState) => boolean;
     requires?: Requirement[];
     source?: string[];
     type?: string[];
+    duration?: number;
 }
 
 export class Action implements IAction {
+    id: number;
     name: string;
     perform: (state: GameState, source?: Entity) => void;
     milestones: (state: GameState) => boolean;
     requires: Requirement[];
     source?: string[];
     type?: string[];
+    duration: number;
 
-    constructor({ name, perform, milestones, requires, source, type }: IAction) {
+    constructor({ name, perform, milestones, requires, source, type, duration }: IAction) {
+        this.id = GetNextId();
         this.name = name;
         this.perform = perform || (() => {});
 
@@ -55,6 +58,19 @@ export class Action implements IAction {
         this.requires = requires || [];
         this.source = source || [];
         this.type = type || [];
+        this.duration = duration || 0;
+    }
+}
+
+export class ActionDuration {
+    action: Action;
+    remaining: number;
+    entity?: Entity;
+
+    constructor(action: Action, entity?: Entity) {
+        this.action = action;
+        this.remaining = action.duration;
+        this.entity = entity;
     }
 }
 

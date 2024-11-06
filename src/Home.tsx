@@ -1,7 +1,7 @@
 import { initialize } from "esbuild";
 import { Box, Button, Grid, Heading, Meter, Stack, Text, Tip } from "grommet";
 import * as React from "react";
-import { Action, Entity, GameState, Item, ItemRequirement, Kin, Rite, Requirement } from "./Classes";
+import { Action, Entity, GameState, Item, ItemRequirement, Kin, Rite, Requirement, ActionDuration } from "./Classes";
 import { groupBy, values } from "lodash";
 import _ from "lodash";
 import { actions, EvaluateRequirements, RemoveItem } from "./Actions";
@@ -26,18 +26,28 @@ const Home = () => {
         setRites([...rites]);
     };
 
+    const [performingActions, setPerformingActions] = React.useState([] as ActionDuration[]);
+
     const performAction = (action: Action) => {
-        action.perform({ inventory, entities, kins, rites, milestones, ticks } as GameState);
-        setInventory([...inventory]);
-        setEntities([...entities]);
-        setKins([...kins]);
+        if (action.duration > 0) {
+            setPerformingActions([...performingActions, new ActionDuration(action)]);
+        } else {
+            action.perform({ inventory, entities, kins, rites, milestones, ticks } as GameState);
+            setInventory([...inventory]);
+            setEntities([...entities]);
+            setKins([...kins]);
+        }
     };
 
     const performEntityAction = (action: Action, entity: Entity) => {
-        action.perform({ inventory, entities, kins, rites, milestones, ticks } as GameState, entity);
-        setInventory([...inventory]);
-        setEntities([...entities]);
-        setKins([...kins]);
+        if (action.duration > 0) {
+            setPerformingActions([...performingActions, new ActionDuration(action, entity)]);
+        } else {
+            action.perform({ inventory, entities, kins, rites, milestones, ticks } as GameState, entity);
+            setInventory([...inventory]);
+            setEntities([...entities]);
+            setKins([...kins]);
+        }
     };
 
     React.useEffect(() => {
@@ -52,6 +62,20 @@ const Home = () => {
 
     React.useEffect(() => {
         const intervalId = setInterval(() => {
+            performingActions.forEach((performingAction) => {
+                performingAction.remaining--;
+                if (performingAction.remaining <= 0) {
+                    if (!performingAction.entity) {
+                        performingAction.action.perform({ inventory, entities, kins, rites, milestones, ticks } as GameState);
+                    } else {
+                        performingAction.action.perform({ inventory, entities, kins, rites, milestones, ticks } as GameState, performingAction.entity);
+                    }
+                }
+            });
+
+            let updatedActions = performingActions.filter((performingAction) => performingAction.remaining > 0);
+            setPerformingActions(updatedActions);
+
             // Decrease ttl of each entity
             const updatedEntities = entities.map((entity) => {
                 entity.tick({ inventory, entities, kins, rites, ticks } as GameState, entity);
@@ -75,7 +99,7 @@ const Home = () => {
 
         // Cleanup function to clear interval on unmount
         return () => clearInterval(intervalId);
-    }, [inventory, entities, kins]);
+    }, [inventory, entities, kins, performingActions]);
 
     return (
         <>
@@ -96,10 +120,32 @@ const Home = () => {
                                         key={action.name}
                                         action={action}
                                         performAction={performAction}
-                                        disabled={!EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires)}
+                                        disabled={
+                                            !EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires) ||
+                                            !!performingActions.find((performingAction) => performingAction.action.id == action.id)
+                                        }
                                     ></ActionButton>
                                 ))}
                         </Box>
+
+                        <Box gap="small">
+                            <Text>Tasks</Text>
+                            {performingActions.map((performingAction, i) => (
+                                <Box key={i}>
+                                    <Text>{performingAction.action.name}</Text>
+                                    <Meter value={performingAction.remaining} max={performingAction.action.duration}></Meter>
+                                </Box>
+                            ))}
+                        </Box>
+
+                        {milestones.length > 0 && (
+                            <Box gap="small">
+                                <Text>Milestones</Text>
+                                {milestones.map((milestone) => (
+                                    <Button disabled key={milestone} label={milestone}></Button>
+                                ))}
+                            </Box>
+                        )}
                         {milestones.length > 0 && (
                             <Box gap="small">
                                 <Text>Rituals</Text>
