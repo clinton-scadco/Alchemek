@@ -1,4 +1,4 @@
-import { Action, Entity, GameState, Item, ItemRequirement, Kin, Requirement, Rite } from "./Classes";
+import { Action, Entity, IGameState, Item, ItemRequirement, Kin, Requirement, Rite } from "./Classes";
 import { HeatedStone, LanguageRite, Stone, Tool, Wood } from "./Eras/One";
 import { GetRandom } from "./utils/Random";
 
@@ -51,7 +51,7 @@ const MeetsRequirement = (requirement: Requirement, source: Item | Entity | Kin 
     return met;
 };
 
-export const EvaluateRequirements = (state: GameState, requirements: Requirement[]) => {
+export const EvaluateRequirements = (state: IGameState, requirements: Requirement[]) => {
     let met = true;
     requirements.forEach((requirement) => {
         if (requirement.type === "item") {
@@ -83,26 +83,27 @@ export const actions = [
     }),
     new Action({
         name: "Make Fire",
-        perform: ({ inventory, entities, kins, rites }, source) => {
+        perform: ({ inventory, entities, kins, rites, ticks }, source) => {
             RemoveItem(inventory, "Wood", 2);
             entities.push(
                 new Entity({
                     name: "Fire",
-                    ttl: 30,
+                    ttl: 60,
                     temperature: 100,
-                    tick: ({}, source) => {
+                    tick: ({ tickRate }, source) => {
                         if (source.temperature <= 100) {
-                            source.ttl -= 1;
+                            source.ttl -= 1 / tickRate;
                         } else {
                             source.ttl = 30;
                         }
-                        source.temperature -= 2;
+                        source.temperature -= 2 / tickRate;
                     },
                     performs: [
                         {
                             name: "Gather",
                             icon: "👤",
                             ttp: 10,
+                            lastTickPerformed: ticks,
                             condition: ({ kins }, source) => {
                                 return source.temperature > 60 && kins.length < 5;
                             },
@@ -115,7 +116,7 @@ export const actions = [
             );
         },
         requires: [ItemRequirement(["Wood", 2])],
-        duration: 10,
+        duration: 5,
     }),
     new Action({
         name: "Make Tool",

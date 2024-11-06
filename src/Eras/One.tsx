@@ -1,5 +1,4 @@
 import { Item, Rite } from "../Classes";
-import { GetNextId } from "../utils/Data";
 
 export class Stone extends Item {
     icon: string = "🪨";

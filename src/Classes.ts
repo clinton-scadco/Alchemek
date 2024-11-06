@@ -31,8 +31,8 @@ export const ItemRequirement = ([item, amount]) => {
 
 export interface IAction {
     name: string;
-    perform?: (state: GameState, source?: Entity) => void;
-    milestones?: (state: GameState) => boolean;
+    perform?: (state: IGameState, source?: Entity) => void;
+    milestones?: (state: IGameState) => boolean;
     requires?: Requirement[];
     source?: string[];
     type?: string[];
@@ -42,8 +42,8 @@ export interface IAction {
 export class Action implements IAction {
     id: number;
     name: string;
-    perform: (state: GameState, source?: Entity) => void;
-    milestones: (state: GameState) => boolean;
+    perform: (state: IGameState, source?: Entity) => void;
+    milestones: (state: IGameState) => boolean;
     requires: Requirement[];
     source?: string[];
     type?: string[];
@@ -113,15 +113,17 @@ interface IEntityPerform {
     icon: string;
     name: string;
     ttp: number;
-    condition: (state: GameState, source: Entity) => boolean;
-    perform: (state: GameState, source: Entity) => void;
+    lastTickPerformed: number;
+
+    condition: (state: IGameState, source: Entity) => boolean;
+    perform: (state: IGameState, source: Entity) => void;
 }
 
 export interface IEntity {
     name: string;
     ttl?: number;
     temperature?: number;
-    tick?: (state: GameState, source: Entity) => void;
+    tick?: (state: IGameState, source: Entity) => void;
     performs?: IEntityPerform[];
 }
 
@@ -129,7 +131,7 @@ export class Entity implements IEntity {
     name: string;
     ttl: number;
     temperature: number;
-    tick: (state: GameState, source: Entity) => void;
+    tick: (state: IGameState, source: Entity) => void;
     performs: IEntityPerform[];
 
     constructor({ name, ttl, temperature, tick, performs }: IEntity) {
@@ -187,7 +189,7 @@ export class Kin implements IKin {
         this.inventory.push(item);
     }
 
-    tick(state: GameState) {
+    tick(state: IGameState) {
         if (!this.inventory.some((i) => i.name == "Tool") && state.inventory.some((i) => i.name == "Tool")) {
             let tool = state.inventory.find((i) => i.name == "Tool");
             if (tool) {
@@ -198,11 +200,14 @@ export class Kin implements IKin {
     }
 }
 
-export interface GameState {
+export interface IGameState {
     inventory: Item[];
     entities: Entity[];
     kins: Kin[];
     rites: Rite[];
     milestones: string[];
     ticks: number;
+    tickRate: number;
+
+    performingActions: ActionDuration[];
 }

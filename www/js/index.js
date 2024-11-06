@@ -54469,10 +54469,10 @@
     return _extends.apply(this, arguments);
   }
   var Action;
-  (function(Action4) {
-    Action4["Pop"] = "POP";
-    Action4["Push"] = "PUSH";
-    Action4["Replace"] = "REPLACE";
+  (function(Action5) {
+    Action5["Pop"] = "POP";
+    Action5["Push"] = "PUSH";
+    Action5["Replace"] = "REPLACE";
   })(Action || (Action = {}));
   var PopStateEventType = "popstate";
   function createBrowserHistory(options) {
@@ -67861,26 +67861,27 @@
     }),
     new Action2({
       name: "Make Fire",
-      perform: ({ inventory, entities, kins, rites }, source) => {
+      perform: ({ inventory, entities, kins, rites, ticks }, source) => {
         RemoveItem(inventory, "Wood", 2);
         entities.push(
           new Entity({
             name: "Fire",
-            ttl: 30,
+            ttl: 60,
             temperature: 100,
-            tick: ({}, source2) => {
+            tick: ({ tickRate }, source2) => {
               if (source2.temperature <= 100) {
-                source2.ttl -= 1;
+                source2.ttl -= 1 / tickRate;
               } else {
                 source2.ttl = 30;
               }
-              source2.temperature -= 2;
+              source2.temperature -= 2 / tickRate;
             },
             performs: [
               {
                 name: "Gather",
                 icon: "\u{1F464}",
                 ttp: 10,
+                lastTickPerformed: ticks,
                 condition: ({ kins: kins2 }, source2) => {
                   return source2.temperature > 60 && kins2.length < 5;
                 },
@@ -67893,7 +67894,7 @@
         );
       },
       requires: [ItemRequirement(["Wood", 2])],
-      duration: 10
+      duration: 5
     }),
     new Action2({
       name: "Make Tool",
@@ -75836,117 +75837,147 @@
   // node_modules/framer-motion/dist/es/index.mjs
   "use client";
 
+  // src/GameState.ts
+  var GameState = class {
+    constructor() {
+      this.subscribe = (listener3) => {
+        this.listeners.push(listener3);
+      };
+      this.unsubscribe = (listener3) => {
+        this.listeners = this.listeners.filter((l) => l !== listener3);
+      };
+      this.notify = () => {
+        this.listeners.forEach((listener3) => listener3(this));
+      };
+      this.performOffering = (rite, itemName) => {
+        RemoveItem(this.inventory, itemName, 1);
+        rite.offerItem(itemName);
+        this.notify();
+      };
+      this.performAction = (action) => {
+        if (action.duration > 0) {
+          this.performingActions.push(new ActionDuration(action));
+        } else {
+          action.perform(this);
+        }
+        this.notify();
+      };
+      this.performEntityAction = (action, entity) => {
+        if (action.duration > 0) {
+          this.performingActions.push(new ActionDuration(action, entity));
+        } else {
+          action.perform(this, entity);
+        }
+        this.notify();
+      };
+      this.updateMilestones = () => {
+        actions.forEach((action) => {
+          action.milestones(this);
+        });
+        this.notify();
+      };
+      this.tick = () => {
+        this.performingActions.forEach((performingAction) => {
+          performingAction.remaining -= 1 / this.tickRate;
+          if (performingAction.remaining <= 0) {
+            if (!performingAction.entity) {
+              performingAction.action.perform(this);
+            } else {
+              performingAction.action.perform(this, performingAction.entity);
+            }
+          }
+        });
+        this.performingActions = this.performingActions.filter((performingAction) => performingAction.remaining > 0);
+        this.entities.forEach((entity) => {
+          entity.tick(this, entity);
+          entity.performs.forEach((perform2) => {
+            if (perform2.ttp && this.ticks - perform2.lastTickPerformed >= perform2.ttp && perform2.condition(this, entity)) {
+              perform2.perform(this, entity);
+              perform2.lastTickPerformed = this.ticks;
+            }
+          });
+          return entity;
+        });
+        this.entities = this.entities.filter((entity) => entity.ttl != 0);
+        this.kins.forEach((kin) => {
+          kin.tick(this);
+        });
+        this.notify();
+      };
+      this.inventory = [];
+      this.entities = [];
+      this.kins = [];
+      this.rites = [];
+      this.milestones = [];
+      this.ticks = 0;
+      this.tickRate = 30;
+      this.performingActions = [];
+      this.listeners = [];
+      setInterval(() => {
+        this.ticks += 1 / this.tickRate;
+        this.tick();
+      }, 1e3 / this.tickRate);
+    }
+  };
+
   // src/Home.tsx
   var Home = () => {
+    const [gameState, setGameState] = React38.useState(new GameState());
     const [inventory, setInventory] = React38.useState([]);
     const [entities, setEntities] = React38.useState([]);
     const [milestones, setMilestones] = React38.useState([]);
     const [kins, setKins] = React38.useState([]);
     const [rites, setRites] = React38.useState([]);
-    React38.useEffect(() => {
-    }, []);
-    const performOffering = (rite, itemName) => {
-      RemoveItem(inventory, itemName, 1);
-      setInventory([...inventory]);
-      rite.offerItem(itemName);
-      setRites([...rites]);
-    };
-    const [performingActions, setPerformingActions] = React38.useState([]);
-    const performAction = (action) => {
-      if (action.duration > 0) {
-        setPerformingActions([...performingActions, new ActionDuration(action)]);
-      } else {
-        action.perform({ inventory, entities, kins, rites, milestones, ticks });
-        setInventory([...inventory]);
-        setEntities([...entities]);
-        setKins([...kins]);
-      }
-    };
-    const performEntityAction = (action, entity) => {
-      if (action.duration > 0) {
-        setPerformingActions([...performingActions, new ActionDuration(action, entity)]);
-      } else {
-        action.perform({ inventory, entities, kins, rites, milestones, ticks }, entity);
-        setInventory([...inventory]);
-        setEntities([...entities]);
-        setKins([...kins]);
-      }
-    };
-    React38.useEffect(() => {
-      let newMilestones = [...milestones];
-      actions.forEach((action) => {
-        action.milestones({ inventory, entities, kins, rites, milestones: newMilestones, ticks });
-      });
-      setMilestones(newMilestones);
-    }, [inventory, entities]);
     const [ticks, setTicks] = React38.useState(0);
+    const [performingActions, setPerformingActions] = React38.useState([]);
     React38.useEffect(() => {
-      const intervalId = setInterval(() => {
-        performingActions.forEach((performingAction) => {
-          performingAction.remaining--;
-          if (performingAction.remaining <= 0) {
-            if (!performingAction.entity) {
-              performingAction.action.perform({ inventory, entities, kins, rites, milestones, ticks });
-            } else {
-              performingAction.action.perform({ inventory, entities, kins, rites, milestones, ticks }, performingAction.entity);
-            }
-          }
-        });
-        let updatedActions = performingActions.filter((performingAction) => performingAction.remaining > 0);
-        setPerformingActions(updatedActions);
-        const updatedEntities = entities.map((entity) => {
-          entity.tick({ inventory, entities, kins, rites, ticks }, entity);
-          entity.performs.forEach((perform2) => {
-            if (perform2.ttp && ticks % perform2.ttp == 0 && perform2.condition({ inventory, entities, kins, rites, milestones, ticks }, entity)) {
-              perform2.perform({ inventory, entities, kins, rites, milestones, ticks }, entity);
-            }
-          });
-          return entity;
-        });
-        const updatedKins = kins.map((kin) => {
-          kin.tick({ inventory, entities, kins, ticks });
-          return kin;
-        });
-        setEntities(updatedEntities.filter((entity) => entity.ttl != 0));
-        setKins(updatedKins);
-        setInventory([...inventory]);
-        setTicks((prevTicks) => prevTicks + 1);
-      }, 1e3);
-      return () => clearInterval(intervalId);
-    }, [inventory, entities, kins, performingActions]);
-    return /* @__PURE__ */ React38.createElement(React38.Fragment, null, /* @__PURE__ */ React38.createElement(LayoutGroup, null, /* @__PURE__ */ React38.createElement(Box, { align: "center", fill: true, gap: "xsmall" }, /* @__PURE__ */ React38.createElement(Box, { fill: true }, /* @__PURE__ */ React38.createElement(Meter, { color: DayNightColors[Math.floor(ticks % 100 / 100 * DayNightColors.length)], value: ticks % 100, max: 100, size: "full", thickness: "10px" })), /* @__PURE__ */ React38.createElement(Box, { direction: "row", gap: "small", align: "start", fill: true }, /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Actions"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.length == 0).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React38.createElement(
+      const listener3 = (newState) => {
+        setInventory(newState.inventory);
+        setEntities(newState.entities);
+        setMilestones(newState.milestones);
+        setKins(newState.kins);
+        setRites(newState.rites);
+        setTicks(newState.ticks);
+        setPerformingActions(newState.performingActions);
+      };
+      gameState.subscribe(listener3);
+      return () => {
+        gameState.unsubscribe(listener3);
+      };
+    }, []);
+    return /* @__PURE__ */ React38.createElement(React38.Fragment, null, /* @__PURE__ */ React38.createElement(LayoutGroup, null, /* @__PURE__ */ React38.createElement(Box, { align: "center", fill: true, gap: "xsmall" }, /* @__PURE__ */ React38.createElement(Box, { fill: true }, /* @__PURE__ */ React38.createElement(Meter, { color: DayNightColors[Math.floor(ticks % 100 / 100 * DayNightColors.length)], value: ticks % 100, max: 100, size: "full", thickness: "10px" })), /* @__PURE__ */ React38.createElement(Box, { direction: "row", gap: "small", align: "start", fill: true }, /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Actions"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.length == 0).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React38.createElement(
       ActionButton,
       {
         key: action.name,
         action,
-        performAction,
-        disabled: !EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, action.requires) || !!performingActions.find((performingAction) => performingAction.action.id == action.id)
+        performAction: gameState.performAction,
+        disabled: !EvaluateRequirements(gameState, action.requires) || !!performingActions.find((performingAction) => performingAction.action.id == action.id)
       }
-    ))), /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Tasks"), performingActions.map((performingAction, i) => /* @__PURE__ */ React38.createElement(Box, { key: i }, /* @__PURE__ */ React38.createElement(Text, null, performingAction.action.name), /* @__PURE__ */ React38.createElement(Meter, { value: performingAction.remaining, max: performingAction.action.duration })))), milestones.length > 0 && /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Milestones"), milestones.map((milestone) => /* @__PURE__ */ React38.createElement(Button, { disabled: true, key: milestone, label: milestone }))), milestones.length > 0 && /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Rituals"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.includes("Ritual")).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React38.createElement(
+    ))), /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Tasks"), performingActions.map((performingAction, i) => /* @__PURE__ */ React38.createElement(Box, { key: i }, /* @__PURE__ */ React38.createElement(Text, null, performingAction.action.name), /* @__PURE__ */ React38.createElement(Meter, { value: performingAction.remaining, max: performingAction.action.duration })))), milestones.length > 0 && /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Milestones"), milestones.map((milestone) => /* @__PURE__ */ React38.createElement(Button, { disabled: true, key: milestone, label: milestone }))), milestones.length > 0 && /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Rituals"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.includes("Ritual")).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React38.createElement(
       ActionButton,
       {
         key: action.name,
         action,
-        performAction,
-        disabled: !EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, action.requires)
+        performAction: gameState.performAction,
+        disabled: !EvaluateRequirements(gameState, action.requires)
       }
-    ))), milestones.length > 0 && /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Rites"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.includes("Rite")).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React38.createElement(
+    ))), milestones.length > 0 && /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Rites"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.includes("Rite")).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React38.createElement(
       ActionButton,
       {
         primary: rites.find((rite) => rite.name == action.name)?.isComplete(),
         key: action.name,
         action,
-        performAction,
-        disabled: !EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, action.requires)
+        performAction: gameState.performAction,
+        disabled: !EvaluateRequirements(gameState, action.requires)
       }
     ))), milestones.length > 0 && /* @__PURE__ */ React38.createElement(Box, { gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Active Rites"), rites.filter((rite) => !rite.isComplete()).map((rite) => /* @__PURE__ */ React38.createElement(Box, { key: rite.id }, /* @__PURE__ */ React38.createElement(Text, null, rite.icon), /* @__PURE__ */ React38.createElement(Text, null, rite.name), rite.ingredients.map(([name, count]) => /* @__PURE__ */ React38.createElement(Box, { key: "rite" + rite.id + "ingredient" + name }, /* @__PURE__ */ React38.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, name, " x", count), /* @__PURE__ */ React38.createElement(
       Button,
       {
         label: "Offer " + name,
-        onClick: () => performOffering(rite, name),
-        disabled: !EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, [ItemRequirement([name, 1])])
+        onClick: () => gameState.performOffering(rite, name),
+        disabled: !EvaluateRequirements(gameState, [ItemRequirement([name, 1])])
       }
-    )), /* @__PURE__ */ React38.createElement(Box, { fill: "horizontal", height: "5px", width: "50px" }, /* @__PURE__ */ React38.createElement(Meter, { value: rite.progress.find(([n, c]) => n == name)?.[1], max: count })))))))), /* @__PURE__ */ React38.createElement(Entities, { entities, performEntityAction, inventory, milestones, kins, rites, ticks }), /* @__PURE__ */ React38.createElement(Box, { direction: "row", gap: "small", fill: true, align: "start" }, /* @__PURE__ */ React38.createElement(Box, { height: { min: "200px" }, width: "320px", border: true, pad: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Inventory"), /* @__PURE__ */ React38.createElement(Inventory, { inventory })), /* @__PURE__ */ React38.createElement(Box, { height: { min: "200px" }, width: "320px" }, kins.length > 0 && /* @__PURE__ */ React38.createElement(Text, null, "Kins"), /* @__PURE__ */ React38.createElement(Kins, { kins }))))));
+    )), /* @__PURE__ */ React38.createElement(Box, { fill: "horizontal", height: "5px", width: "50px" }, /* @__PURE__ */ React38.createElement(Meter, { value: rite.progress.find(([n, c]) => n == name)?.[1], max: count })))))))), /* @__PURE__ */ React38.createElement(Entities, { entities, performEntityAction: gameState.performEntityAction, inventory, milestones, kins, rites, ticks }), /* @__PURE__ */ React38.createElement(Box, { direction: "row", gap: "small", fill: true, align: "start" }, /* @__PURE__ */ React38.createElement(Box, { height: { min: "200px" }, width: "320px", border: true, pad: "small" }, /* @__PURE__ */ React38.createElement(Text, null, "Inventory"), /* @__PURE__ */ React38.createElement(Inventory, { inventory })), /* @__PURE__ */ React38.createElement(Box, { height: { min: "200px" }, width: "320px" }, kins.length > 0 && /* @__PURE__ */ React38.createElement(Text, null, "Kins"), /* @__PURE__ */ React38.createElement(Kins, { kins }))))));
   };
   var ActionButton = ({ action, performAction, disabled: disabled2, ...props }) => {
     return action.requires.length > 0 ? /* @__PURE__ */ React38.createElement(Tip, { key: action.name, content: /* @__PURE__ */ React38.createElement(RenderRequirements, { requirements: action.requires }) }, /* @__PURE__ */ React38.createElement(Box, null, /* @__PURE__ */ React38.createElement(Button, { label: action.name, onClick: () => performAction(action), disabled: disabled2, ...props }))) : /* @__PURE__ */ React38.createElement(Button, { label: action.name, onClick: () => performAction(action), disabled: disabled2, ...props });
@@ -75975,7 +76006,7 @@
     rites,
     ticks
   }) => {
-    return /* @__PURE__ */ React38.createElement(Box, { height: { min: "200px" }, fill: true, align: "start" }, /* @__PURE__ */ React38.createElement(Text, null, "Entities"), /* @__PURE__ */ React38.createElement(Box, { gap: "xsmall" }, entities.map((entity, i) => /* @__PURE__ */ React38.createElement(Box, { key: "entitiy" + entity.name + i, direction: "row", gap: "small" }, /* @__PURE__ */ React38.createElement(Box, null, /* @__PURE__ */ React38.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, entity.name), entity.ttl > 0 && /* @__PURE__ */ React38.createElement(Text, null, entity.ttl.toFixed(0), "s"), entity.temperature != 0 && /* @__PURE__ */ React38.createElement(Text, null, entity.temperature.toFixed(0), " \xB0C")), entity.performs.map((perform2) => /* @__PURE__ */ React38.createElement(Box, { key: "entitiy" + entity.name + i + "perform" + perform2.name, direction: "row", gap: "xsmall", align: "center" }, perform2.ttp > 0 && perform2.condition({ inventory, entities, kins, rites, milestones, ticks }, entity) && /* @__PURE__ */ React38.createElement(React38.Fragment, null, /* @__PURE__ */ React38.createElement(Text, null, perform2.icon), /* @__PURE__ */ React38.createElement(Meter, { value: ticks % perform2.ttp - 1, max: perform2.ttp, thickness: "10px", size: "full" }))))), actions.filter((action) => action.source?.includes(entity.name)).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React38.createElement(
+    return /* @__PURE__ */ React38.createElement(Box, { height: { min: "200px" }, fill: true, align: "start" }, /* @__PURE__ */ React38.createElement(Text, null, "Entities"), /* @__PURE__ */ React38.createElement(Box, { gap: "xsmall" }, entities.map((entity, i) => /* @__PURE__ */ React38.createElement(Box, { key: "entitiy" + entity.name + i, direction: "row", gap: "small" }, /* @__PURE__ */ React38.createElement(Box, null, /* @__PURE__ */ React38.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React38.createElement(Text, null, entity.name), entity.ttl > 0 && /* @__PURE__ */ React38.createElement(Text, null, entity.ttl.toFixed(0), "s"), entity.temperature != 0 && /* @__PURE__ */ React38.createElement(Text, null, entity.temperature.toFixed(0), " \xB0C")), entity.performs.map((perform2) => /* @__PURE__ */ React38.createElement(Box, { key: "entitiy" + entity.name + i + "perform" + perform2.name, direction: "row", gap: "xsmall", align: "center" }, perform2.ttp > 0 && perform2.condition({ inventory, entities, kins, rites, milestones, ticks }, entity) && /* @__PURE__ */ React38.createElement(React38.Fragment, null, /* @__PURE__ */ React38.createElement(Text, null, perform2.icon), /* @__PURE__ */ React38.createElement(Meter, { value: ticks - perform2.lastTickPerformed, max: perform2.ttp, thickness: "10px", size: "full" }))))), actions.filter((action) => action.source?.includes(entity.name)).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React38.createElement(
       ActionButton,
       {
         key: action.name,
