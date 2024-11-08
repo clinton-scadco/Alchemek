@@ -8,6 +8,7 @@ import Theme from "./utils/Theme";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 import Home from "./Home";
+import ComponentTest from "./components/ComponentTest";
 
 function App() {
     const navigate = useNavigate();
@@ -27,6 +28,7 @@ function App() {
                     <Box pad={{ left: "medium", right: "medium" }} style={{ position: "relative" }}>
                         <ErrorBoundary>
                             <Routes>
+                                <Route path="/test" element={<ComponentTest></ComponentTest>}></Route>
                                 <Route path="/*" element={<Home></Home>}></Route>
                             </Routes>
                         </ErrorBoundary>
