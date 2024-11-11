@@ -9,20 +9,27 @@ import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import * as Items from "./Eras/One";
 import { DayNightColors } from "./utils/Theme";
 import { GameState } from "./GameState";
+import Modal from "./components/Modal";
+import { use } from "framer-motion/client";
+import { Milestone } from "./Eras/One";
+import Debug from "./Debug";
+import Progress from "./components/Progress";
 
 const Home = () => {
     const [gameState, setGameState] = React.useState(new GameState());
 
     const [inventory, setInventory] = React.useState([] as Item[]);
     const [entities, setEntities] = React.useState([] as Entity[]);
-    const [milestones, setMilestones] = React.useState([] as string[]);
+    const [milestones, setMilestones] = React.useState([] as Milestone[]);
     const [kins, setKins] = React.useState([] as Kin[]);
     const [rites, setRites] = React.useState([] as Rite[]);
     const [ticks, setTicks] = React.useState(0);
     const [performingActions, setPerformingActions] = React.useState([] as ActionDuration[]);
+    const [messages, setMessages] = React.useState([] as string[]);
+    const [showMessages, setShowMessages] = React.useState(false);
 
     React.useEffect(() => {
-        const listener = (newState) => {
+        const listener = (newState, messages) => {
             setInventory(newState.inventory);
             setEntities(newState.entities);
             setMilestones(newState.milestones);
@@ -30,6 +37,10 @@ const Home = () => {
             setRites(newState.rites);
             setTicks(newState.ticks);
             setPerformingActions(newState.performingActions);
+            if (messages.length > 0) {
+                setMessages(messages);
+                setShowMessages(true);
+            }
         };
 
         gameState.subscribe(listener);
@@ -40,94 +51,12 @@ const Home = () => {
         };
     }, []);
 
-    // React.useEffect(() => {}, []);
-
-    // const performOffering = (rite: Rite, itemName: string) => {
-    //     RemoveItem(inventory, itemName, 1);
-    //     setInventory([...inventory]);
-
-    //     rite.offerItem(itemName);
-    //     setRites([...rites]);
-    // };
-
-    // const performAction = (action: Action) => {
-    //     if (action.duration > 0) {
-    //         setPerformingActions([...performingActions, new ActionDuration(action)]);
-    //     } else {
-    //         action.perform({ inventory, entities, kins, rites, milestones, ticks } as IGameState);
-    //         setInventory([...inventory]);
-    //         setEntities([...entities]);
-    //         setKins([...kins]);
-    //     }
-    // };
-
-    // const performEntityAction = (action: Action, entity: Entity) => {
-    //     if (action.duration > 0) {
-    //         setPerformingActions([...performingActions, new ActionDuration(action, entity)]);
-    //     } else {
-    //         action.perform({ inventory, entities, kins, rites, milestones, ticks } as IGameState, entity);
-    //         setInventory([...inventory]);
-    //         setEntities([...entities]);
-    //         setKins([...kins]);
-    //     }
-    // };
-
-    // React.useEffect(() => {
-    //     let newMilestones = [...milestones];
-    //     actions.forEach((action) => {
-    //         action.milestones({ inventory, entities, kins, rites, milestones: newMilestones, ticks } as IGameState);
-    //     });
-    //     setMilestones(newMilestones);
-    // }, [inventory, entities]);
-
-    // React.useEffect(() => {
-    //     const intervalId = setInterval(() => {
-    //         performingActions.forEach((performingAction) => {
-    //             performingAction.remaining--;
-    //             if (performingAction.remaining <= 0) {
-    //                 if (!performingAction.entity) {
-    //                     performingAction.action.perform({ inventory, entities, kins, rites, milestones, ticks } as IGameState);
-    //                 } else {
-    //                     performingAction.action.perform({ inventory, entities, kins, rites, milestones, ticks } as IGameState, performingAction.entity);
-    //                 }
-    //             }
-    //         });
-
-    //         let updatedActions = performingActions.filter((performingAction) => performingAction.remaining > 0);
-    //         setPerformingActions(updatedActions);
-
-    //         // Decrease ttl of each entity
-    //         const updatedEntities = entities.map((entity) => {
-    //             entity.tick({ inventory, entities, kins, rites, ticks } as IGameState, entity);
-    //             entity.performs.forEach((perform) => {
-    //                 if (perform.ttp && ticks % perform.ttp == 0 && perform.condition({ inventory, entities, kins, rites, milestones, ticks } as IGameState, entity)) {
-    //                     perform.perform({ inventory, entities, kins, rites, milestones, ticks } as IGameState, entity);
-    //                 }
-    //             });
-    //             return entity;
-    //         });
-
-    //         const updatedKins = kins.map((kin) => {
-    //             kin.tick({ inventory, entities, kins, ticks } as IGameState);
-    //             return kin;
-    //         });
-    //         setEntities(updatedEntities.filter((entity) => entity.ttl != 0));
-    //         setKins(updatedKins);
-    //         setInventory([...inventory]);
-    //         setTicks((prevTicks) => prevTicks + 1);
-    //     }, 1000);
-
-    //     // Cleanup function to clear interval on unmount
-    //     return () => clearInterval(intervalId);
-    // }, [inventory, entities, kins, performingActions]);
-
     return (
         <>
             <LayoutGroup>
                 <Box align="center" fill gap={"xsmall"}>
-                    <Box fill>
-                        <Meter color={DayNightColors[Math.floor(((ticks % 100) / 100) * DayNightColors.length)]} value={ticks % 100} max={100} size="full" thickness="10px"></Meter>
-                    </Box>
+                    <Progress color={DayNightColors[Math.floor(((ticks % 100) / 100) * DayNightColors.length)]} value={ticks % 100} ttl={100} width={"100%"}></Progress>
+                    {messages.length}
                     <Box direction="row" gap="small" align="start" fill>
                         <Box gap="small">
                             <Text>Actions</Text>
@@ -150,7 +79,8 @@ const Home = () => {
                             {performingActions.map((performingAction, i) => (
                                 <Box key={i}>
                                     <Text>{performingAction.action.name}</Text>
-                                    <Meter value={performingAction.remaining} max={performingAction.action.duration}></Meter>
+                                    <Progress width={"200px"} color="green" value={performingAction.action.duration - performingAction.remaining} ttl={performingAction.action.duration}></Progress>
+                                    {/* <Meter value={performingAction.remaining} max={performingAction.action.duration}></Meter> */}
                                 </Box>
                             ))}
                         </Box>
@@ -158,8 +88,8 @@ const Home = () => {
                         {milestones.length > 0 && (
                             <Box gap="small">
                                 <Text>Milestones</Text>
-                                {milestones.map((milestone) => (
-                                    <Button disabled key={milestone} label={milestone}></Button>
+                                {milestones.map((milestone, i) => (
+                                    <Button disabled key={milestone.name + i} label={milestone.name}></Button>
                                 ))}
                             </Box>
                         )}
@@ -240,7 +170,18 @@ const Home = () => {
                             <Kins kins={kins}></Kins>
                         </Box>
                     </Box>
+                    <Box>
+                        <Debug perform={(p) => gameState.performAction(p)}></Debug>
+                    </Box>
                 </Box>
+                <Modal isOpen={showMessages} setIsOpen={setShowMessages}>
+                    {messages.map((message, i) => (
+                        <Box key={i}>{message}</Box>
+                    ))}
+                    <Box direction="row" justify="center">
+                        <Button label="Continue" onClick={() => setShowMessages(false)}></Button>
+                    </Box>
+                </Modal>
             </LayoutGroup>
         </>
     );
@@ -305,7 +246,7 @@ const Entities = ({
     entities: Entity[];
     performEntityAction: Function;
     inventory: Item[];
-    milestones: string[];
+    milestones: Milestone[];
     kins: Kin[];
     rites: Rite[];
     ticks: number;

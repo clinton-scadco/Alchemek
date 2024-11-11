@@ -1,5 +1,5 @@
 import { Action, Entity, IGameState, Item, ItemRequirement, Kin, Requirement, Rite } from "./Classes";
-import { HeatedStone, LanguageRite, Stone, Tool, Wood } from "./Eras/One";
+import { HeatedStone, LanguageRite, MilestoneDefinitions, Stone, Tool, Wood } from "./Eras/One";
 import { GetRandom } from "./utils/Random";
 
 export function RemoveItem(inventory: Item[], name, count) {
@@ -123,8 +123,8 @@ export const actions = [
         perform: function ({ inventory, milestones }, source) {
             let random = GetRandom(this.id, 1 / 6);
             if (random.next()) {
-                if (!milestones.includes("Hafting")) {
-                    milestones.push("Hafting");
+                if (!milestones.some((m) => m.name == "Hafting")) {
+                    milestones.push(MilestoneDefinitions.Hafting);
                 }
             }
             RemoveItem(inventory, "Stone", 1);
@@ -165,10 +165,10 @@ export const actions = [
         },
         requires: [ItemRequirement(["Heated Stone", 2]), new Requirement({ type: "entity", name: "Fire", value: 1, requires: [new Requirement({ type: "temperature", value: 200, operator: ">" })] })],
         milestones: ({ inventory, entities, kins, rites, milestones }) => {
-            if (!!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200) && !milestones.includes("Emberstone")) {
-                milestones.push("Emberstone");
+            if (!!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200) && !milestones.includes(MilestoneDefinitions.Emberstone)) {
+                milestones.push(MilestoneDefinitions.Emberstone);
             }
-            return milestones.includes("Emberstone");
+            return milestones.includes(MilestoneDefinitions.Emberstone);
         },
         type: ["Ritual"],
     }),
@@ -192,10 +192,10 @@ export const actions = [
         },
         requires: [new Requirement({ type: "kin", name: "Kin", value: 5, operator: ">=" }), new Requirement({ type: "rite", name: "Language", value: 1, operator: "<" })],
         milestones: ({ inventory, entities, kins, rites, milestones }) => {
-            if (kins.filter((kin) => kin.name === "Kin").length >= 5 && !milestones.includes("Language")) {
-                milestones.push("Language");
+            if (kins.filter((kin) => kin.name === "Kin").length >= 5 && !milestones.includes(MilestoneDefinitions.Language)) {
+                milestones.push(MilestoneDefinitions.Language);
             }
-            return milestones.includes("Language");
+            return milestones.includes(MilestoneDefinitions.Language);
         },
         type: ["Rite"],
     }),

@@ -1,18 +1,20 @@
 import { RemoveItem, actions } from "./Actions";
 import { Item, Entity, Kin, Rite, ActionDuration, Action } from "./Classes";
+import { Milestone } from "./Eras/One";
+import { MilestoneMessage } from "./Messages";
 
 export class GameState {
     inventory: Item[];
     entities: Entity[];
     kins: Kin[];
     rites: Rite[];
-    milestones: string[];
+    milestones: Milestone[];
     ticks: number;
     tickRate: number;
 
     performingActions: ActionDuration[];
 
-    listeners: ((GameState) => void)[];
+    listeners: ((GameState: GameState, Messages: string[]) => void)[];
 
     constructor() {
         this.inventory = [];
@@ -21,15 +23,21 @@ export class GameState {
         this.rites = [];
         this.milestones = [];
         this.ticks = 0;
-        this.tickRate = 30;
+        this.tickRate = 10;
         this.performingActions = [];
         this.listeners = [];
 
-        setInterval(() => {
-            this.ticks += 1 / this.tickRate;
-            this.tick();
-        }, 1000 / this.tickRate);
+        if (this.tickRate > 0) {
+            setInterval(() => {
+                this.ticks += 1 / this.tickRate;
+                this.tick();
+            }, 1000 / this.tickRate);
+        }
     }
+
+    snapshot = () => {
+        return JSON.parse(JSON.stringify(this)) as GameState;
+    };
 
     subscribe = (listener) => {
         this.listeners.push(listener);
@@ -39,42 +47,55 @@ export class GameState {
         this.listeners = this.listeners.filter((l) => l !== listener);
     };
 
-    notify = () => {
-        this.listeners.forEach((listener) => listener(this));
+    notify = (oldState: GameState) => {
+        let newMilestones = this.milestones.filter((milestone) => !oldState.milestones.some((m) => m.name == milestone.name));
+        if (newMilestones.length > 0) {
+            console.log(newMilestones);
+        }
+
+        let messages = [...newMilestones.map((m) => MilestoneMessage(m))];
+        this.listeners.forEach((listener) => listener(this, messages));
     };
 
     performOffering = (rite: Rite, itemName: string) => {
+        let oldState = this.snapshot();
+
         RemoveItem(this.inventory, itemName, 1);
         rite.offerItem(itemName);
-        this.notify();
+        this.notify(oldState);
     };
 
     performAction = (action: Action) => {
+        let oldState = this.snapshot();
+
         if (action.duration > 0) {
             this.performingActions.push(new ActionDuration(action));
         } else {
             action.perform(this);
         }
-        this.notify();
+        this.notify(oldState);
     };
 
     performEntityAction = (action: Action, entity: Entity) => {
+        let oldState = this.snapshot();
+
         if (action.duration > 0) {
             this.performingActions.push(new ActionDuration(action, entity));
         } else {
             action.perform(this, entity);
         }
-        this.notify();
+        this.notify(oldState);
     };
 
     updateMilestones = () => {
         actions.forEach((action) => {
             action.milestones(this);
         });
-        this.notify();
     };
 
     tick = () => {
+        let oldState = this.snapshot();
+
         this.performingActions.forEach((performingAction) => {
             performingAction.remaining -= 1 / this.tickRate;
             if (performingAction.remaining <= 0) {
@@ -105,6 +126,9 @@ export class GameState {
         this.kins.forEach((kin) => {
             kin.tick(this);
         });
-        this.notify();
+
+        // this.updateMilestones();
+
+        this.notify(oldState);
     };
 }

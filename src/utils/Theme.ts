@@ -149,35 +149,35 @@ const Theme = deepMerge(grommet, ssacovidtheme);
 
 export default Theme;
 
-const GetLinearGradient = (colors: string[]) => {
+export const GetLinearGradient = (colors: string[]) => {
     return `linear-gradient(90deg, ${colors.join(",")})`;
 };
 
 export const DayNightColors = [
-    "#012459",
-    "#003972",
-    "#003972",
-    "#004372",
-    "#004372",
-    "#016792",
-    "#07729f",
-    "#12a1c0",
-    "#74d4cc",
-    "#efeebc",
-    "#fee154",
-    "#fdc352",
-    "#ffac6f",
-    "#fda65a",
-    "#fd9e58",
-    "#f18448",
-    "#f06b7e",
-    "#ca5a92",
-    "#5b2c83",
-    "#371a79",
-    "#28166b",
-    "#192861",
-    "#040b3c",
-    "#040b3c",
+    "#012459", //0
+    "#003972", //1
+    "#003972", //2
+    "#004372", //3
+    "#004372", //4
+    "#016792", //5
+    "#07729f", //6
+    "#12a1c0", //7
+    "#74d4cc", //8
+    "#efeebc", //9
+    "#fee154", //10
+    "#fdc352", //11
+    "#ffac6f", //12
+    "#fda65a", //13
+    "#fd9e58", //14
+    "#f18448", //15
+    "#f06b7e", //16
+    "#ca5a92", //17
+    "#5b2c83", //18
+    "#371a79", //19
+    "#28166b", //20
+    "#192861", //21
+    "#040b3c", //22
+    "#040b3c", //23
 ];
 
 export const DayNightGradient = GetLinearGradient(DayNightColors);

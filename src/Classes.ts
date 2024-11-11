@@ -1,3 +1,4 @@
+import { Milestone } from "./Eras/One";
 import { GetNextId } from "./utils/Data";
 
 export interface IRequirement {
@@ -205,7 +206,7 @@ export interface IGameState {
     entities: Entity[];
     kins: Kin[];
     rites: Rite[];
-    milestones: string[];
+    milestones: Milestone[];
     ticks: number;
     tickRate: number;
 
