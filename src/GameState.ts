@@ -126,7 +126,7 @@ export class GameState {
                 return entity;
             });
 
-            this.entities = this.entities.filter((entity) => entity.ttl != 0);
+            this.entities = this.entities.filter((entity) => entity.ttl > 0);
 
             this.kins.forEach((kin) => {
                 kin.tick(this);

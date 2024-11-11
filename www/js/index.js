@@ -68696,7 +68696,7 @@
               if (source2.temperature <= 100) {
                 source2.ttl -= 1 / tickRate;
               } else {
-                source2.ttl = 30;
+                source2.ttl = 60;
               }
               source2.temperature -= 2 / tickRate;
             },
@@ -76740,7 +76740,7 @@
             });
             return entity;
           });
-          this.entities = this.entities.filter((entity) => entity.ttl != 0);
+          this.entities = this.entities.filter((entity) => entity.ttl > 0);
           this.kins.forEach((kin) => {
             kin.tick(this);
           });

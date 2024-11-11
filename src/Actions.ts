@@ -31,7 +31,7 @@ export const actions = [
                         if (source.temperature <= 100) {
                             source.ttl -= 1 / tickRate;
                         } else {
-                            source.ttl = 30;
+                            source.ttl = 60;
                         }
                         source.temperature -= 2 / tickRate;
                     },
