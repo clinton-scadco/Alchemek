@@ -1092,7 +1092,7 @@
             }
             return dispatcher.useContext(Context);
           }
-          function useState19(initialState) {
+          function useState21(initialState) {
             var dispatcher = resolveDispatcher();
             return dispatcher.useState(initialState);
           }
@@ -1104,7 +1104,7 @@
             var dispatcher = resolveDispatcher();
             return dispatcher.useRef(initialValue);
           }
-          function useEffect24(create, deps) {
+          function useEffect25(create, deps) {
             var dispatcher = resolveDispatcher();
             return dispatcher.useEffect(create, deps);
           }
@@ -1887,7 +1887,7 @@
           exports.useContext = useContext22;
           exports.useDebugValue = useDebugValue;
           exports.useDeferredValue = useDeferredValue;
-          exports.useEffect = useEffect24;
+          exports.useEffect = useEffect25;
           exports.useId = useId4;
           exports.useImperativeHandle = useImperativeHandle2;
           exports.useInsertionEffect = useInsertionEffect3;
@@ -1895,7 +1895,7 @@
           exports.useMemo = useMemo17;
           exports.useReducer = useReducer;
           exports.useRef = useRef17;
-          exports.useState = useState19;
+          exports.useState = useState21;
           exports.useSyncExternalStore = useSyncExternalStore;
           exports.useTransition = useTransition;
           exports.version = ReactVersion;
@@ -2391,9 +2391,9 @@
           if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
             __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(new Error());
           }
-          var React47 = require_react();
+          var React49 = require_react();
           var Scheduler = require_scheduler();
-          var ReactSharedInternals = React47.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+          var ReactSharedInternals = React49.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
           var suppressWarning = false;
           function setSuppressWarning(newSuppressWarning) {
             {
@@ -3998,7 +3998,7 @@
             {
               if (props.value == null) {
                 if (typeof props.children === "object" && props.children !== null) {
-                  React47.Children.forEach(props.children, function(child) {
+                  React49.Children.forEach(props.children, function(child) {
                     if (child == null) {
                       return;
                     }
@@ -29864,7 +29864,7 @@
       if (true) {
         (function() {
           "use strict";
-          var React47 = require_react();
+          var React49 = require_react();
           var REACT_ELEMENT_TYPE = Symbol.for("react.element");
           var REACT_PORTAL_TYPE = Symbol.for("react.portal");
           var REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
@@ -29890,7 +29890,7 @@
             }
             return null;
           }
-          var ReactSharedInternals = React47.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+          var ReactSharedInternals = React49.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
           function error(format3) {
             {
               {
@@ -30763,7 +30763,7 @@
   });
 
   // src/index.tsx
-  var React46 = __toESM(require_react(), 1);
+  var React48 = __toESM(require_react(), 1);
   var import_client2 = __toESM(require_client(), 1);
 
   // node_modules/@fortawesome/fontawesome-svg-core/index.mjs
@@ -54444,7 +54444,7 @@
   };
 
   // src/App.tsx
-  var React45 = __toESM(require_react(), 1);
+  var React47 = __toESM(require_react(), 1);
 
   // node_modules/react-router-dom/dist/index.js
   var React2 = __toESM(require_react());
@@ -76992,14 +76992,57 @@
   };
   var Home_default = Home;
 
+  // src/components/ComponentTest.tsx
+  var import_react72 = __toESM(require_react(), 1);
+
+  // src/components/ProgressButton.tsx
+  var import_react71 = __toESM(require_react(), 1);
+  var import_styled_components29 = __toESM(require_styled_components_browser_cjs(), 1);
+  var ProgressButtonContainer = import_styled_components29.default.default.div`
+    position: relative;
+    user-select: none; 
+    .progress {
+        position: absolute;
+        min-height: 100%;
+        height: 100%;
+        // transition: width 0.5s ease;
+        pointer-events: none;
+    }
+`;
+  var ProgressButton = ({ label, value, max, onClick }) => {
+    const [width, setWidth] = (0, import_react71.useState)("0%");
+    (0, import_react71.useEffect)(() => {
+      setWidth(`${value / max * 100}%`);
+    }, [value, max]);
+    return /* @__PURE__ */ import_react71.default.createElement(ProgressButtonContainer, null, /* @__PURE__ */ import_react71.default.createElement("div", { className: "progress", style: { backgroundColor: "rgba(255,255,255,0.5)", width } }), /* @__PURE__ */ import_react71.default.createElement(Box, { border: { size: "2px", color: "white" }, onClick }, label));
+  };
+  var ProgressButton_default = ProgressButton;
+
+  // src/components/ComponentTest.tsx
+  var ComponentTest = () => {
+    const [value, setValue] = (0, import_react72.useState)(50);
+    return /* @__PURE__ */ import_react72.default.createElement(import_react72.default.Fragment, null, /* @__PURE__ */ import_react72.default.createElement(
+      ProgressButton_default,
+      {
+        label: "Click me",
+        value,
+        max: 100,
+        onClick: () => {
+          setValue(value + 1);
+        }
+      }
+    ));
+  };
+  var ComponentTest_default = ComponentTest;
+
   // src/App.tsx
   function App() {
     const navigate = useNavigate();
     const [isDarkMode, toggleDarkMode] = useDarkMode();
-    const [grommetProps, setGrommetProps] = React45.useState({});
-    React45.useEffect(() => {
+    const [grommetProps, setGrommetProps] = React47.useState({});
+    React47.useEffect(() => {
     }, []);
-    return /* @__PURE__ */ React45.createElement(Grommet, { ...grommetProps, full: true, theme: Theme_default, themeMode: isDarkMode ? "dark" : "light" }, /* @__PURE__ */ React45.createElement(Box, { background: { color: "background" } }, /* @__PURE__ */ React45.createElement(DarkModeSwitch_default, null), /* @__PURE__ */ React45.createElement(Box, { style: { backgroundSize: "cover" }, height: { min: "100vh" }, pad: { top: "small" } }, /* @__PURE__ */ React45.createElement(Box, { pad: { left: "medium", right: "medium" }, style: { position: "relative" } }, /* @__PURE__ */ React45.createElement(ErrorBoundary_default, null, /* @__PURE__ */ React45.createElement(Routes, null, /* @__PURE__ */ React45.createElement(Route, { path: "/*", element: /* @__PURE__ */ React45.createElement(Home_default, null) })))))));
+    return /* @__PURE__ */ React47.createElement(Grommet, { ...grommetProps, full: true, theme: Theme_default, themeMode: isDarkMode ? "dark" : "light" }, /* @__PURE__ */ React47.createElement(Box, { background: { color: "background" } }, /* @__PURE__ */ React47.createElement(DarkModeSwitch_default, null), /* @__PURE__ */ React47.createElement(Box, { style: { backgroundSize: "cover" }, height: { min: "100vh" }, pad: { top: "small" } }, /* @__PURE__ */ React47.createElement(Box, { pad: { left: "medium", right: "medium" }, style: { position: "relative" } }, /* @__PURE__ */ React47.createElement(ErrorBoundary_default, null, /* @__PURE__ */ React47.createElement(Routes, null, /* @__PURE__ */ React47.createElement(Route, { path: "/test", element: /* @__PURE__ */ React47.createElement(ComponentTest_default, null) }), /* @__PURE__ */ React47.createElement(Route, { path: "/*", element: /* @__PURE__ */ React47.createElement(Home_default, null) })))))));
   }
   var App_default = App;
 
@@ -77008,12 +77051,12 @@
   var router = createBrowserRouter([
     {
       path: "/*",
-      element: /* @__PURE__ */ React46.createElement(App_default, null)
+      element: /* @__PURE__ */ React48.createElement(App_default, null)
     }
   ]);
   var container = document.getElementById("app");
   var root = (0, import_client2.createRoot)(container);
-  root.render(/* @__PURE__ */ React46.createElement(RouterProvider, { router }));
+  root.render(/* @__PURE__ */ React48.createElement(RouterProvider, { router }));
 })();
 /*! For license information please see index.js.LEGAL.txt */
 //# sourceMappingURL=index.js.map
