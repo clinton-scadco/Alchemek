@@ -1,4 +1,3 @@
-import { Milestone } from "./Eras/One";
 import { GetNextId } from "./utils/Data";
 
 export interface IRequirement {
@@ -35,7 +34,7 @@ export interface IAction {
     perform?: (state: IGameState, source?: Entity) => void;
     milestones?: (state: IGameState) => boolean;
     requires?: Requirement[];
-    source?: string[];
+    entities?: string[];
     type?: string[];
     duration?: number;
 }
@@ -46,33 +45,46 @@ export class Action implements IAction {
     perform: (state: IGameState, source?: Entity) => void;
     milestones: (state: IGameState) => boolean;
     requires: Requirement[];
-    source?: string[];
+    entities?: string[];
     type?: string[];
     duration: number;
 
-    constructor({ name, perform, milestones, requires, source, type, duration }: IAction) {
+    constructor({ name, perform, milestones, requires, entities, type, duration }: IAction) {
         this.id = GetNextId();
         this.name = name;
         this.perform = perform || (() => {});
 
         this.milestones = milestones || (() => true);
         this.requires = requires || [];
-        this.source = source || [];
+        this.entities = entities || [];
         this.type = type || [];
         this.duration = duration || 0;
     }
 }
 
 export class ActionDuration {
+    id: number;
     action: Action;
     remaining: number;
     entity?: Entity;
 
     constructor(action: Action, entity?: Entity) {
+        this.id = GetNextId();
         this.action = action;
         this.remaining = action.duration;
         this.entity = entity;
     }
+}
+
+export interface IRecipe {
+    name: string;
+    ingredients: Requirement[];
+    requires?: Requirement[];
+    produces: [string, number, number?][];
+    entities?: string[];
+    type?: string[];
+    duration: number;
+    perform: (state: IGameState, source?: Entity) => void;
 }
 
 export interface IRite {
@@ -150,6 +162,7 @@ export interface IItem {
     name: string;
     durability?: number;
     maxDurability?: number;
+    icon: string;
 }
 
 export class Item implements IItem {
@@ -160,8 +173,9 @@ export class Item implements IItem {
 
     icon: string = "📦";
 
-    constructor({ name, durability, maxDurability }: IItem) {
+    constructor({ icon, name, durability, maxDurability }: IItem) {
         this.id = GetNextId();
+        this.icon = icon || this.icon;
         this.name = name;
         this.durability = durability || -1;
         this.maxDurability = maxDurability || durability || -1;
@@ -201,6 +215,12 @@ export class Kin implements IKin {
     }
 }
 
+export interface IActionDuration {
+    action: IAction;
+    remaining: number;
+    entity?: Entity;
+}
+
 export interface IGameState {
     inventory: Item[];
     entities: Entity[];
@@ -210,5 +230,12 @@ export interface IGameState {
     ticks: number;
     tickRate: number;
 
-    performingActions: ActionDuration[];
+    performingActions: IActionDuration[];
+}
+
+export class Milestone {
+    name: string;
+    constructor(name: string) {
+        this.name = name;
+    }
 }

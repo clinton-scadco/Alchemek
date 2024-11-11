@@ -54469,10 +54469,10 @@
     return _extends.apply(this, arguments);
   }
   var Action;
-  (function(Action5) {
-    Action5["Pop"] = "POP";
-    Action5["Push"] = "PUSH";
-    Action5["Replace"] = "REPLACE";
+  (function(Action4) {
+    Action4["Pop"] = "POP";
+    Action4["Push"] = "PUSH";
+    Action4["Replace"] = "REPLACE";
   })(Action || (Action = {}));
   var PopStateEventType = "popstate";
   function createBrowserHistory(options) {
@@ -68413,7 +68413,7 @@
     return lastId++;
   };
 
-  // src/Classes.ts
+  // src/BaseClasses.ts
   var Requirement = class {
     constructor({ type, name, value, operator, requires }) {
       this.type = type;
@@ -68427,20 +68427,21 @@
     return new Requirement({ type: "item", name: item, value: amount });
   };
   var Action2 = class {
-    constructor({ name, perform: perform2, milestones, requires, source, type, duration }) {
+    constructor({ name, perform: perform2, milestones, requires, entities, type, duration }) {
       this.id = GetNextId();
       this.name = name;
       this.perform = perform2 || (() => {
       });
       this.milestones = milestones || (() => true);
       this.requires = requires || [];
-      this.source = source || [];
+      this.entities = entities || [];
       this.type = type || [];
       this.duration = duration || 0;
     }
   };
   var ActionDuration = class {
     constructor(action, entity) {
+      this.id = GetNextId();
       this.action = action;
       this.remaining = action.duration;
       this.entity = entity;
@@ -68478,9 +68479,10 @@
     }
   };
   var Item = class {
-    constructor({ name, durability, maxDurability }) {
+    constructor({ icon: icon3, name, durability, maxDurability }) {
       this.icon = "\u{1F4E6}";
       this.id = GetNextId();
+      this.icon = icon3 || this.icon;
       this.name = name;
       this.durability = durability || -1;
       this.maxDurability = maxDurability || durability || -1;
@@ -68506,117 +68508,28 @@
       }
     }
   };
+  var Milestone = class {
+    constructor(name) {
+      this.name = name;
+    }
+  };
 
   // src/Eras/One.tsx
-  var Stone = class extends Item {
-    constructor() {
-      super({ name: "Stone", durability: -1 });
-      this.icon = "\u{1FAA8}";
-    }
-  };
-  var Wood = class extends Item {
-    constructor() {
-      super({ name: "Wood", durability: -1 });
-      this.icon = "\u{1FAB5}";
-    }
-  };
-  var Tool = class extends Item {
-    constructor(durability) {
-      super({ name: "Tool", durability });
-      this.icon = "\u{1F6E0}\uFE0F";
-    }
-  };
-  var HeatedStone = class extends Item {
-    constructor() {
-      super({ name: "Heated Stone", durability: -1 });
-      this.icon = "\u{1F525}\u{1FAA8}";
-    }
-  };
   var LanguageRite = class extends Rite {
     constructor() {
       super({ name: "Language", ingredients: [["Tool", 10]] });
       this.icon = "\u{1F524}";
     }
   };
-  var ItemDefinitions = {
-    Stone: {
-      icon: "\u{1FAA8}",
-      class: Stone
-    },
-    Wood: {
-      icon: "\u{1FAB5}",
-      class: Wood
-    },
-    Tool: {
-      icon: "\u{1F6E0}\uFE0F",
-      class: Tool
-    },
-    "Heated Stone": {
-      icon: "\u{1F525}\u{1FAA8}",
-      class: HeatedStone
-    },
-    "Language Rite": {
-      icon: "\u{1F524}",
-      class: LanguageRite
-    }
-  };
-  var Milestone = class {
-    constructor(name) {
-      this.name = name;
-    }
-  };
+
+  // src/Eras/MilestoneDefinitions.ts
   var MilestoneDefinitions = {
     Emberstone: new Milestone("Emberstone"),
     Hafting: new Milestone("Hafting"),
     Language: new Milestone("Language")
   };
 
-  // src/utils/Random.ts
-  var instances = /* @__PURE__ */ new Map();
-  var Random = class {
-    constructor(id3, chance) {
-      this.chance = chance;
-      this.iterations = 0;
-    }
-    next() {
-      let r = Math.random();
-      if (r < this.chance) {
-        this.iterations = 0;
-        return true;
-      } else {
-        this.iterations++;
-      }
-      if (this.iterations >= 1 / this.chance) {
-        this.iterations = 0;
-        return true;
-      }
-      return false;
-    }
-  };
-  var GetRandom = (id3, change) => {
-    let instance = instances.get(id3);
-    if (instance) {
-      return instance;
-    } else {
-      const instance2 = new Random(id3, change);
-      instances.set(id3, instance2);
-      return instance2;
-    }
-  };
-
-  // src/Actions.ts
-  function RemoveItem(inventory, name, count) {
-    let removedCount = 0;
-    while (removedCount < count) {
-      for (let i = inventory.length - 1; i >= 0; i--) {
-        if (inventory[i].name === name) {
-          inventory.splice(i, 1);
-          removedCount++;
-          break;
-        }
-      }
-    }
-  }
+  // src/Functions.ts
   var Compare = (a, b, operator) => {
     switch (operator) {
       case ">":
@@ -68664,15 +68577,110 @@
     });
     return met;
   };
+  function RemoveItem(inventory, name, count) {
+    let removedCount = 0;
+    while (removedCount < count) {
+      for (let i = inventory.length - 1; i >= 0; i--) {
+        if (inventory[i].name === name) {
+          inventory.splice(i, 1);
+          removedCount++;
+          break;
+        }
+      }
+    }
+  }
+
+  // src/utils/Random.ts
+  var instances = /* @__PURE__ */ new Map();
+  var Random = class {
+    constructor(id3, chance) {
+      this.chance = chance;
+      this.iterations = 0;
+    }
+    next() {
+      let r = Math.random();
+      if (r < this.chance) {
+        this.iterations = 0;
+        return true;
+      } else {
+        this.iterations++;
+      }
+      if (this.iterations >= 1 / this.chance) {
+        this.iterations = 0;
+        return true;
+      }
+      return false;
+    }
+  };
+  var GetRandom = (id3, change) => {
+    let instance = instances.get(id3);
+    if (instance) {
+      return instance;
+    } else {
+      const instance2 = new Random(id3, change);
+      instances.set(id3, instance2);
+      return instance2;
+    }
+  };
+
+  // src/Eras/ItemDefinitions.ts
+  var ItemDefinitions = {
+    Stone: {
+      icon: "\u{1FAA8}",
+      create: () => new Item({ icon: "\u{1FAA8}", name: "Stone", durability: -1 })
+    },
+    Wood: {
+      icon: "\u{1FAB5}",
+      create: () => new Item({ icon: "\u{1FAB5}", name: "Wood", durability: -1 })
+    },
+    Tool: {
+      icon: "\u{1F6E0}\uFE0F",
+      create: (durability) => new Item({ icon: "\u{1F6E0}\uFE0F", name: "Tool", durability })
+    },
+    "Heated Stone": {
+      icon: "\u{1F525}\u{1FAA8}",
+      create: () => new Item({ icon: "\u{1F525}\u{1FAA8}", name: "Heated Stone", durability: -1 })
+    },
+    "Language Rite": {
+      icon: "\u{1F524}",
+      class: LanguageRite
+    }
+  };
+
+  // src/Recipe.ts
+  var Recipe = class extends Action2 {
+    constructor({ name, ingredients, requires, produces, entities, type, duration, perform: perform2 }) {
+      super({ name, requires, entities, type, duration });
+      this.id = GetNextId();
+      this.name = name;
+      this.ingredients = ingredients || [];
+      this.requires = (requires || []).concat(this.ingredients);
+      this.produces = produces || [];
+      this.entities = entities || [];
+      this.type = type || [];
+      this.duration = duration || 0;
+      this.perform = (state, source) => {
+        perform2 && perform2(state, source);
+        RemoveItem(state.inventory, this.ingredients[0].name, this.ingredients[0].value);
+        state.inventory.push(
+          ...this.produces.flatMap(
+            ([item, count, durability]) => Array(count).fill(item).map((i) => ItemDefinitions[item].create(durability))
+          )
+        );
+      };
+    }
+  };
+
+  // src/Actions.ts
   var actions = [
     new Action2({
       name: "Collect Stone",
-      perform: ({ inventory }) => inventory.push(new Stone()),
+      perform: ({ inventory }) => inventory.push(ItemDefinitions.Stone.create()),
       duration: 2
     }),
     new Action2({
       name: "Collect Wood",
-      perform: ({ inventory }) => inventory.push(new Wood()),
+      perform: ({ inventory }) => inventory.push(ItemDefinitions.Wood.create()),
       duration: 2
     }),
     new Action2({
@@ -68712,8 +68720,10 @@
       requires: [ItemRequirement(["Wood", 2])],
       duration: 5
     }),
-    new Action2({
+    new Recipe({
       name: "Make Tool",
+      ingredients: [ItemRequirement(["Stone", 1])],
+      produces: [["Tool", 1, 10]],
       perform: function({ inventory, milestones }, source) {
         let random = GetRandom(this.id, 1 / 6);
         if (random.next()) {
@@ -68721,10 +68731,7 @@
             milestones.push(MilestoneDefinitions.Hafting);
           }
         }
-        RemoveItem(inventory, "Stone", 1);
-        inventory.push(new Tool(10));
       },
-      requires: [ItemRequirement(["Stone", 1])],
       duration: 8
     }),
     new Action2({
@@ -68740,7 +68747,7 @@
           fire.temperature += 10;
         }
       },
-      source: ["Fire"],
+      entities: ["Fire"],
       requires: [ItemRequirement(["Wood", 1]), new Requirement({ type: "entity", name: "Fire", value: 1 })]
     }),
     new Action2({
@@ -68771,9 +68778,9 @@
         if (fire && fire.name == "Fire") {
           fire.temperature -= 10;
         }
-        inventory.push(new HeatedStone());
+        inventory.push(ItemDefinitions["Heated Stone"].create());
       },
-      source: ["Fire", "Emberstone"],
+      entities: ["Fire", "Emberstone"],
       requires: [ItemRequirement(["Stone", 1]), new Requirement({ type: "entity", name: "Fire", value: 1, requires: [new Requirement({ type: "temperature", value: 150, operator: ">=" })] })]
     }),
     new Action2({
@@ -76669,12 +76676,16 @@
         this.listeners = this.listeners.filter((l) => l !== listener3);
       };
       this.notify = (oldState) => {
-        let newMilestones = this.milestones.filter((milestone) => !oldState.milestones.some((m) => m.name == milestone.name));
-        if (newMilestones.length > 0) {
-          console.log(newMilestones);
+        try {
+          let newMilestones = this.milestones.filter((milestone) => !oldState.milestones.some((m) => m.name == milestone.name));
+          if (newMilestones.length > 0) {
+            console.log(newMilestones);
+          }
+          let messages = [...newMilestones.map((m) => MilestoneMessage(m))];
+          this.listeners.forEach((listener3) => listener3(this, messages));
+        } catch (e) {
+          console.error(e);
         }
-        let messages = [...newMilestones.map((m) => MilestoneMessage(m))];
-        this.listeners.forEach((listener3) => listener3(this, messages));
       };
       this.performOffering = (rite, itemName) => {
         let oldState = this.snapshot();
@@ -76706,33 +76717,37 @@
         });
       };
       this.tick = () => {
-        let oldState = this.snapshot();
-        this.performingActions.forEach((performingAction) => {
-          performingAction.remaining -= 1 / this.tickRate;
-          if (performingAction.remaining <= 0) {
-            if (!performingAction.entity) {
-              performingAction.action.perform(this);
-            } else {
-              performingAction.action.perform(this, performingAction.entity);
-            }
-          }
-        });
-        this.performingActions = this.performingActions.filter((performingAction) => performingAction.remaining > 0);
-        this.entities.forEach((entity) => {
-          entity.tick(this, entity);
-          entity.performs.forEach((perform2) => {
-            if (perform2.ttp && this.ticks - perform2.lastTickPerformed >= perform2.ttp && perform2.condition(this, entity)) {
-              perform2.perform(this, entity);
-              perform2.lastTickPerformed = this.ticks;
+        try {
+          let oldState = this.snapshot();
+          this.performingActions.forEach((performingAction) => {
+            performingAction.remaining -= 1 / this.tickRate;
+            if (performingAction.remaining <= 0) {
+              if (!performingAction.entity) {
+                performingAction.action.perform(this);
+              } else {
+                performingAction.action.perform(this, performingAction.entity);
+              }
             }
           });
-          return entity;
-        });
-        this.entities = this.entities.filter((entity) => entity.ttl != 0);
-        this.kins.forEach((kin) => {
-          kin.tick(this);
-        });
-        this.notify(oldState);
+          this.performingActions = this.performingActions.filter((performingAction) => performingAction.remaining > 0);
+          this.entities.forEach((entity) => {
+            entity.tick(this, entity);
+            entity.performs.forEach((perform2) => {
+              if (perform2.ttp && this.ticks - perform2.lastTickPerformed >= perform2.ttp && perform2.condition(this, entity)) {
+                perform2.perform(this, entity);
+                perform2.lastTickPerformed = this.ticks;
+              }
+            });
+            return entity;
+          });
+          this.entities = this.entities.filter((entity) => entity.ttl != 0);
+          this.kins.forEach((kin) => {
+            kin.tick(this);
+          });
+          this.notify(oldState);
+        } catch (e) {
+          console.error(e);
+        }
       };
       this.inventory = [];
       this.entities = [];
@@ -76832,10 +76847,11 @@
     overflow: hidden;
     min-width: ${({ width }) => width || "200px"};
 `;
-  var Progress = ({ value, color: color2, ttl, width }) => {
+  var Progress = ({ value, color: color2, ttl, width, name }) => {
     return /* @__PURE__ */ React43.createElement(ProgressContainer, { width }, /* @__PURE__ */ React43.createElement(
       motion.div,
       {
+        key: name,
         initial: { width: value / ttl * 100 + "%" },
         animate: { width: `100%` },
         style: { height: "10px", backgroundColor: color2 || "green" },
@@ -76876,7 +76892,16 @@
         gameState.unsubscribe(listener3);
       };
     }, []);
-    return /* @__PURE__ */ React44.createElement(React44.Fragment, null, /* @__PURE__ */ React44.createElement(LayoutGroup, null, /* @__PURE__ */ React44.createElement(Box, { align: "center", fill: true, gap: "xsmall" }, /* @__PURE__ */ React44.createElement(Progress_default, { color: DayNightColors[Math.floor(ticks % 100 / 100 * DayNightColors.length)], value: ticks % 100, ttl: 100, width: "100%" }), messages.length, /* @__PURE__ */ React44.createElement(Box, { direction: "row", gap: "small", align: "start", fill: true }, /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, "Actions"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.length == 0).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React44.createElement(
+    return /* @__PURE__ */ React44.createElement(React44.Fragment, null, /* @__PURE__ */ React44.createElement(LayoutGroup, null, /* @__PURE__ */ React44.createElement(Box, { align: "center", fill: true, gap: "xsmall" }, /* @__PURE__ */ React44.createElement(
+      Progress_default,
+      {
+        color: DayNightColors[Math.floor(ticks % 100 / 100 * DayNightColors.length)],
+        value: 0,
+        name: "Day " + (Math.floor(ticks / 100) + 1),
+        ttl: 100,
+        width: "100%"
+      }
+    ), "Day " + (Math.floor(ticks / 100) + 1), /* @__PURE__ */ React44.createElement(Box, { direction: "row", gap: "small", align: "start", fill: true }, /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, "Actions"), actions.filter((action) => action.entities?.length == 0).filter((action) => action.type?.length == 0).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React44.createElement(
       ActionButton,
       {
         key: action.name,
@@ -76884,7 +76909,7 @@
         performAction: gameState.performAction,
         disabled: !EvaluateRequirements(gameState, action.requires) || !!performingActions.find((performingAction) => performingAction.action.id == action.id)
       }
-    ))), /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, "Tasks"), performingActions.map((performingAction, i) => /* @__PURE__ */ React44.createElement(Box, { key: i }, /* @__PURE__ */ React44.createElement(Text, null, performingAction.action.name), /* @__PURE__ */ React44.createElement(Progress_default, { width: "200px", color: "green", value: performingAction.action.duration - performingAction.remaining, ttl: performingAction.action.duration })))), milestones.length > 0 && /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, "Milestones"), milestones.map((milestone, i) => /* @__PURE__ */ React44.createElement(Button, { disabled: true, key: milestone.name + i, label: milestone.name }))), milestones.length > 0 && /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, "Rituals"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.includes("Ritual")).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React44.createElement(
+    ))), /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, "Tasks"), performingActions.map((performingAction, i) => /* @__PURE__ */ React44.createElement(Box, { key: i }, /* @__PURE__ */ React44.createElement(Text, null, performingAction.action.name), /* @__PURE__ */ React44.createElement(Progress_default, { name: performingAction.id, width: "200px", color: "green", value: performingAction.action.duration - performingAction.remaining, ttl: performingAction.action.duration })))), milestones.length > 0 && /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, "Milestones"), milestones.map((milestone, i) => /* @__PURE__ */ React44.createElement(Button, { disabled: true, key: milestone.name + i, label: milestone.name }))), milestones.length > 0 && /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, "Rituals"), actions.filter((action) => action.entities?.length == 0).filter((action) => action.type?.includes("Ritual")).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React44.createElement(
       ActionButton,
       {
         key: action.name,
@@ -76892,7 +76917,7 @@
         performAction: gameState.performAction,
         disabled: !EvaluateRequirements(gameState, action.requires)
       }
-    ))), milestones.length > 0 && /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, "Rites"), actions.filter((action) => action.source?.length == 0).filter((action) => action.type?.includes("Rite")).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React44.createElement(
+    ))), milestones.length > 0 && /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, "Rites"), actions.filter((action) => action.entities?.length == 0).filter((action) => action.type?.includes("Rite")).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React44.createElement(
       ActionButton,
       {
         primary: rites.find((rite) => rite.name == action.name)?.isComplete(),
@@ -76937,7 +76962,7 @@
     rites,
     ticks
   }) => {
-    return /* @__PURE__ */ React44.createElement(Box, { height: { min: "200px" }, fill: true, align: "start" }, /* @__PURE__ */ React44.createElement(Text, null, "Entities"), /* @__PURE__ */ React44.createElement(Box, { gap: "xsmall" }, entities.map((entity, i) => /* @__PURE__ */ React44.createElement(Box, { key: "entitiy" + entity.name + i, direction: "row", gap: "small" }, /* @__PURE__ */ React44.createElement(Box, null, /* @__PURE__ */ React44.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, entity.name), entity.ttl > 0 && /* @__PURE__ */ React44.createElement(Text, null, entity.ttl.toFixed(0), "s"), entity.temperature != 0 && /* @__PURE__ */ React44.createElement(Text, null, entity.temperature.toFixed(0), " \xB0C")), entity.performs.map((perform2) => /* @__PURE__ */ React44.createElement(Box, { key: "entitiy" + entity.name + i + "perform" + perform2.name, direction: "row", gap: "xsmall", align: "center" }, perform2.ttp > 0 && perform2.condition({ inventory, entities, kins, rites, milestones, ticks }, entity) && /* @__PURE__ */ React44.createElement(React44.Fragment, null, /* @__PURE__ */ React44.createElement(Text, null, perform2.icon), /* @__PURE__ */ React44.createElement(Meter, { value: ticks - perform2.lastTickPerformed, max: perform2.ttp, thickness: "10px", size: "full" }))))), actions.filter((action) => action.source?.includes(entity.name)).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React44.createElement(
+    return /* @__PURE__ */ React44.createElement(Box, { height: { min: "200px" }, fill: true, align: "start" }, /* @__PURE__ */ React44.createElement(Text, null, "Entities"), /* @__PURE__ */ React44.createElement(Box, { gap: "xsmall" }, entities.map((entity, i) => /* @__PURE__ */ React44.createElement(Box, { key: "entitiy" + entity.name + i, direction: "row", gap: "small" }, /* @__PURE__ */ React44.createElement(Box, null, /* @__PURE__ */ React44.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, entity.name), entity.ttl > 0 && /* @__PURE__ */ React44.createElement(Text, null, entity.ttl.toFixed(0), "s"), entity.temperature != 0 && /* @__PURE__ */ React44.createElement(Text, null, entity.temperature.toFixed(0), " \xB0C")), entity.performs.map((perform2) => /* @__PURE__ */ React44.createElement(Box, { key: "entitiy" + entity.name + i + "perform" + perform2.name, direction: "row", gap: "xsmall", align: "center" }, perform2.ttp > 0 && perform2.condition({ inventory, entities, kins, rites, milestones, ticks }, entity) && /* @__PURE__ */ React44.createElement(React44.Fragment, null, /* @__PURE__ */ React44.createElement(Text, null, perform2.icon), /* @__PURE__ */ React44.createElement(Meter, { value: ticks - perform2.lastTickPerformed, max: perform2.ttp, thickness: "10px", size: "full" }))))), actions.filter((action) => action.entities?.includes(entity.name)).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React44.createElement(
       ActionButton,
       {
         key: action.name,

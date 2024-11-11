@@ -10,10 +10,11 @@ const ProgressContainer = styled.default.div`
     min-width: ${({ width }) => width || "200px"};
 `;
 
-const Progress = ({ value, color, ttl, width }) => {
+const Progress = ({ value, color, ttl, width, name }) => {
     return (
         <ProgressContainer width={width}>
             <motion.div
+                key={name}
                 initial={{ width: (value / ttl) * 100 + "%" }}
                 animate={{ width: `100%` }}
                 style={{ height: "10px", backgroundColor: color || "green" }}

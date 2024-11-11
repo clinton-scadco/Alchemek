@@ -1,3 +1,3 @@
-import { Milestone } from "./Eras/One";
+import { Milestone } from "./BaseClasses";
 
-export const MilestoneMessage = (milestone:Milestone)=> `You have discovered ${milestone.name}!`;
+export const MilestoneMessage = (milestone: Milestone) => `You have discovered ${milestone.name}!`;

@@ -1,6 +1,6 @@
 import { Box, Button } from "grommet";
 import React from "react";
-import { MilestoneDefinitions } from "./Eras/One";
+import { MilestoneDefinitions } from "./Eras/MilestoneDefinitions";
 import { GameState } from "./GameState";
 
 const Debug = ({ perform }) => {

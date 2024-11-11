@@ -1,19 +1,21 @@
 import { initialize } from "esbuild";
 import { Box, Button, Grid, Heading, Meter, Stack, Text, Tip } from "grommet";
 import * as React from "react";
-import { Action, Entity, IGameState, Item, ItemRequirement, Kin, Rite, Requirement, ActionDuration } from "./Classes";
+import { ActionDuration, Entity, IGameState, Item, ItemRequirement, Kin, Rite, Requirement } from "./BaseClasses";
 import { groupBy, values } from "lodash";
 import _ from "lodash";
-import { actions, EvaluateRequirements, RemoveItem } from "./Actions";
+import { actions } from "./Actions";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import * as Items from "./Eras/One";
 import { DayNightColors } from "./utils/Theme";
 import { GameState } from "./GameState";
 import Modal from "./components/Modal";
 import { use } from "framer-motion/client";
-import { Milestone } from "./Eras/One";
+import { Milestone } from "./BaseClasses";
 import Debug from "./Debug";
 import Progress from "./components/Progress";
+import { EvaluateRequirements } from "./Functions";
+import { ItemDefinitions } from "./Eras/ItemDefinitions";
 
 const Home = () => {
     const [gameState, setGameState] = React.useState(new GameState());
@@ -55,13 +57,19 @@ const Home = () => {
         <>
             <LayoutGroup>
                 <Box align="center" fill gap={"xsmall"}>
-                    <Progress color={DayNightColors[Math.floor(((ticks % 100) / 100) * DayNightColors.length)]} value={ticks % 100} ttl={100} width={"100%"}></Progress>
-                    {messages.length}
+                    <Progress
+                        color={DayNightColors[Math.floor(((ticks % 100) / 100) * DayNightColors.length)]}
+                        value={0}
+                        name={"Day " + (Math.floor(ticks / 100) + 1)}
+                        ttl={100}
+                        width={"100%"}
+                    ></Progress>
+                    {"Day " + (Math.floor(ticks / 100) + 1)}
                     <Box direction="row" gap="small" align="start" fill>
                         <Box gap="small">
                             <Text>Actions</Text>
                             {actions
-                                .filter((action) => action.source?.length == 0)
+                                .filter((action) => action.entities?.length == 0)
                                 .filter((action) => action.type?.length == 0)
                                 .filter((action) => action.milestones(gameState))
                                 .map((action) => (
@@ -79,7 +87,7 @@ const Home = () => {
                             {performingActions.map((performingAction, i) => (
                                 <Box key={i}>
                                     <Text>{performingAction.action.name}</Text>
-                                    <Progress width={"200px"} color="green" value={performingAction.action.duration - performingAction.remaining} ttl={performingAction.action.duration}></Progress>
+                                    <Progress name={performingAction.id} width={"200px"} color="green" value={performingAction.action.duration - performingAction.remaining} ttl={performingAction.action.duration}></Progress>
                                     {/* <Meter value={performingAction.remaining} max={performingAction.action.duration}></Meter> */}
                                 </Box>
                             ))}
@@ -97,7 +105,7 @@ const Home = () => {
                             <Box gap="small">
                                 <Text>Rituals</Text>
                                 {actions
-                                    .filter((action) => action.source?.length == 0)
+                                    .filter((action) => action.entities?.length == 0)
                                     .filter((action) => action.type?.includes("Ritual"))
                                     .filter((action) => action.milestones(gameState))
                                     .map((action) => (
@@ -114,7 +122,7 @@ const Home = () => {
                             <Box gap="small">
                                 <Text>Rites</Text>
                                 {actions
-                                    .filter((action) => action.source?.length == 0)
+                                    .filter((action) => action.entities?.length == 0)
                                     .filter((action) => action.type?.includes("Rite"))
                                     .filter((action) => action.milestones(gameState))
                                     .map((action) => (
@@ -275,7 +283,7 @@ const Entities = ({
                             ))}
                         </Box>
                         {actions
-                            .filter((action) => action.source?.includes(entity.name))
+                            .filter((action) => action.entities?.includes(entity.name))
                             .filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks } as GameState))
                             .map((action) => (
                                 <ActionButton
@@ -329,7 +337,7 @@ const RenderRequirements = ({ requirements }: { requirements: Requirement[] }) =
             {requirements.map((requirement, i) => (
                 <Box key={i} gap={"xsmall"}>
                     <Box direction="row" gap={"xsmall"}>
-                        {requirement.name && <Text>{Items.ItemDefinitions[requirement.name]?.icon || requirement.name}</Text>}
+                        {requirement.name && <Text>{ItemDefinitions[requirement.name]?.icon || requirement.name}</Text>}
                         {!requirement.name && <Text>{requirement.type}</Text>}
                         <Text>{requirement.operator}</Text>
                         <Text>{requirement.value}</Text>
