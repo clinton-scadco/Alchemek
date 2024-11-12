@@ -1,3 +1,4 @@
+import { EvaluateRequirements } from "./Functions";
 import { GetNextId } from "./utils/Data";
 
 export interface IRequirement {
@@ -31,6 +32,7 @@ export const ItemRequirement = ([item, amount]) => {
 
 export interface IAction {
     name: string;
+    icon: string;
     perform?: (state: IGameState, source?: Entity) => void;
     milestones?: (state: IGameState) => boolean;
     requires?: Requirement[];
@@ -42,6 +44,7 @@ export interface IAction {
 export class Action implements IAction {
     id: number;
     name: string;
+    icon: string;
     perform: (state: IGameState, source?: Entity) => void;
     milestones: (state: IGameState) => boolean;
     requires: Requirement[];
@@ -49,9 +52,10 @@ export class Action implements IAction {
     type?: string[];
     duration: number;
 
-    constructor({ name, perform, milestones, requires, entities, type, duration }: IAction) {
+    constructor({ name, icon, perform, milestones, requires, entities, type, duration }: IAction) {
         this.id = GetNextId();
         this.name = name;
+        this.icon = icon || "🫴";
         this.perform = perform || (() => {});
 
         this.milestones = milestones || (() => true);
@@ -71,13 +75,14 @@ export class ActionDuration {
     constructor(action: Action, entity?: Entity) {
         this.id = GetNextId();
         this.action = action;
-        this.remaining = action.duration;
+        this.remaining = action.duration || 0;
         this.entity = entity;
     }
 }
 
 export interface IRecipe {
     name: string;
+    icon: string;
     ingredients: Requirement[];
     requires?: Requirement[];
     produces: [string, number, number?][];
@@ -194,10 +199,15 @@ export class Kin implements IKin {
 
     icon: string = "👤";
 
+    performingActions: ActionDuration[];
+    actionPreference: Action[];
+
     constructor({ name, inventory }: IKin) {
         this.id = GetNextId();
         this.name = name;
         this.inventory = inventory || [];
+        this.performingActions = [];
+        this.actionPreference = [];
     }
 
     giveItem(item: Item) {
@@ -212,6 +222,31 @@ export class Kin implements IKin {
                 this.giveItem(tool);
             }
         }
+        if (this.actionPreference.length > 0) {
+            for (let action of this.actionPreference) {
+                if (!this.performingActions.some((a) => a.action.name == action.name)) {
+                    if (EvaluateRequirements(state, action.requires)) {
+                        this.performingActions.push(new ActionDuration(action));
+                    }
+                }
+            }
+        }
+
+        this.performingActions.forEach((a) => {
+            a.remaining -= 1 / state.tickRate;
+            if (a.remaining <= 0) {
+                a.action.perform(state);
+                this.performingActions.splice(this.performingActions.indexOf(a), 1);
+            }
+        });
+    }
+
+    giveActionPreference(action: Action) {
+        this.actionPreference = [action];
+    }
+
+    removeActionPreference(action: Action) {
+        this.actionPreference = this.actionPreference.filter((a) => a.name != action.name);
     }
 }
 

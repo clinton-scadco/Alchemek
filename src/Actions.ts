@@ -1,5 +1,5 @@
 import { Action, Entity, IAction, IGameState, Item, ItemRequirement, Kin, Requirement, Rite } from "./BaseClasses";
-import { LanguageRite } from "./Eras/One";
+import { EntityDefinitions, LanguageRite } from "./Eras/One";
 import { MilestoneDefinitions } from "./Eras/MilestoneDefinitions";
 import { RemoveItem } from "./Functions";
 import { GetRandom } from "./utils/Random";
@@ -10,53 +10,31 @@ import { ItemDefinitions } from "./Eras/ItemDefinitions";
 export const actions = [
     new Action({
         name: "Collect Stone",
+        icon: "🪨",
         perform: ({ inventory }) => inventory.push(ItemDefinitions.Stone.create()),
         duration: 2,
+        entities: ["*", "Kin"],
     }),
     new Action({
         name: "Collect Wood",
+        icon: "🪵",
         perform: ({ inventory }) => inventory.push(ItemDefinitions.Wood.create()),
         duration: 2,
+        entities: ["*", "Kin"],
     }),
     new Action({
         name: "Make Fire",
+        icon: "🔥",
         perform: ({ inventory, entities, kins, rites, ticks }, source) => {
             RemoveItem(inventory, "Wood", 2);
-            entities.push(
-                new Entity({
-                    name: "Fire",
-                    ttl: 60,
-                    temperature: 100,
-                    tick: ({ tickRate }, source) => {
-                        if (source.temperature <= 100) {
-                            source.ttl -= 1 / tickRate;
-                        } else {
-                            source.ttl = 60;
-                        }
-                        source.temperature -= 2 / tickRate;
-                    },
-                    performs: [
-                        {
-                            name: "Gather",
-                            icon: "👤",
-                            ttp: 10,
-                            lastTickPerformed: ticks,
-                            condition: ({ kins }, source) => {
-                                return source.temperature > 60 && kins.length < 5;
-                            },
-                            perform: ({ kins }, source) => {
-                                kins.push(new Kin({ name: "Kin" }));
-                            },
-                        },
-                    ],
-                })
-            );
+            entities.push(EntityDefinitions.Fire.create(ticks));
         },
         requires: [ItemRequirement(["Wood", 2])],
         duration: 5,
     }),
     new Recipe({
         name: "Make Tool",
+        icon: "🛠️",
         ingredients: [ItemRequirement(["Stone", 1])],
         produces: [["Tool", 1, 10]],
         perform: function ({ inventory, milestones }, source) {
@@ -71,7 +49,14 @@ export const actions = [
     }),
     new Action({
         name: "Feed Fire",
-        perform: ({ inventory }, source) => {
+        icon: "🪵🔥",
+        perform: ({ inventory, entities }, source) => {
+            if (!source) {
+                source = entities.sort((a, b) => a.temperature - b.temperature).find((entity) => entity.name === "Fire");
+                if (!source) {
+                    return;
+                }
+            }
             RemoveItem(inventory, "Wood", 1);
             let fire = source;
             if (fire) {
@@ -84,19 +69,16 @@ export const actions = [
                 fire.temperature += 10;
             }
         },
-        entities: ["Fire"],
-        requires: [ItemRequirement(["Wood", 1]), new Requirement({ type: "entity", name: "Fire", value: 1 })],
+        duration: 1,
+        entities: ["Fire", "Kin"],
+        requires: [ItemRequirement(["Wood", 1]), new Requirement({ type: "entity", name: "Fire", value: 1, requires: [new Requirement({ type: "temperature", value: 220, operator: "<" })] })],
     }),
     new Action({
         name: "Emberstone",
+        icon: "🔥🪨🔥",
         perform: ({ inventory, entities }) => {
             RemoveItem(inventory, "Heated Stone", 2);
-            entities.push(
-                new Entity({
-                    name: "Emberstone",
-                    temperature: 200,
-                })
-            );
+            entities.push(EntityDefinitions.Emberstone.create());
         },
         requires: [ItemRequirement(["Heated Stone", 2]), new Requirement({ type: "entity", name: "Fire", value: 1, requires: [new Requirement({ type: "temperature", value: 200, operator: ">" })] })],
         milestones: ({ inventory, entities, kins, rites, milestones }) => {
@@ -109,6 +91,7 @@ export const actions = [
     }),
     new Action({
         name: "Heat Stone",
+        icon: "🔥🪨",
         perform: ({ inventory, entities, kins, rites }, source) => {
             RemoveItem(inventory, "Stone", 1);
             let fire = source;
@@ -122,6 +105,7 @@ export const actions = [
     }),
     new Action({
         name: "Language",
+        icon: "🔤",
         perform: ({ rites }) => {
             rites.push(new LanguageRite());
         },

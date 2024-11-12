@@ -132,7 +132,7 @@ export class GameState {
                 kin.tick(this);
             });
 
-            // this.updateMilestones();
+            this.updateMilestones();
 
             this.notify(oldState);
         } catch (e) {

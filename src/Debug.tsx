@@ -2,6 +2,9 @@ import { Box, Button } from "grommet";
 import React from "react";
 import { MilestoneDefinitions } from "./Eras/MilestoneDefinitions";
 import { GameState } from "./GameState";
+import { Kin } from "./BaseClasses";
+import { EntityDefinitions } from "./Eras/One";
+import { ItemDefinitions } from "./Eras/ItemDefinitions";
 
 const Debug = ({ perform }) => {
     return (
@@ -27,6 +30,36 @@ const Debug = ({ perform }) => {
                     perform({
                         perform: (gameState: GameState) => {
                             gameState.tick();
+                        },
+                    })
+                }
+            />
+            <Button
+                label={"Fire"}
+                onClick={() =>
+                    perform({
+                        perform: (gameState: GameState) => {
+                            gameState.entities.push(EntityDefinitions.Fire.create(gameState.ticks));
+                        },
+                    })
+                }
+            />
+            <Button
+                label={"Kin"}
+                onClick={() =>
+                    perform({
+                        perform: (gameState: GameState) => {
+                            gameState.kins.push(new Kin({ name: "Kin" }));
+                        },
+                    })
+                }
+            />
+            <Button
+                label={"Tool"}
+                onClick={() =>
+                    perform({
+                        perform: (gameState: GameState) => {
+                            gameState.inventory.push(ItemDefinitions.Tool.create(10));
                         },
                     })
                 }

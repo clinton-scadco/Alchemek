@@ -54469,10 +54469,10 @@
     return _extends.apply(this, arguments);
   }
   var Action;
-  (function(Action4) {
-    Action4["Pop"] = "POP";
-    Action4["Push"] = "PUSH";
-    Action4["Replace"] = "REPLACE";
+  (function(Action5) {
+    Action5["Pop"] = "POP";
+    Action5["Push"] = "PUSH";
+    Action5["Replace"] = "REPLACE";
   })(Action || (Action = {}));
   var PopStateEventType = "popstate";
   function createBrowserHistory(options) {
@@ -68405,129 +68405,7 @@
   var ErrorBoundary_default = ErrorBoundary;
 
   // src/Home.tsx
-  var React44 = __toESM(require_react(), 1);
-
-  // src/utils/Data.ts
-  var lastId = 0;
-  var GetNextId = () => {
-    return lastId++;
-  };
-
-  // src/BaseClasses.ts
-  var Requirement = class {
-    constructor({ type, name, value, operator, requires }) {
-      this.type = type;
-      this.name = name;
-      this.value = value;
-      this.operator = operator || ">=";
-      this.requires = requires || [];
-    }
-  };
-  var ItemRequirement = ([item, amount]) => {
-    return new Requirement({ type: "item", name: item, value: amount });
-  };
-  var Action2 = class {
-    constructor({ name, perform: perform2, milestones, requires, entities, type, duration }) {
-      this.id = GetNextId();
-      this.name = name;
-      this.perform = perform2 || (() => {
-      });
-      this.milestones = milestones || (() => true);
-      this.requires = requires || [];
-      this.entities = entities || [];
-      this.type = type || [];
-      this.duration = duration || 0;
-    }
-  };
-  var ActionDuration = class {
-    constructor(action, entity) {
-      this.id = GetNextId();
-      this.action = action;
-      this.remaining = action.duration;
-      this.entity = entity;
-    }
-  };
-  var Rite = class {
-    constructor({ name, ingredients }) {
-      this.icon = "\u{1F4E6}";
-      this.id = GetNextId();
-      this.name = name;
-      this.ingredients = ingredients || [];
-      this.progress = [];
-    }
-    isComplete() {
-      return this.ingredients.every(([name, count]) => {
-        return this.progress.filter(([n, c]) => n == name && c == count).length > 0;
-      });
-    }
-    offerItem(item) {
-      let p2 = this.progress.find(([name, count]) => name == item);
-      if (p2) {
-        p2[1] += 1;
-      } else
-        [this.progress.push([item, 1])];
-    }
-  };
-  var Entity = class {
-    constructor({ name, ttl, temperature, tick, performs }) {
-      this.name = name;
-      this.ttl = ttl || -1;
-      this.temperature = temperature || 0;
-      this.performs = performs || [];
-      this.tick = tick || (() => {
-      });
-    }
-  };
-  var Item = class {
-    constructor({ icon: icon3, name, durability, maxDurability }) {
-      this.icon = "\u{1F4E6}";
-      this.id = GetNextId();
-      this.icon = icon3 || this.icon;
-      this.name = name;
-      this.durability = durability || -1;
-      this.maxDurability = maxDurability || durability || -1;
-    }
-  };
-  var Kin = class {
-    constructor({ name, inventory }) {
-      this.icon = "\u{1F464}";
-      this.id = GetNextId();
-      this.name = name;
-      this.inventory = inventory || [];
-    }
-    giveItem(item) {
-      this.inventory.push(item);
-    }
-    tick(state) {
-      if (!this.inventory.some((i) => i.name == "Tool") && state.inventory.some((i) => i.name == "Tool")) {
-        let tool = state.inventory.find((i) => i.name == "Tool");
-        if (tool) {
-          state.inventory.splice(state.inventory.indexOf(tool), 1);
-          this.giveItem(tool);
-        }
-      }
-    }
-  };
-  var Milestone = class {
-    constructor(name) {
-      this.name = name;
-    }
-  };
-
-  // src/Eras/One.tsx
-  var LanguageRite = class extends Rite {
-    constructor() {
-      super({ name: "Language", ingredients: [["Tool", 10]] });
-      this.icon = "\u{1F524}";
-    }
-  };
-
-  // src/Eras/MilestoneDefinitions.ts
-  var MilestoneDefinitions = {
-    Emberstone: new Milestone("Emberstone"),
-    Hafting: new Milestone("Hafting"),
-    Language: new Milestone("Language")
-  };
+  var React45 = __toESM(require_react(), 1);
 
   // src/Functions.ts
   var Compare = (a, b, operator) => {
@@ -68590,6 +68468,190 @@
     }
   }
 
+  // src/utils/Data.ts
+  var lastId = 0;
+  var GetNextId = () => {
+    return lastId++;
+  };
+
+  // src/BaseClasses.ts
+  var Requirement = class {
+    constructor({ type, name, value, operator, requires }) {
+      this.type = type;
+      this.name = name;
+      this.value = value;
+      this.operator = operator || ">=";
+      this.requires = requires || [];
+    }
+  };
+  var ItemRequirement = ([item, amount]) => {
+    return new Requirement({ type: "item", name: item, value: amount });
+  };
+  var Action2 = class {
+    constructor({ name, icon: icon3, perform: perform2, milestones, requires, entities, type, duration }) {
+      this.id = GetNextId();
+      this.name = name;
+      this.icon = icon3 || "\u{1FAF4}";
+      this.perform = perform2 || (() => {
+      });
+      this.milestones = milestones || (() => true);
+      this.requires = requires || [];
+      this.entities = entities || [];
+      this.type = type || [];
+      this.duration = duration || 0;
+    }
+  };
+  var ActionDuration = class {
+    constructor(action, entity) {
+      this.id = GetNextId();
+      this.action = action;
+      this.remaining = action.duration || 0;
+      this.entity = entity;
+    }
+  };
+  var Rite = class {
+    constructor({ name, ingredients }) {
+      this.icon = "\u{1F4E6}";
+      this.id = GetNextId();
+      this.name = name;
+      this.ingredients = ingredients || [];
+      this.progress = [];
+    }
+    isComplete() {
+      return this.ingredients.every(([name, count]) => {
+        return this.progress.filter(([n, c]) => n == name && c == count).length > 0;
+      });
+    }
+    offerItem(item) {
+      let p2 = this.progress.find(([name, count]) => name == item);
+      if (p2) {
+        p2[1] += 1;
+      } else
+        [this.progress.push([item, 1])];
+    }
+  };
+  var Entity = class {
+    constructor({ name, ttl, temperature, tick, performs }) {
+      this.name = name;
+      this.ttl = ttl || -1;
+      this.temperature = temperature || 0;
+      this.performs = performs || [];
+      this.tick = tick || (() => {
+      });
+    }
+  };
+  var Item = class {
+    constructor({ icon: icon3, name, durability, maxDurability }) {
+      this.icon = "\u{1F4E6}";
+      this.id = GetNextId();
+      this.icon = icon3 || this.icon;
+      this.name = name;
+      this.durability = durability || -1;
+      this.maxDurability = maxDurability || durability || -1;
+    }
+  };
+  var Kin = class {
+    constructor({ name, inventory }) {
+      this.icon = "\u{1F464}";
+      this.id = GetNextId();
+      this.name = name;
+      this.inventory = inventory || [];
+      this.performingActions = [];
+      this.actionPreference = [];
+    }
+    giveItem(item) {
+      this.inventory.push(item);
+    }
+    tick(state) {
+      if (!this.inventory.some((i) => i.name == "Tool") && state.inventory.some((i) => i.name == "Tool")) {
+        let tool = state.inventory.find((i) => i.name == "Tool");
+        if (tool) {
+          state.inventory.splice(state.inventory.indexOf(tool), 1);
+          this.giveItem(tool);
+        }
+      }
+      if (this.actionPreference.length > 0) {
+        for (let action of this.actionPreference) {
+          if (!this.performingActions.some((a) => a.action.name == action.name)) {
+            if (EvaluateRequirements(state, action.requires)) {
+              this.performingActions.push(new ActionDuration(action));
+            }
+          }
+        }
+      }
+      this.performingActions.forEach((a) => {
+        a.remaining -= 1 / state.tickRate;
+        if (a.remaining <= 0) {
+          a.action.perform(state);
+          this.performingActions.splice(this.performingActions.indexOf(a), 1);
+        }
+      });
+    }
+    giveActionPreference(action) {
+      this.actionPreference = [action];
+    }
+    removeActionPreference(action) {
+      this.actionPreference = this.actionPreference.filter((a) => a.name != action.name);
+    }
+  };
+  var Milestone = class {
+    constructor(name) {
+      this.name = name;
+    }
+  };
+
+  // src/Eras/One.tsx
+  var LanguageRite = class extends Rite {
+    constructor() {
+      super({ name: "Language", ingredients: [["Tool", 10]] });
+      this.icon = "\u{1F524}";
+    }
+  };
+  var EntityDefinitions = {
+    Fire: {
+      create: (ticks) => new Entity({
+        name: "Fire",
+        ttl: 60,
+        temperature: 100,
+        tick: ({ tickRate }, source) => {
+          if (source.temperature <= 100) {
+            source.ttl -= 1 / tickRate;
+          } else {
+            source.ttl = 60;
+          }
+          source.temperature -= 2 / tickRate;
+        },
+        performs: [
+          {
+            name: "Gather",
+            icon: "\u{1F464}",
+            ttp: 10,
+            lastTickPerformed: ticks,
+            condition: ({ kins }, source) => {
+              return source.temperature > 60 && kins.length < 5;
+            },
+            perform: ({ kins }, source) => {
+              kins.push(new Kin({ name: "Kin" }));
+            }
+          }
+        ]
+      })
+    },
+    Emberstone: {
+      create: () => new Entity({
+        name: "Emberstone",
+        temperature: 200
+      })
+    }
+  };
+
+  // src/Eras/MilestoneDefinitions.ts
+  var MilestoneDefinitions = {
+    Emberstone: new Milestone("Emberstone"),
+    Hafting: new Milestone("Hafting"),
+    Language: new Milestone("Language")
+  };
+
   // src/utils/Random.ts
   var instances = /* @__PURE__ */ new Map();
   var Random = class {
@@ -68649,16 +68711,13 @@
 
   // src/Recipe.ts
   var Recipe = class extends Action2 {
-    constructor({ name, ingredients, requires, produces, entities, type, duration, perform: perform2 }) {
-      super({ name, requires, entities, type, duration });
+    constructor({ name, icon: icon3, ingredients, requires, produces, entities, type, duration, perform: perform2 }) {
+      super({ name, icon: icon3, requires, entities, type, duration });
       this.id = GetNextId();
       this.name = name;
       this.ingredients = ingredients || [];
       this.requires = (requires || []).concat(this.ingredients);
       this.produces = produces || [];
-      this.entities = entities || [];
-      this.type = type || [];
-      this.duration = duration || 0;
       this.perform = (state, source) => {
         perform2 && perform2(state, source);
         RemoveItem(state.inventory, this.ingredients[0].name, this.ingredients[0].value);
@@ -68675,53 +68734,31 @@
   var actions = [
     new Action2({
       name: "Collect Stone",
+      icon: "\u{1FAA8}",
       perform: ({ inventory }) => inventory.push(ItemDefinitions.Stone.create()),
-      duration: 2
+      duration: 2,
+      entities: ["*", "Kin"]
     }),
     new Action2({
       name: "Collect Wood",
+      icon: "\u{1FAB5}",
       perform: ({ inventory }) => inventory.push(ItemDefinitions.Wood.create()),
-      duration: 2
+      duration: 2,
+      entities: ["*", "Kin"]
     }),
     new Action2({
       name: "Make Fire",
+      icon: "\u{1F525}",
       perform: ({ inventory, entities, kins, rites, ticks }, source) => {
         RemoveItem(inventory, "Wood", 2);
-        entities.push(
-          new Entity({
-            name: "Fire",
-            ttl: 60,
-            temperature: 100,
-            tick: ({ tickRate }, source2) => {
-              if (source2.temperature <= 100) {
-                source2.ttl -= 1 / tickRate;
-              } else {
-                source2.ttl = 60;
-              }
-              source2.temperature -= 2 / tickRate;
-            },
-            performs: [
-              {
-                name: "Gather",
-                icon: "\u{1F464}",
-                ttp: 10,
-                lastTickPerformed: ticks,
-                condition: ({ kins: kins2 }, source2) => {
-                  return source2.temperature > 60 && kins2.length < 5;
-                },
-                perform: ({ kins: kins2 }, source2) => {
-                  kins2.push(new Kin({ name: "Kin" }));
-                }
-              }
-            ]
-          })
-        );
+        entities.push(EntityDefinitions.Fire.create(ticks));
       },
       requires: [ItemRequirement(["Wood", 2])],
       duration: 5
     }),
     new Recipe({
       name: "Make Tool",
+      icon: "\u{1F6E0}\uFE0F",
       ingredients: [ItemRequirement(["Stone", 1])],
       produces: [["Tool", 1, 10]],
       perform: function({ inventory, milestones }, source) {
@@ -68736,7 +68773,14 @@
     }),
     new Action2({
       name: "Feed Fire",
-      perform: ({ inventory }, source) => {
+      icon: "\u{1FAB5}\u{1F525}",
+      perform: ({ inventory, entities }, source) => {
+        if (!source) {
+          source = entities.sort((a, b) => a.temperature - b.temperature).find((entity) => entity.name === "Fire");
+          if (!source) {
+            return;
+          }
+        }
         RemoveItem(inventory, "Wood", 1);
         let fire = source;
         if (fire) {
@@ -68747,19 +68791,16 @@
           fire.temperature += 10;
         }
       },
-      entities: ["Fire"],
-      requires: [ItemRequirement(["Wood", 1]), new Requirement({ type: "entity", name: "Fire", value: 1 })]
+      duration: 1,
+      entities: ["Fire", "Kin"],
+      requires: [ItemRequirement(["Wood", 1]), new Requirement({ type: "entity", name: "Fire", value: 1, requires: [new Requirement({ type: "temperature", value: 220, operator: "<" })] })]
     }),
     new Action2({
       name: "Emberstone",
+      icon: "\u{1F525}\u{1FAA8}\u{1F525}",
       perform: ({ inventory, entities }) => {
         RemoveItem(inventory, "Heated Stone", 2);
-        entities.push(
-          new Entity({
-            name: "Emberstone",
-            temperature: 200
-          })
-        );
+        entities.push(EntityDefinitions.Emberstone.create());
       },
       requires: [ItemRequirement(["Heated Stone", 2]), new Requirement({ type: "entity", name: "Fire", value: 1, requires: [new Requirement({ type: "temperature", value: 200, operator: ">" })] })],
       milestones: ({ inventory, entities, kins, rites, milestones }) => {
@@ -68772,6 +68813,7 @@
     }),
     new Action2({
       name: "Heat Stone",
+      icon: "\u{1F525}\u{1FAA8}",
       perform: ({ inventory, entities, kins, rites }, source) => {
         RemoveItem(inventory, "Stone", 1);
         let fire = source;
@@ -68785,6 +68827,7 @@
     }),
     new Action2({
       name: "Language",
+      icon: "\u{1F524}",
       perform: ({ rites }) => {
         rites.push(new LanguageRite());
       },
@@ -76744,6 +76787,7 @@
           this.kins.forEach((kin) => {
             kin.tick(this);
           });
+          this.updateMilestones();
           this.notify(oldState);
         } catch (e) {
           console.error(e);
@@ -76834,6 +76878,36 @@
           }
         })
       }
+    ), /* @__PURE__ */ import_react70.default.createElement(
+      Button,
+      {
+        label: "Fire",
+        onClick: () => perform2({
+          perform: (gameState) => {
+            gameState.entities.push(EntityDefinitions.Fire.create(gameState.ticks));
+          }
+        })
+      }
+    ), /* @__PURE__ */ import_react70.default.createElement(
+      Button,
+      {
+        label: "Kin",
+        onClick: () => perform2({
+          perform: (gameState) => {
+            gameState.kins.push(new Kin({ name: "Kin" }));
+          }
+        })
+      }
+    ), /* @__PURE__ */ import_react70.default.createElement(
+      Button,
+      {
+        label: "Tool",
+        onClick: () => perform2({
+          perform: (gameState) => {
+            gameState.inventory.push(ItemDefinitions.Tool.create(10));
+          }
+        })
+      }
     ));
   };
   var Debug_default = Debug;
@@ -76861,19 +76935,50 @@
   };
   var Progress_default = Progress;
 
+  // src/components/ProgressButton.tsx
+  var import_react71 = __toESM(require_react(), 1);
+  var import_styled_components29 = __toESM(require_styled_components_browser_cjs(), 1);
+  var ProgressButtonContainer = import_styled_components29.default.default.div`
+    position: relative;
+    user-select: none; 
+    .progress {
+        position: absolute;
+        min-height: 100%;
+        height: 100%;
+        pointer-events: none;
+        top:0;
+        z-index: 0;
+    }
+    width: fit-content;
+`;
+  var ProgressButton = ({ icon: icon3, active, id: id3, label, remaining, max, color: color2, disabled: disabled2, onClick }) => {
+    return /* @__PURE__ */ import_react71.default.createElement(ProgressButtonContainer, null, /* @__PURE__ */ import_react71.default.createElement(Button, { icon: icon3, onClick, label, disabled: disabled2 }), /* @__PURE__ */ import_react71.default.createElement(
+      motion.div,
+      {
+        className: "progress",
+        key: id3,
+        initial: { width: "0%" },
+        animate: active && { width: `100%` },
+        style: { height: "10px", backgroundColor: color2 || "rgba(255,255,255,0.5" },
+        transition: { duration: remaining }
+      }
+    ));
+  };
+  var ProgressButton_default = ProgressButton;
+
   // src/Home.tsx
   var Home = () => {
-    const [gameState, setGameState] = React44.useState(new GameState());
-    const [inventory, setInventory] = React44.useState([]);
-    const [entities, setEntities] = React44.useState([]);
-    const [milestones, setMilestones] = React44.useState([]);
-    const [kins, setKins] = React44.useState([]);
-    const [rites, setRites] = React44.useState([]);
-    const [ticks, setTicks] = React44.useState(0);
-    const [performingActions, setPerformingActions] = React44.useState([]);
-    const [messages, setMessages] = React44.useState([]);
-    const [showMessages, setShowMessages] = React44.useState(false);
-    React44.useEffect(() => {
+    const [gameState, setGameState] = React45.useState(new GameState());
+    const [inventory, setInventory] = React45.useState([]);
+    const [entities, setEntities] = React45.useState([]);
+    const [milestones, setMilestones] = React45.useState([]);
+    const [kins, setKins] = React45.useState([]);
+    const [rites, setRites] = React45.useState([]);
+    const [ticks, setTicks] = React45.useState(0);
+    const [performingActions, setPerformingActions] = React45.useState([]);
+    const [messages, setMessages] = React45.useState([]);
+    const [showMessages, setShowMessages] = React45.useState(false);
+    React45.useEffect(() => {
       const listener3 = (newState, messages2) => {
         setInventory(newState.inventory);
         setEntities(newState.entities);
@@ -76892,7 +76997,7 @@
         gameState.unsubscribe(listener3);
       };
     }, []);
-    return /* @__PURE__ */ React44.createElement(React44.Fragment, null, /* @__PURE__ */ React44.createElement(LayoutGroup, null, /* @__PURE__ */ React44.createElement(Box, { align: "center", fill: true, gap: "xsmall" }, /* @__PURE__ */ React44.createElement(
+    return /* @__PURE__ */ React45.createElement(React45.Fragment, null, /* @__PURE__ */ React45.createElement(LayoutGroup, null, /* @__PURE__ */ React45.createElement(Box, { align: "center", fill: true, gap: "xsmall" }, /* @__PURE__ */ React45.createElement(
       Progress_default,
       {
         color: DayNightColors[Math.floor(ticks % 100 / 100 * DayNightColors.length)],
@@ -76901,45 +77006,87 @@
         ttl: 100,
         width: "100%"
       }
-    ), "Day " + (Math.floor(ticks / 100) + 1), /* @__PURE__ */ React44.createElement(Box, { direction: "row", gap: "small", align: "start", fill: true }, /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, "Actions"), actions.filter((action) => action.entities?.length == 0).filter((action) => action.type?.length == 0).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React44.createElement(
+    ), "Day " + (Math.floor(ticks / 100) + 1), /* @__PURE__ */ React45.createElement(Box, { direction: "row", gap: "small", align: "start", fill: true }, /* @__PURE__ */ React45.createElement(Box, { gap: "small" }, /* @__PURE__ */ React45.createElement(Text, null, "Actions"), actions.filter((action) => action.entities?.length == 0 || action.entities?.includes("*")).filter((action) => action.type?.length == 0).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React45.createElement(
       ActionButton,
       {
+        performingActions,
         key: action.name,
         action,
         performAction: gameState.performAction,
         disabled: !EvaluateRequirements(gameState, action.requires) || !!performingActions.find((performingAction) => performingAction.action.id == action.id)
       }
-    ))), /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, "Tasks"), performingActions.map((performingAction, i) => /* @__PURE__ */ React44.createElement(Box, { key: i }, /* @__PURE__ */ React44.createElement(Text, null, performingAction.action.name), /* @__PURE__ */ React44.createElement(Progress_default, { name: performingAction.id, width: "200px", color: "green", value: performingAction.action.duration - performingAction.remaining, ttl: performingAction.action.duration })))), milestones.length > 0 && /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, "Milestones"), milestones.map((milestone, i) => /* @__PURE__ */ React44.createElement(Button, { disabled: true, key: milestone.name + i, label: milestone.name }))), milestones.length > 0 && /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, "Rituals"), actions.filter((action) => action.entities?.length == 0).filter((action) => action.type?.includes("Ritual")).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React44.createElement(
+    ))), milestones.length > 0 && /* @__PURE__ */ React45.createElement(Box, { gap: "small" }, /* @__PURE__ */ React45.createElement(Text, null, "Milestones"), milestones.map((milestone, i) => /* @__PURE__ */ React45.createElement(Button, { disabled: true, key: milestone.name + i, label: milestone.name }))), milestones.length > 0 && /* @__PURE__ */ React45.createElement(Box, { gap: "small" }, /* @__PURE__ */ React45.createElement(Text, null, "Rituals"), actions.filter((action) => action.entities?.length == 0).filter((action) => action.type?.includes("Ritual")).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React45.createElement(
       ActionButton,
       {
+        performingActions,
         key: action.name,
         action,
         performAction: gameState.performAction,
         disabled: !EvaluateRequirements(gameState, action.requires)
       }
-    ))), milestones.length > 0 && /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, "Rites"), actions.filter((action) => action.entities?.length == 0).filter((action) => action.type?.includes("Rite")).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React44.createElement(
+    ))), milestones.length > 0 && /* @__PURE__ */ React45.createElement(Box, { gap: "small" }, /* @__PURE__ */ React45.createElement(Text, null, "Rites"), actions.filter((action) => action.entities?.length == 0).filter((action) => action.type?.includes("Rite")).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React45.createElement(
       ActionButton,
       {
+        performingActions,
         primary: rites.find((rite) => rite.name == action.name)?.isComplete(),
         key: action.name,
         action,
         performAction: gameState.performAction,
         disabled: !EvaluateRequirements(gameState, action.requires)
       }
-    ))), milestones.length > 0 && /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, "Active Rites"), rites.filter((rite) => !rite.isComplete()).map((rite) => /* @__PURE__ */ React44.createElement(Box, { key: rite.id }, /* @__PURE__ */ React44.createElement(Text, null, rite.icon), /* @__PURE__ */ React44.createElement(Text, null, rite.name), rite.ingredients.map(([name, count]) => /* @__PURE__ */ React44.createElement(Box, { key: "rite" + rite.id + "ingredient" + name }, /* @__PURE__ */ React44.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, name, " x", count), /* @__PURE__ */ React44.createElement(
+    ))), milestones.length > 0 && /* @__PURE__ */ React45.createElement(Box, { gap: "small" }, /* @__PURE__ */ React45.createElement(Text, null, "Active Rites"), rites.filter((rite) => !rite.isComplete()).map((rite) => /* @__PURE__ */ React45.createElement(Box, { key: rite.id }, /* @__PURE__ */ React45.createElement(Text, null, rite.icon), /* @__PURE__ */ React45.createElement(Text, null, rite.name), rite.ingredients.map(([name, count]) => /* @__PURE__ */ React45.createElement(Box, { key: "rite" + rite.id + "ingredient" + name }, /* @__PURE__ */ React45.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React45.createElement(Text, null, name, " x", count), /* @__PURE__ */ React45.createElement(
       Button,
       {
         label: "Offer " + name,
         onClick: () => gameState.performOffering(rite, name),
         disabled: !EvaluateRequirements(gameState, [ItemRequirement([name, 1])])
       }
-    )), /* @__PURE__ */ React44.createElement(Box, { fill: "horizontal", height: "5px", width: "50px" }, /* @__PURE__ */ React44.createElement(Meter, { value: rite.progress.find(([n, c]) => n == name)?.[1], max: count })))))))), /* @__PURE__ */ React44.createElement(Entities, { entities, performEntityAction: gameState.performEntityAction, inventory, milestones, kins, rites, ticks }), /* @__PURE__ */ React44.createElement(Box, { direction: "row", gap: "small", fill: true, align: "start" }, /* @__PURE__ */ React44.createElement(Box, { height: { min: "200px" }, width: "320px", border: true, pad: "small" }, /* @__PURE__ */ React44.createElement(Text, null, "Inventory"), /* @__PURE__ */ React44.createElement(Inventory, { inventory })), /* @__PURE__ */ React44.createElement(Box, { height: { min: "200px" }, width: "320px" }, kins.length > 0 && /* @__PURE__ */ React44.createElement(Text, null, "Kins"), /* @__PURE__ */ React44.createElement(Kins, { kins }))), /* @__PURE__ */ React44.createElement(Box, null, /* @__PURE__ */ React44.createElement(Debug_default, { perform: (p2) => gameState.performAction(p2) }))), /* @__PURE__ */ React44.createElement(Modal_default, { isOpen: showMessages, setIsOpen: setShowMessages }, messages.map((message, i) => /* @__PURE__ */ React44.createElement(Box, { key: i }, message)), /* @__PURE__ */ React44.createElement(Box, { direction: "row", justify: "center" }, /* @__PURE__ */ React44.createElement(Button, { label: "Continue", onClick: () => setShowMessages(false) })))));
+    )), /* @__PURE__ */ React45.createElement(Box, { fill: "horizontal", height: "5px", width: "50px" }, /* @__PURE__ */ React45.createElement(Meter, { value: rite.progress.find(([n, c]) => n == name)?.[1], max: count })))))))), /* @__PURE__ */ React45.createElement(
+      Entities,
+      {
+        performingActions,
+        entities,
+        performEntityAction: gameState.performEntityAction,
+        inventory,
+        milestones,
+        kins,
+        rites,
+        ticks
+      }
+    ), /* @__PURE__ */ React45.createElement(Box, { direction: "row", gap: "small", fill: true, align: "start" }, /* @__PURE__ */ React45.createElement(Box, { height: { min: "200px" }, width: "320px", border: true, pad: "small" }, /* @__PURE__ */ React45.createElement(Text, null, "Inventory"), /* @__PURE__ */ React45.createElement(Inventory, { inventory })), /* @__PURE__ */ React45.createElement(Box, { height: { min: "200px" }, width: "320px" }, kins.length > 0 && /* @__PURE__ */ React45.createElement(Text, null, "Kins"), /* @__PURE__ */ React45.createElement(Kins, { entities, inventory, milestones, kins, rites, ticks }))), /* @__PURE__ */ React45.createElement(Box, null, /* @__PURE__ */ React45.createElement(Debug_default, { perform: (p2) => gameState.performAction(p2) }))), /* @__PURE__ */ React45.createElement(Modal_default, { isOpen: showMessages, setIsOpen: setShowMessages }, messages.map((message, i) => /* @__PURE__ */ React45.createElement(Box, { key: i }, message)), /* @__PURE__ */ React45.createElement(Box, { direction: "row", justify: "center" }, /* @__PURE__ */ React45.createElement(Button, { label: "Continue", onClick: () => setShowMessages(false) })))));
   };
-  var ActionButton = ({ action, performAction, disabled: disabled2, ...props }) => {
-    return action.requires.length > 0 ? /* @__PURE__ */ React44.createElement(Tip, { key: action.name, content: /* @__PURE__ */ React44.createElement(RenderRequirements, { requirements: action.requires }) }, /* @__PURE__ */ React44.createElement(Box, null, /* @__PURE__ */ React44.createElement(Button, { label: action.name, onClick: () => performAction(action), disabled: disabled2, ...props }))) : /* @__PURE__ */ React44.createElement(Button, { label: action.name, onClick: () => performAction(action), disabled: disabled2, ...props });
+  var ActionButton = ({ action, performingActions, performAction, disabled: disabled2, ...props }) => {
+    let performingAction = performingActions.find((performingAction2) => performingAction2.action.id == action.id);
+    return action.requires.length > 0 ? /* @__PURE__ */ React45.createElement(Tip, { key: action.name, content: /* @__PURE__ */ React45.createElement(RenderRequirements, { requirements: action.requires }) }, /* @__PURE__ */ React45.createElement(Box, null, /* @__PURE__ */ React45.createElement(
+      ProgressButton_default,
+      {
+        id: performingAction?.id || -1,
+        remaining: performingAction?.remaining,
+        max: action.duration,
+        icon: /* @__PURE__ */ React45.createElement(Text, null, action.icon),
+        label: action.name,
+        onClick: () => performAction(action),
+        disabled: disabled2,
+        active: !!performingAction,
+        ...props
+      }
+    ))) : /* @__PURE__ */ React45.createElement(
+      ProgressButton_default,
+      {
+        id: performingAction?.id || -1,
+        remaining: performingAction?.remaining,
+        max: action.duration,
+        icon: /* @__PURE__ */ React45.createElement(Text, null, action.icon),
+        label: action.name,
+        onClick: () => performAction(action),
+        disabled: disabled2,
+        active: !!performingAction,
+        ...props
+      }
+    );
   };
   var Inventory = ({ inventory, compact }) => {
-    return /* @__PURE__ */ React44.createElement(Grid, { columns: { size: "auto", count: 5 }, gap: "small" }, /* @__PURE__ */ React44.createElement(AnimatePresence, null, inventory.map((item, i) => /* @__PURE__ */ React44.createElement(
+    return /* @__PURE__ */ React45.createElement(Grid, { columns: { size: "auto", count: 5 }, gap: "small" }, /* @__PURE__ */ React45.createElement(AnimatePresence, null, inventory.map((item, i) => /* @__PURE__ */ React45.createElement(
       motion.div,
       {
         layout: true,
@@ -76950,7 +77097,7 @@
         animate: { opacity: 1, scale: [0, 0.8, 1.1, 1] },
         transition: { ease: "easeIn", duration: 0.3 }
       },
-      /* @__PURE__ */ React44.createElement(Stack, { anchor: "bottom", fill: true }, /* @__PURE__ */ React44.createElement(Box, { border: !compact, align: "center", width: "50px", height: compact ? "30px" : "50px" }, /* @__PURE__ */ React44.createElement(Text, null, item.icon), !compact && /* @__PURE__ */ React44.createElement(React44.Fragment, null, /* @__PURE__ */ React44.createElement(Text, null, item.name))), /* @__PURE__ */ React44.createElement(Box, { fill: "horizontal", height: "5px", width: "50px" }, item.durability != -1 && /* @__PURE__ */ React44.createElement(Meter, { value: item.durability, max: item.maxDurability })))
+      /* @__PURE__ */ React45.createElement(Stack, { anchor: "bottom", fill: true }, /* @__PURE__ */ React45.createElement(Box, { border: !compact, align: "center", width: "50px", height: compact ? "30px" : "50px" }, /* @__PURE__ */ React45.createElement(Text, null, item.icon), !compact && /* @__PURE__ */ React45.createElement(React45.Fragment, null, /* @__PURE__ */ React45.createElement(Text, null, item.name))), /* @__PURE__ */ React45.createElement(Box, { fill: "horizontal", height: "5px", width: "50px" }, item.durability != -1 && /* @__PURE__ */ React45.createElement(Meter, { value: item.durability, max: item.maxDurability })))
     ))));
   };
   var Entities = ({
@@ -76960,11 +77107,13 @@
     milestones,
     kins,
     rites,
-    ticks
+    ticks,
+    performingActions
   }) => {
-    return /* @__PURE__ */ React44.createElement(Box, { height: { min: "200px" }, fill: true, align: "start" }, /* @__PURE__ */ React44.createElement(Text, null, "Entities"), /* @__PURE__ */ React44.createElement(Box, { gap: "xsmall" }, entities.map((entity, i) => /* @__PURE__ */ React44.createElement(Box, { key: "entitiy" + entity.name + i, direction: "row", gap: "small" }, /* @__PURE__ */ React44.createElement(Box, null, /* @__PURE__ */ React44.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React44.createElement(Text, null, entity.name), entity.ttl > 0 && /* @__PURE__ */ React44.createElement(Text, null, entity.ttl.toFixed(0), "s"), entity.temperature != 0 && /* @__PURE__ */ React44.createElement(Text, null, entity.temperature.toFixed(0), " \xB0C")), entity.performs.map((perform2) => /* @__PURE__ */ React44.createElement(Box, { key: "entitiy" + entity.name + i + "perform" + perform2.name, direction: "row", gap: "xsmall", align: "center" }, perform2.ttp > 0 && perform2.condition({ inventory, entities, kins, rites, milestones, ticks }, entity) && /* @__PURE__ */ React44.createElement(React44.Fragment, null, /* @__PURE__ */ React44.createElement(Text, null, perform2.icon), /* @__PURE__ */ React44.createElement(Meter, { value: ticks - perform2.lastTickPerformed, max: perform2.ttp, thickness: "10px", size: "full" }))))), actions.filter((action) => action.entities?.includes(entity.name)).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React44.createElement(
+    return /* @__PURE__ */ React45.createElement(Box, { height: { min: "200px" }, fill: true, align: "start" }, /* @__PURE__ */ React45.createElement(Text, null, "Entities"), /* @__PURE__ */ React45.createElement(Box, { gap: "xsmall" }, entities.map((entity, i) => /* @__PURE__ */ React45.createElement(Box, { key: "entity" + entity.name + i, gap: "small" }, /* @__PURE__ */ React45.createElement(Box, null, /* @__PURE__ */ React45.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React45.createElement(Text, null, entity.name), entity.ttl > 0 && /* @__PURE__ */ React45.createElement(Text, null, entity.ttl.toFixed(0), "s"), entity.temperature != 0 && /* @__PURE__ */ React45.createElement(Text, null, entity.temperature.toFixed(0), " \xB0C")), entity.performs.map((perform2) => /* @__PURE__ */ React45.createElement(Box, { key: "entity" + entity.name + i + "perform" + perform2.name, direction: "row", gap: "xsmall", align: "center" }, perform2.ttp > 0 && perform2.condition({ inventory, entities, kins, rites, milestones, ticks }, entity) && /* @__PURE__ */ React45.createElement(React45.Fragment, null, /* @__PURE__ */ React45.createElement(Text, null, perform2.icon), /* @__PURE__ */ React45.createElement(Meter, { value: ticks - perform2.lastTickPerformed, max: perform2.ttp, thickness: "10px", size: "full" }))))), actions.filter((action) => action.entities?.includes(entity.name)).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React45.createElement(
       ActionButton,
       {
+        performingActions,
         key: action.name,
         action,
         performAction: () => performEntityAction(action, entity),
@@ -76972,8 +77121,8 @@
       }
     ))))));
   };
-  var Kins = ({ kins }) => {
-    return /* @__PURE__ */ React44.createElement(AnimatePresence, null, /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, kins.map((kin, i) => /* @__PURE__ */ React44.createElement(
+  var Kins = ({ inventory, entities, kins, rites, milestones, ticks }) => {
+    return /* @__PURE__ */ React45.createElement(AnimatePresence, null, /* @__PURE__ */ React45.createElement(Box, { gap: "small" }, kins.map((kin, i) => /* @__PURE__ */ React45.createElement(
       motion.div,
       {
         layout: true,
@@ -76984,52 +77133,68 @@
         animate: { opacity: 1, scale: [0, 0.8, 1.1, 1] },
         transition: { ease: "easeIn", duration: 0.3 }
       },
-      /* @__PURE__ */ React44.createElement(Stack, { anchor: "bottom", fill: true }, /* @__PURE__ */ React44.createElement(Box, { direction: "row", border: true, pad: "small", width: "350px" }, /* @__PURE__ */ React44.createElement(Box, { align: "center", height: "50px" }, /* @__PURE__ */ React44.createElement(Text, null, kin.icon), /* @__PURE__ */ React44.createElement(Text, null, kin.name)), /* @__PURE__ */ React44.createElement(Box, { width: "300px" }, /* @__PURE__ */ React44.createElement(Inventory, { inventory: kin.inventory, compact: true }))))
+      /* @__PURE__ */ React45.createElement(Stack, { anchor: "bottom", fill: true }, /* @__PURE__ */ React45.createElement(Box, { direction: "row", border: true, pad: "small", width: "350px" }, /* @__PURE__ */ React45.createElement(Box, { align: "center", height: "50px" }, /* @__PURE__ */ React45.createElement(Text, null, kin.icon), /* @__PURE__ */ React45.createElement(Text, null, kin.name)), /* @__PURE__ */ React45.createElement(Box, { width: "300px", gap: "xsmall" }, /* @__PURE__ */ React45.createElement(Inventory, { inventory: kin.inventory, compact: true }), rites.some((rite) => rite.name == "Language" && rite.isComplete()) && actions.filter((action) => action.entities?.includes(kin.name)).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React45.createElement(Box, { key: action.name, direction: "row", gap: "xsmall" }, /* @__PURE__ */ React45.createElement(
+        ActionButton,
+        {
+          performingActions: kin.performingActions,
+          primary: kin.actionPreference.find((a) => a.name == action.name) != void 0,
+          action,
+          performAction: () => kin.giveActionPreference(action),
+          disabled: !EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, action.requires)
+        }
+      ), /* @__PURE__ */ React45.createElement(
+        Button,
+        {
+          style: { padding: 0 },
+          icon: /* @__PURE__ */ React45.createElement(Text, null, kin.actionPreference.some((a) => a.name == action.name) ? "\u2714\uFE0F" : "\u{1F5D9}"),
+          onClick: () => kin.removeActionPreference(action)
+        }
+      ))))))
     ))));
   };
   var RenderRequirements = ({ requirements }) => {
-    return /* @__PURE__ */ React44.createElement(Box, { gap: "small" }, requirements.map((requirement, i) => /* @__PURE__ */ React44.createElement(Box, { key: i, gap: "xsmall" }, /* @__PURE__ */ React44.createElement(Box, { direction: "row", gap: "xsmall" }, requirement.name && /* @__PURE__ */ React44.createElement(Text, null, ItemDefinitions[requirement.name]?.icon || requirement.name), !requirement.name && /* @__PURE__ */ React44.createElement(Text, null, requirement.type), /* @__PURE__ */ React44.createElement(Text, null, requirement.operator), /* @__PURE__ */ React44.createElement(Text, null, requirement.value)), requirement.requires.length > 0 && /* @__PURE__ */ React44.createElement(RenderRequirements, { requirements: requirement.requires }))));
+    return /* @__PURE__ */ React45.createElement(Box, { gap: "small" }, requirements.map((requirement, i) => /* @__PURE__ */ React45.createElement(Box, { key: i, gap: "xsmall" }, /* @__PURE__ */ React45.createElement(Box, { direction: "row", gap: "xsmall" }, requirement.name && /* @__PURE__ */ React45.createElement(Text, null, ItemDefinitions[requirement.name]?.icon || requirement.name), !requirement.name && /* @__PURE__ */ React45.createElement(Text, null, requirement.type), /* @__PURE__ */ React45.createElement(Text, null, requirement.operator), /* @__PURE__ */ React45.createElement(Text, null, requirement.value)), requirement.requires.length > 0 && /* @__PURE__ */ React45.createElement(RenderRequirements, { requirements: requirement.requires }))));
   };
   var Home_default = Home;
 
   // src/components/ComponentTest.tsx
   var import_react72 = __toESM(require_react(), 1);
-
-  // src/components/ProgressButton.tsx
-  var import_react71 = __toESM(require_react(), 1);
-  var import_styled_components29 = __toESM(require_styled_components_browser_cjs(), 1);
-  var ProgressButtonContainer = import_styled_components29.default.default.div`
-    position: relative;
-    user-select: none; 
-    .progress {
-        position: absolute;
-        min-height: 100%;
-        height: 100%;
-        // transition: width 0.5s ease;
-        pointer-events: none;
-    }
-`;
-  var ProgressButton = ({ label, value, max, onClick }) => {
-    const [width, setWidth] = (0, import_react71.useState)("0%");
-    (0, import_react71.useEffect)(() => {
-      setWidth(`${value / max * 100}%`);
-    }, [value, max]);
-    return /* @__PURE__ */ import_react71.default.createElement(ProgressButtonContainer, null, /* @__PURE__ */ import_react71.default.createElement("div", { className: "progress", style: { backgroundColor: "rgba(255,255,255,0.5)", width } }), /* @__PURE__ */ import_react71.default.createElement(Box, { border: { size: "2px", color: "white" }, onClick }, label));
-  };
-  var ProgressButton_default = ProgressButton;
-
-  // src/components/ComponentTest.tsx
   var ComponentTest = () => {
-    const [value, setValue] = (0, import_react72.useState)(50);
-    return /* @__PURE__ */ import_react72.default.createElement(import_react72.default.Fragment, null, /* @__PURE__ */ import_react72.default.createElement(
+    const [value, setValue] = (0, import_react72.useState)(5);
+    return /* @__PURE__ */ import_react72.default.createElement(Box, { gap: "small" }, /* @__PURE__ */ import_react72.default.createElement(
       ProgressButton_default,
       {
         label: "Click me",
-        value,
-        max: 100,
+        remaining: value,
+        max: 10,
         onClick: () => {
           setValue(value + 1);
-        }
+        },
+        id: 1,
+        active: true
+      }
+    ), /* @__PURE__ */ import_react72.default.createElement(
+      ProgressButton_default,
+      {
+        label: "Click me",
+        remaining: value,
+        max: 30,
+        onClick: () => {
+          setValue(value + 1);
+        },
+        id: 2
+      }
+    ), /* @__PURE__ */ import_react72.default.createElement(
+      ProgressButton_default,
+      {
+        label: "Click me",
+        remaining: value,
+        max: 30,
+        onClick: () => {
+          setValue(value + 1);
+        },
+        id: 3,
+        disabled: true
       }
     ));
   };
