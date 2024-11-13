@@ -12,6 +12,7 @@ export const EntityDefinitions = {
         create: (ticks: number) =>
             new Entity({
                 name: "Fire",
+                icon: "🔥",
                 ttl: 60,
                 temperature: 100,
                 tick: ({ tickRate }, source) => {
@@ -42,6 +43,7 @@ export const EntityDefinitions = {
         create: () =>
             new Entity({
                 name: "Emberstone",
+                icon: "🔥🪨🔥",
                 temperature: 200,
             }),
     },

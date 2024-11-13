@@ -68531,8 +68531,9 @@
     }
   };
   var Entity = class {
-    constructor({ name, ttl, temperature, tick, performs }) {
+    constructor({ name, icon: icon3, ttl, temperature, tick, performs }) {
       this.name = name;
+      this.icon = icon3 || "\u{1F3E0}";
       this.ttl = ttl || -1;
       this.temperature = temperature || 0;
       this.performs = performs || [];
@@ -68611,6 +68612,7 @@
     Fire: {
       create: (ticks) => new Entity({
         name: "Fire",
+        icon: "\u{1F525}",
         ttl: 60,
         temperature: 100,
         tick: ({ tickRate }, source) => {
@@ -68640,6 +68642,7 @@
     Emberstone: {
       create: () => new Entity({
         name: "Emberstone",
+        icon: "\u{1F525}\u{1FAA8}\u{1F525}",
         temperature: 200
       })
     }
@@ -76950,9 +76953,16 @@
         z-index: 0;
     }
     width: fit-content;
+    .info {
+        position: absolute;
+        z-index: 1;
+        left: 100%;
+        pad-left:4px;
+    }
 `;
-  var ProgressButton = ({ icon: icon3, active, id: id3, label, remaining, max, color: color2, disabled: disabled2, onClick }) => {
-    return /* @__PURE__ */ import_react71.default.createElement(ProgressButtonContainer, null, /* @__PURE__ */ import_react71.default.createElement(Button, { icon: icon3, onClick, label, disabled: disabled2 }), /* @__PURE__ */ import_react71.default.createElement(
+  var ProgressButton = ({ icon: icon3, active, id: id3, label, remaining, max, color: color2, disabled: disabled2, onClick, info }) => {
+    const [showInfo, setShowInfo] = (0, import_react71.useState)(false);
+    return /* @__PURE__ */ import_react71.default.createElement(ProgressButtonContainer, null, /* @__PURE__ */ import_react71.default.createElement(Box, { direction: "row", onMouseEnter: () => setShowInfo(true), onMouseLeave: () => setShowInfo(false), align: "center" }, /* @__PURE__ */ import_react71.default.createElement(Button, { icon: icon3, onClick, label: /* @__PURE__ */ import_react71.default.createElement(Text, null, label), disabled: disabled2 }), info && showInfo && /* @__PURE__ */ import_react71.default.createElement("div", { className: "info" }, info), /* @__PURE__ */ import_react71.default.createElement(
       motion.div,
       {
         className: "progress",
@@ -76962,9 +76972,19 @@
         style: { height: "10px", backgroundColor: color2 || "rgba(255,255,255,0.5" },
         transition: { duration: remaining }
       }
-    ));
+    )));
   };
   var ProgressButton_default = ProgressButton;
+
+  // src/Eras/RequirementDefinitions.ts
+  var RequirementDefinitions = {
+    temperature: {
+      icon: "\u{1F321}\uFE0F"
+    },
+    Fire: {
+      icon: "\u{1F525}"
+    }
+  };
 
   // src/Home.tsx
   var Home = () => {
@@ -77057,7 +77077,7 @@
   };
   var ActionButton = ({ action, performingActions, performAction, disabled: disabled2, ...props }) => {
     let performingAction = performingActions.find((performingAction2) => performingAction2.action.id == action.id);
-    return action.requires.length > 0 ? /* @__PURE__ */ React45.createElement(Tip, { key: action.name, content: /* @__PURE__ */ React45.createElement(RenderRequirements, { requirements: action.requires }) }, /* @__PURE__ */ React45.createElement(Box, null, /* @__PURE__ */ React45.createElement(
+    return /* @__PURE__ */ React45.createElement(
       ProgressButton_default,
       {
         id: performingAction?.id || -1,
@@ -77068,20 +77088,8 @@
         onClick: () => performAction(action),
         disabled: disabled2,
         active: !!performingAction,
-        ...props
-      }
-    ))) : /* @__PURE__ */ React45.createElement(
-      ProgressButton_default,
-      {
-        id: performingAction?.id || -1,
-        remaining: performingAction?.remaining,
-        max: action.duration,
-        icon: /* @__PURE__ */ React45.createElement(Text, null, action.icon),
-        label: action.name,
-        onClick: () => performAction(action),
-        disabled: disabled2,
-        active: !!performingAction,
-        ...props
+        ...props,
+        info: /* @__PURE__ */ React45.createElement(RenderRequirements, { requirements: action.requires })
       }
     );
   };
@@ -77110,7 +77118,7 @@
     ticks,
     performingActions
   }) => {
-    return /* @__PURE__ */ React45.createElement(Box, { height: { min: "200px" }, fill: true, align: "start" }, /* @__PURE__ */ React45.createElement(Text, null, "Entities"), /* @__PURE__ */ React45.createElement(Box, { gap: "xsmall" }, entities.map((entity, i) => /* @__PURE__ */ React45.createElement(Box, { key: "entity" + entity.name + i, gap: "small" }, /* @__PURE__ */ React45.createElement(Box, null, /* @__PURE__ */ React45.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React45.createElement(Text, null, entity.name), entity.ttl > 0 && /* @__PURE__ */ React45.createElement(Text, null, entity.ttl.toFixed(0), "s"), entity.temperature != 0 && /* @__PURE__ */ React45.createElement(Text, null, entity.temperature.toFixed(0), " \xB0C")), entity.performs.map((perform2) => /* @__PURE__ */ React45.createElement(Box, { key: "entity" + entity.name + i + "perform" + perform2.name, direction: "row", gap: "xsmall", align: "center" }, perform2.ttp > 0 && perform2.condition({ inventory, entities, kins, rites, milestones, ticks }, entity) && /* @__PURE__ */ React45.createElement(React45.Fragment, null, /* @__PURE__ */ React45.createElement(Text, null, perform2.icon), /* @__PURE__ */ React45.createElement(Meter, { value: ticks - perform2.lastTickPerformed, max: perform2.ttp, thickness: "10px", size: "full" }))))), actions.filter((action) => action.entities?.includes(entity.name)).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React45.createElement(
+    return /* @__PURE__ */ React45.createElement(Box, { height: { min: "200px" }, fill: true, align: "start" }, /* @__PURE__ */ React45.createElement(Text, null, "Entities"), /* @__PURE__ */ React45.createElement(Box, { gap: "xsmall" }, entities.map((entity, i) => /* @__PURE__ */ React45.createElement(Box, { key: "entity" + entity.name + i, gap: "small" }, /* @__PURE__ */ React45.createElement(Box, null, /* @__PURE__ */ React45.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React45.createElement(Text, null, entity.icon), /* @__PURE__ */ React45.createElement(Text, null, entity.name), entity.ttl > 0 && /* @__PURE__ */ React45.createElement(Text, null, entity.ttl.toFixed(0), "s"), entity.temperature != 0 && /* @__PURE__ */ React45.createElement(Text, null, entity.temperature.toFixed(0), " \xB0C")), entity.performs.map((perform2) => /* @__PURE__ */ React45.createElement(Box, { key: "entity" + entity.name + i + "perform" + perform2.name, direction: "row", gap: "xsmall", align: "center" }, perform2.ttp > 0 && perform2.condition({ inventory, entities, kins, rites, milestones, ticks }, entity) && /* @__PURE__ */ React45.createElement(React45.Fragment, null, /* @__PURE__ */ React45.createElement(Text, null, perform2.icon), /* @__PURE__ */ React45.createElement(Meter, { value: ticks - perform2.lastTickPerformed, max: perform2.ttp, thickness: "10px", size: "full" }))))), actions.filter((action) => action.entities?.includes(entity.name)).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ React45.createElement(
       ActionButton,
       {
         performingActions,
@@ -77153,7 +77161,7 @@
     ))));
   };
   var RenderRequirements = ({ requirements }) => {
-    return /* @__PURE__ */ React45.createElement(Box, { gap: "small" }, requirements.map((requirement, i) => /* @__PURE__ */ React45.createElement(Box, { key: i, gap: "xsmall" }, /* @__PURE__ */ React45.createElement(Box, { direction: "row", gap: "xsmall" }, requirement.name && /* @__PURE__ */ React45.createElement(Text, null, ItemDefinitions[requirement.name]?.icon || requirement.name), !requirement.name && /* @__PURE__ */ React45.createElement(Text, null, requirement.type), /* @__PURE__ */ React45.createElement(Text, null, requirement.operator), /* @__PURE__ */ React45.createElement(Text, null, requirement.value)), requirement.requires.length > 0 && /* @__PURE__ */ React45.createElement(RenderRequirements, { requirements: requirement.requires }))));
+    return /* @__PURE__ */ React45.createElement(Box, { as: "span", style: { display: "inline-flex" }, gap: "xsmall", direction: "row" }, requirements.map((requirement, i) => /* @__PURE__ */ React45.createElement(Box, { key: i, gap: "xsmall", direction: "row" }, /* @__PURE__ */ React45.createElement(Box, { direction: "row", gap: "xsmall" }, requirement.name && /* @__PURE__ */ React45.createElement(Text, null, ItemDefinitions[requirement.name]?.icon || RequirementDefinitions[requirement.name]?.icon || requirement.name), !requirement.name && /* @__PURE__ */ React45.createElement(Text, null, RequirementDefinitions[requirement.type]?.icon || requirement.type), /* @__PURE__ */ React45.createElement(Text, null, requirement.operator), /* @__PURE__ */ React45.createElement(Text, null, requirement.value)), requirement.requires.length > 0 && /* @__PURE__ */ React45.createElement(RenderRequirements, { requirements: requirement.requires }))));
   };
   var Home_default = Home;
 

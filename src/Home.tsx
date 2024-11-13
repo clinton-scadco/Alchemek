@@ -17,6 +17,7 @@ import Progress from "./components/Progress";
 import { EvaluateRequirements } from "./Functions";
 import { ItemDefinitions } from "./Eras/ItemDefinitions";
 import ProgressButton from "./components/ProgressButton";
+import { RequirementDefinitions } from "./Eras/RequirementDefinitions";
 
 const Home = () => {
     const [gameState, setGameState] = React.useState(new GameState());
@@ -223,24 +224,7 @@ interface ActionButtonProps {
 
 const ActionButton = ({ action, performingActions, performAction, disabled, ...props }: ActionButtonProps) => {
     let performingAction = performingActions.find((performingAction) => performingAction.action.id == action.id);
-
-    return action.requires.length > 0 ? (
-        <Tip key={action.name} content={<RenderRequirements requirements={action.requires}></RenderRequirements>}>
-            <Box>
-                <ProgressButton
-                    id={performingAction?.id || -1}
-                    remaining={performingAction?.remaining}
-                    max={action.duration}
-                    icon={<Text>{action.icon}</Text>}
-                    label={action.name}
-                    onClick={() => performAction(action)}
-                    disabled={disabled}
-                    active={!!performingAction}
-                    {...props}
-                ></ProgressButton>
-            </Box>
-        </Tip>
-    ) : (
+    return (
         <ProgressButton
             id={performingAction?.id || -1}
             remaining={performingAction?.remaining}
@@ -251,6 +235,7 @@ const ActionButton = ({ action, performingActions, performAction, disabled, ...p
             disabled={disabled}
             active={!!performingAction}
             {...props}
+            info={<RenderRequirements requirements={action.requires}></RenderRequirements>}
         ></ProgressButton>
     );
 };
@@ -317,6 +302,7 @@ const Entities = ({
                     <Box key={"entity" + entity.name + i} gap="small">
                         <Box>
                             <Box direction="row" gap={"small"}>
+                                <Text>{entity.icon}</Text>
                                 <Text>{entity.name}</Text>
                                 {entity.ttl > 0 && <Text>{entity.ttl.toFixed(0)}s</Text>}
                                 {entity.temperature != 0 && <Text>{entity.temperature.toFixed(0)} &#176;C</Text>}
@@ -373,6 +359,7 @@ const Kins = ({ inventory, entities, kins, rites, milestones, ticks }: { entitie
                                 </Box>
                                 <Box width={"300px"} gap={"xsmall"}>
                                     <Inventory inventory={kin.inventory} compact={true}></Inventory>
+
                                     {rites.some((rite) => rite.name == "Language" && rite.isComplete()) &&
                                         actions
                                             .filter((action) => action.entities?.includes(kin.name))
@@ -405,12 +392,12 @@ const Kins = ({ inventory, entities, kins, rites, milestones, ticks }: { entitie
 
 const RenderRequirements = ({ requirements }: { requirements: Requirement[] }) => {
     return (
-        <Box gap={"small"}>
+        <Box as={"span"} style={{ display: "inline-flex" }} gap={"xsmall"} direction="row">
             {requirements.map((requirement, i) => (
-                <Box key={i} gap={"xsmall"}>
+                <Box key={i} gap={"xsmall"} direction="row">
                     <Box direction="row" gap={"xsmall"}>
-                        {requirement.name && <Text>{ItemDefinitions[requirement.name]?.icon || requirement.name}</Text>}
-                        {!requirement.name && <Text>{requirement.type}</Text>}
+                        {requirement.name && <Text>{ItemDefinitions[requirement.name]?.icon || RequirementDefinitions[requirement.name]?.icon || requirement.name}</Text>}
+                        {!requirement.name && <Text>{RequirementDefinitions[requirement.type]?.icon || requirement.type}</Text>}
                         <Text>{requirement.operator}</Text>
                         <Text>{requirement.value}</Text>
                     </Box>

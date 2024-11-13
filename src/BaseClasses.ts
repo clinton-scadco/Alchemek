@@ -139,6 +139,7 @@ interface IEntityPerform {
 
 export interface IEntity {
     name: string;
+    icon: string;
     ttl?: number;
     temperature?: number;
     tick?: (state: IGameState, source: Entity) => void;
@@ -147,13 +148,15 @@ export interface IEntity {
 
 export class Entity implements IEntity {
     name: string;
+    icon: string;
     ttl: number;
     temperature: number;
     tick: (state: IGameState, source: Entity) => void;
     performs: IEntityPerform[];
 
-    constructor({ name, ttl, temperature, tick, performs }: IEntity) {
+    constructor({ name, icon, ttl, temperature, tick, performs }: IEntity) {
         this.name = name;
+        this.icon = icon || "🏠";
         this.ttl = ttl || -1;
         this.temperature = temperature || 0;
 

@@ -15,10 +15,17 @@ const ProgressButtonContainer = styled.default.div`
         z-index: 0;
     }
     width: fit-content;
+    .info {
+        position: absolute;
+        z-index: 1;
+        left: 100%;
+        pad-left:4px;
+    }
 `;
 
 interface ProgressButtonProps {
     icon?: JSX.Element;
+    info?: JSX.Element;
     active?: boolean;
     id: number;
     label: string;
@@ -29,18 +36,23 @@ interface ProgressButtonProps {
     onClick: () => void;
 }
 
-const ProgressButton = ({ icon, active, id, label, remaining, max, color, disabled, onClick }: ProgressButtonProps) => {
+const ProgressButton = ({ icon, active, id, label, remaining, max, color, disabled, onClick, info }: ProgressButtonProps) => {
+    const [showInfo, setShowInfo] = useState(false);
+
     return (
         <ProgressButtonContainer>
-            <Button icon={icon} onClick={onClick} label={label} disabled={disabled}></Button>
-            <motion.div
-                className="progress"
-                key={id}
-                initial={{ width: "0%" }}
-                animate={active && { width: `100%` }}
-                style={{ height: "10px", backgroundColor: color || "rgba(255,255,255,0.5" }}
-                transition={{ duration: remaining }}
-            />
+            <Box direction="row" onMouseEnter={() => setShowInfo(true)} onMouseLeave={() => setShowInfo(false)} align="center">
+                <Button icon={icon} onClick={onClick} label={<Text>{label}</Text>} disabled={disabled}></Button>
+                {info && showInfo && <div className="info">{info}</div>}
+                <motion.div
+                    className="progress"
+                    key={id}
+                    initial={{ width: "0%" }}
+                    animate={active && { width: `100%` }}
+                    style={{ height: "10px", backgroundColor: color || "rgba(255,255,255,0.5" }}
+                    transition={{ duration: remaining }}
+                />
+            </Box>
         </ProgressButtonContainer>
     );
 };
