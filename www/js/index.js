@@ -68407,6 +68407,28 @@
   // src/Home.tsx
   var React45 = __toESM(require_react(), 1);
 
+  // src/Eras/TimeDefinitions.ts
+  var TimeDefinitions = {
+    Dawn: [5, 6],
+    Day: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+    Dusk: [18, 19],
+    Midnight: [22, 23],
+    Night: [20, 21, 22, 23, 0, 1, 2, 3, 4],
+    GetTime(ticks) {
+      return Math.floor(ticks % 100 / 100 * DayNightColors.length);
+    },
+    GetTimeColor(ticks) {
+      return DayNightColors[TimeDefinitions.GetTime(ticks)];
+    },
+    GetTimeName(ticks) {
+      const time2 = TimeDefinitions.GetTime(ticks);
+      return Object.keys(TimeDefinitions).find((name) => TimeDefinitions[name].includes(time2));
+    },
+    GetTimeGradient(name) {
+      return GetLinearGradient(TimeDefinitions[name].map((time2) => DayNightColors[time2]));
+    }
+  };
+
   // src/Functions.ts
   var Compare = (a, b, operator) => {
     switch (operator) {
@@ -68424,7 +68446,7 @@
         return false;
     }
   };
-  var MeetsRequirement = (requirement, source) => {
+  var MeetsRequirement = (requirement, source, state) => {
     let met = true;
     if (requirement.name) {
       met = met && source.name === requirement.name;
@@ -68433,7 +68455,7 @@
       met = met && Compare(source[requirement.type], requirement.value, requirement.operator);
     }
     if (requirement.requires.length > 0) {
-      met = met && requirement.requires.every((r) => MeetsRequirement(r, source));
+      met = met && requirement.requires.every((r) => MeetsRequirement(r, source, state));
     }
     return met;
   };
@@ -68441,23 +68463,26 @@
     let met = true;
     requirements.forEach((requirement) => {
       if (requirement.type === "item") {
-        met = met && Compare(state.inventory.filter((i) => MeetsRequirement(requirement, i)).length, requirement.value, requirement.operator);
+        met = met && Compare(state.inventory.filter((i) => MeetsRequirement(requirement, i, state)).length, requirement.value, requirement.operator);
       }
       if (requirement.type === "entity") {
-        met = met && Compare(state.entities.filter((i) => MeetsRequirement(requirement, i)).length, requirement.value, requirement.operator);
+        met = met && Compare(state.entities.filter((i) => MeetsRequirement(requirement, i, state)).length, requirement.value, requirement.operator);
       }
       if (requirement.type === "kin") {
-        met = met && Compare(state.kins.filter((i) => MeetsRequirement(requirement, i)).length, requirement.value, requirement.operator);
+        met = met && Compare(state.kins.filter((i) => MeetsRequirement(requirement, i, state)).length, requirement.value, requirement.operator);
       }
       if (requirement.type === "rite") {
-        met = met && Compare(state.rites.filter((i) => MeetsRequirement(requirement, i)).length, requirement.value, requirement.operator);
+        met = met && Compare(state.rites.filter((i) => MeetsRequirement(requirement, i, state)).length, requirement.value, requirement.operator);
+      }
+      if (requirement.type === "timeName") {
+        met = met && Compare(TimeDefinitions.GetTimeName(state.ticks), requirement.value, requirement.operator);
       }
     });
     return met;
   };
   function RemoveItem(inventory, name, count) {
     let removedCount = 0;
-    while (removedCount < count) {
+    while (removedCount < count && inventory.some((i) => i.name === name)) {
       for (let i = inventory.length - 1; i >= 0; i--) {
         if (inventory[i].name === name) {
           inventory.splice(i, 1);
@@ -68805,7 +68830,7 @@
         RemoveItem(inventory, "Heated Stone", 2);
         entities.push(EntityDefinitions.Emberstone.create());
       },
-      requires: [ItemRequirement(["Heated Stone", 2]), new Requirement({ type: "entity", name: "Fire", value: 1, requires: [new Requirement({ type: "temperature", value: 200, operator: ">" })] })],
+      requires: [ItemRequirement(["Heated Stone", 2]), new Requirement({ type: "entity", name: "Fire", value: 1, requires: [new Requirement({ type: "temperature", value: 200, operator: ">" })] }), new Requirement({ type: "timeName", value: "Midnight", operator: "=" })],
       milestones: ({ inventory, entities, kins, rites, milestones }) => {
         if (!!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200) && !milestones.includes(MilestoneDefinitions.Emberstone)) {
           milestones.push(MilestoneDefinitions.Emberstone);
@@ -76953,16 +76978,11 @@
         z-index: 0;
     }
     width: fit-content;
-    .info {
-        position: absolute;
-        z-index: 1;
-        left: 100%;
-        pad-left:4px;
-    }
 `;
   var ProgressButton = ({ icon: icon3, active, id: id3, label, remaining, max, color: color2, disabled: disabled2, onClick, info }) => {
     const [showInfo, setShowInfo] = (0, import_react71.useState)(false);
-    return /* @__PURE__ */ import_react71.default.createElement(ProgressButtonContainer, null, /* @__PURE__ */ import_react71.default.createElement(Box, { direction: "row", onMouseEnter: () => setShowInfo(true), onMouseLeave: () => setShowInfo(false), align: "center" }, /* @__PURE__ */ import_react71.default.createElement(Button, { icon: icon3, onClick, label: /* @__PURE__ */ import_react71.default.createElement(Text, null, label), disabled: disabled2 }), info && showInfo && /* @__PURE__ */ import_react71.default.createElement("div", { className: "info" }, info), /* @__PURE__ */ import_react71.default.createElement(
+    const ref = import_react71.default.useRef(null);
+    return /* @__PURE__ */ import_react71.default.createElement(ProgressButtonContainer, null, /* @__PURE__ */ import_react71.default.createElement(Box, { ref, onMouseEnter: () => setShowInfo(true), onMouseLeave: () => setShowInfo(false) }, info && showInfo && /* @__PURE__ */ import_react71.default.createElement(Drop, { target: ref, plain: true, align: { left: "right" } }, /* @__PURE__ */ import_react71.default.createElement(Box, { border: { size: "2px", color: "white" }, margin: "xsmall", pad: "xsmall", background: "rgba(0,0,0,0.5)" }, info)), /* @__PURE__ */ import_react71.default.createElement(Button, { icon: icon3, onClick, label: /* @__PURE__ */ import_react71.default.createElement(Text, null, label), disabled: disabled2 }), /* @__PURE__ */ import_react71.default.createElement(
       motion.div,
       {
         className: "progress",
@@ -77089,7 +77109,7 @@
         disabled: disabled2,
         active: !!performingAction,
         ...props,
-        info: /* @__PURE__ */ React45.createElement(RenderRequirements, { requirements: action.requires })
+        info: action.requires.length > 0 ? /* @__PURE__ */ React45.createElement(RenderRequirements, { requirements: action.requires }) : void 0
       }
     );
   };
@@ -77161,7 +77181,7 @@
     ))));
   };
   var RenderRequirements = ({ requirements }) => {
-    return /* @__PURE__ */ React45.createElement(Box, { as: "span", style: { display: "inline-flex" }, gap: "xsmall", direction: "row" }, requirements.map((requirement, i) => /* @__PURE__ */ React45.createElement(Box, { key: i, gap: "xsmall", direction: "row" }, /* @__PURE__ */ React45.createElement(Box, { direction: "row", gap: "xsmall" }, requirement.name && /* @__PURE__ */ React45.createElement(Text, null, ItemDefinitions[requirement.name]?.icon || RequirementDefinitions[requirement.name]?.icon || requirement.name), !requirement.name && /* @__PURE__ */ React45.createElement(Text, null, RequirementDefinitions[requirement.type]?.icon || requirement.type), /* @__PURE__ */ React45.createElement(Text, null, requirement.operator), /* @__PURE__ */ React45.createElement(Text, null, requirement.value)), requirement.requires.length > 0 && /* @__PURE__ */ React45.createElement(RenderRequirements, { requirements: requirement.requires }))));
+    return /* @__PURE__ */ React45.createElement(Box, { style: { display: "inline-flex" }, gap: "xsmall" }, requirements.map((requirement, i) => /* @__PURE__ */ React45.createElement(Box, { key: i, gap: "xsmall" }, /* @__PURE__ */ React45.createElement(Box, { direction: "row", gap: "xsmall" }, requirement.name && /* @__PURE__ */ React45.createElement(Text, null, ItemDefinitions[requirement.name]?.icon || RequirementDefinitions[requirement.name]?.icon || requirement.name), !requirement.name && /* @__PURE__ */ React45.createElement(Text, null, RequirementDefinitions[requirement.type]?.icon || requirement.type), /* @__PURE__ */ React45.createElement(Text, null, requirement.operator), /* @__PURE__ */ React45.createElement(Text, null, requirement.value)), requirement.requires.length > 0 && /* @__PURE__ */ React45.createElement(RenderRequirements, { requirements: requirement.requires }))));
   };
   var Home_default = Home;
 

@@ -235,7 +235,7 @@ const ActionButton = ({ action, performingActions, performAction, disabled, ...p
             disabled={disabled}
             active={!!performingAction}
             {...props}
-            info={<RenderRequirements requirements={action.requires}></RenderRequirements>}
+            info={action.requires.length > 0 ? <RenderRequirements requirements={action.requires}></RenderRequirements> : undefined}
         ></ProgressButton>
     );
 };
@@ -392,9 +392,9 @@ const Kins = ({ inventory, entities, kins, rites, milestones, ticks }: { entitie
 
 const RenderRequirements = ({ requirements }: { requirements: Requirement[] }) => {
     return (
-        <Box as={"span"} style={{ display: "inline-flex" }} gap={"xsmall"} direction="row">
+        <Box style={{ display: "inline-flex" }} gap={"xsmall"}>
             {requirements.map((requirement, i) => (
-                <Box key={i} gap={"xsmall"} direction="row">
+                <Box key={i} gap={"xsmall"}>
                     <Box direction="row" gap={"xsmall"}>
                         {requirement.name && <Text>{ItemDefinitions[requirement.name]?.icon || RequirementDefinitions[requirement.name]?.icon || requirement.name}</Text>}
                         {!requirement.name && <Text>{RequirementDefinitions[requirement.type]?.icon || requirement.type}</Text>}

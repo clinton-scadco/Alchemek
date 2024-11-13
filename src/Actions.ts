@@ -80,7 +80,7 @@ export const actions = [
             RemoveItem(inventory, "Heated Stone", 2);
             entities.push(EntityDefinitions.Emberstone.create());
         },
-        requires: [ItemRequirement(["Heated Stone", 2]), new Requirement({ type: "entity", name: "Fire", value: 1, requires: [new Requirement({ type: "temperature", value: 200, operator: ">" })] })],
+        requires: [ItemRequirement(["Heated Stone", 2]), new Requirement({ type: "entity", name: "Fire", value: 1, requires: [new Requirement({ type: "temperature", value: 200, operator: ">" })] }), new Requirement({type:"timeName", value: "Midnight", operator: "="})],
         milestones: ({ inventory, entities, kins, rites, milestones }) => {
             if (!!entities.find((entity) => entity.name === "Fire" && entity.temperature > 200) && !milestones.includes(MilestoneDefinitions.Emberstone)) {
                 milestones.push(MilestoneDefinitions.Emberstone);

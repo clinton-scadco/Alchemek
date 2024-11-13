@@ -1,7 +1,7 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import styled from "styled-components";
-import { Box, Text, Button } from "grommet";
+import { Box, Text, Button, Tip, Drop } from "grommet";
 
 const ProgressButtonContainer = styled.default.div`
     position: relative;
@@ -15,12 +15,6 @@ const ProgressButtonContainer = styled.default.div`
         z-index: 0;
     }
     width: fit-content;
-    .info {
-        position: absolute;
-        z-index: 1;
-        left: 100%;
-        pad-left:4px;
-    }
 `;
 
 interface ProgressButtonProps {
@@ -38,12 +32,19 @@ interface ProgressButtonProps {
 
 const ProgressButton = ({ icon, active, id, label, remaining, max, color, disabled, onClick, info }: ProgressButtonProps) => {
     const [showInfo, setShowInfo] = useState(false);
-
+    const ref = React.useRef(null);
+    
     return (
         <ProgressButtonContainer>
-            <Box direction="row" onMouseEnter={() => setShowInfo(true)} onMouseLeave={() => setShowInfo(false)} align="center">
+            <Box ref={ref} onMouseEnter={() => setShowInfo(true)} onMouseLeave={() => setShowInfo(false)}>
+                {info && showInfo && (
+                    <Drop target={ref} plain align={{ left: "right" }}>
+                        <Box border={{ size: "2px", color: "white" }} margin="xsmall" pad="xsmall" background={"rgba(0,0,0,0.5)"}>
+                            {info}
+                        </Box>
+                    </Drop>
+                )}
                 <Button icon={icon} onClick={onClick} label={<Text>{label}</Text>} disabled={disabled}></Button>
-                {info && showInfo && <div className="info">{info}</div>}
                 <motion.div
                     className="progress"
                     key={id}

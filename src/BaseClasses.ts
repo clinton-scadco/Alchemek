@@ -4,14 +4,14 @@ import { GetNextId } from "./utils/Data";
 export interface IRequirement {
     type: string;
     name?: string;
-    value: number;
+    value: number | string;
     operator?: string;
     requires?: Requirement[];
 }
 
 export class Requirement implements IRequirement {
     type: string;
-    value: number;
+    value: number | string;
     operator: string;
     name?: string;
 

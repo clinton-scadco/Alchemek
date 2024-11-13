@@ -6,8 +6,15 @@ export const TimeDefinitions = {
     Dusk: [18, 19],
     Midnight: [22, 23],
     Night: [20, 21, 22, 23, 0, 1, 2, 3, 4],
-    GetTimeColor(time: number) {
-        return DayNightColors[time];
+    GetTime(ticks: number) {
+        return Math.floor(((ticks % 100) / 100) * DayNightColors.length);
+    },
+    GetTimeColor(ticks: number) {
+        return DayNightColors[TimeDefinitions.GetTime(ticks)];
+    },
+    GetTimeName(ticks: number) {
+        const time = TimeDefinitions.GetTime(ticks);
+        return Object.keys(TimeDefinitions).find((name) => TimeDefinitions[name].includes(time));
     },
     GetTimeGradient(name: string) {
         return GetLinearGradient(TimeDefinitions[name].map((time) => DayNightColors[time]));
