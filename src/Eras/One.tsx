@@ -1,3 +1,4 @@
+import { create } from "lodash";
 import { Entity, Kin, Rite } from "../BaseClasses";
 
 export class LanguageRite extends Rite {
@@ -6,6 +7,12 @@ export class LanguageRite extends Rite {
         super({ name: "Language", ingredients: [["Tool", 10]] });
     }
 }
+
+export const RiteDefinitions = {
+    Language: {
+        create: () => new LanguageRite(),
+    },
+};
 
 export const EntityDefinitions = {
     Fire: {
@@ -45,6 +52,11 @@ export const EntityDefinitions = {
                 name: "Emberstone",
                 icon: "🔥🪨🔥",
                 temperature: 200,
+                tick: ({ tickRate }, source) => {
+                    if (source.temperature <= 200) {
+                        source.temperature += 2 / tickRate;
+                    }
+                },
             }),
     },
 };

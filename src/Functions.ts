@@ -1,7 +1,22 @@
 import { Entity, IGameState, Item, Kin, Requirement, Rite } from "./BaseClasses";
 import { TimeDefinitions } from "./Eras/TimeDefinitions";
 
-const Compare = (a, b, operator) => {
+export const Change = (a, b, operator) => {
+    switch (operator) {
+        case "+":
+            return a + b;
+        case "-":
+            return a - b;
+        case "*":
+            return a * b;
+        case "/":
+            return a / b;
+        default:
+            return a;
+    }
+};
+
+export const Compare = (a, b, operator) => {
     switch (operator) {
         case ">":
             return a > b;
@@ -18,11 +33,24 @@ const Compare = (a, b, operator) => {
     }
 };
 
+export const ParseOperatorValue = (value: string | number) => {
+    if (typeof value === "number") {
+        return { operator: ">=", value: value };
+    }
+
+    const operator = value.match(/[<>=]+/g);
+    const val = value.match(/[0-9]+/g);
+    if (!operator || !val) {
+        return { operator: ">=", value: value };
+    }
+    return { operator: operator[0], value: val[0] };
+};
+
 const MeetsRequirement = (requirement: Requirement, source: Item | Entity | Kin | Rite, state: IGameState) => {
     let met = true;
 
     if (requirement.name) {
-        met = met && source.name === requirement.name;
+        met = met && (source.name === requirement.name || requirement.name === "*");
     }
 
     if (requirement.type == "temperature") {
@@ -52,7 +80,10 @@ export const EvaluateRequirements = (state: IGameState, requirements: Requiremen
             met = met && Compare(state.rites.filter((i) => MeetsRequirement(requirement, i, state)).length, requirement.value, requirement.operator);
         }
         if (requirement.type === "timeName") {
-            met = met && Compare(TimeDefinitions.GetTimeName(state.ticks), requirement.value, requirement.operator);
+            met = met && Compare(TimeDefinitions.GetTimeName(state.ticks), requirement.name, requirement.operator);
+        }
+        if (requirement.type === "milestone") {
+            met = met && state.milestones.filter((i) => i.name === requirement.name).length > 0;
         }
     });
     return met;

@@ -33,7 +33,7 @@ interface ProgressButtonProps {
 const ProgressButton = ({ icon, active, id, label, remaining, max, color, disabled, onClick, info }: ProgressButtonProps) => {
     const [showInfo, setShowInfo] = useState(false);
     const ref = React.useRef(null);
-    
+
     return (
         <ProgressButtonContainer>
             <Box ref={ref} onMouseEnter={() => setShowInfo(true)} onMouseLeave={() => setShowInfo(false)}>
@@ -51,7 +51,7 @@ const ProgressButton = ({ icon, active, id, label, remaining, max, color, disabl
                     initial={{ width: "0%" }}
                     animate={active && { width: `100%` }}
                     style={{ height: "10px", backgroundColor: color || "rgba(255,255,255,0.5" }}
-                    transition={{ duration: remaining }}
+                    transition={{ type: "tween", duration: remaining }}
                 />
             </Box>
         </ProgressButtonContainer>

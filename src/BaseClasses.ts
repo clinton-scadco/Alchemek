@@ -36,7 +36,7 @@ export interface IAction {
     perform?: (state: IGameState, source?: Entity) => void;
     milestones?: (state: IGameState) => boolean;
     requires?: Requirement[];
-    entities?: string[];
+    allowedEntities?: string[];
     type?: string[];
     duration?: number;
 }
@@ -48,11 +48,11 @@ export class Action implements IAction {
     perform: (state: IGameState, source?: Entity) => void;
     milestones: (state: IGameState) => boolean;
     requires: Requirement[];
-    entities?: string[];
+    allowedEntities?: string[];
     type?: string[];
     duration: number;
 
-    constructor({ name, icon, perform, milestones, requires, entities, type, duration }: IAction) {
+    constructor({ name, icon, perform, milestones, requires, allowedEntities: entities, type, duration }: IAction) {
         this.id = GetNextId();
         this.name = name;
         this.icon = icon || "🫴";
@@ -60,7 +60,7 @@ export class Action implements IAction {
 
         this.milestones = milestones || (() => true);
         this.requires = requires || [];
-        this.entities = entities || [];
+        this.allowedEntities = entities || [];
         this.type = type || [];
         this.duration = duration || 0;
     }
@@ -273,7 +273,22 @@ export interface IGameState {
 
 export class Milestone {
     name: string;
-    constructor(name: string) {
+    help: string;
+    requirements?: Requirement[];
+    constructor(name: string, help: string, requirements?: Requirement[]) {
         this.name = name;
+        this.help = help;
+        this.requirements = requirements;
+    }
+}
+
+export class Message {
+    icon: string;
+    text: string;
+    content: string;
+    constructor(icon: string, text: string, content: string) {
+        this.icon = icon;
+        this.text = text;
+        this.content = content;
     }
 }

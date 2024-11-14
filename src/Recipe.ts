@@ -13,7 +13,7 @@ export class Recipe extends Action {
     perform: (state: IGameState, source?: Entity) => void;
 
     constructor({ name, icon, ingredients, requires, produces, entities, type, duration, perform }: IRecipe) {
-        super({ name, icon, requires, entities, type, duration });
+        super({ name, icon, requires, allowedEntities: entities, type, duration });
         this.id = GetNextId();
         this.name = name;
         this.ingredients = ingredients || [];

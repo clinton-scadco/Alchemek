@@ -5,10 +5,11 @@ import { GameState } from "./GameState";
 import { Kin } from "./BaseClasses";
 import { EntityDefinitions } from "./Eras/One";
 import { ItemDefinitions } from "./Eras/ItemDefinitions";
+import { ActionFunctions } from "./Actions";
 
 const Debug = ({ perform }) => {
     return (
-        <Box direction="row" gap="small">
+        <Box direction="row" gap="small" wrap>
             {Object.values(MilestoneDefinitions).map((milestone) => {
                 return (
                     <Button
@@ -18,6 +19,21 @@ const Debug = ({ perform }) => {
                             perform({
                                 perform: (gameState) => {
                                     gameState.milestones.push(milestone);
+                                },
+                            })
+                        }
+                    />
+                );
+            })}
+            {Object.keys(ItemDefinitions).map((item) => {
+                return (
+                    <Button
+                        key={item}
+                        label={item}
+                        onClick={() =>
+                            perform({
+                                perform: (gameState) => {
+                                    gameState.inventory.push(ItemDefinitions[item].create(1));
                                 },
                             })
                         }
@@ -55,11 +71,11 @@ const Debug = ({ perform }) => {
                 }
             />
             <Button
-                label={"Tool"}
+                label={"Emberstone"}
                 onClick={() =>
                     perform({
                         perform: (gameState: GameState) => {
-                            gameState.inventory.push(ItemDefinitions.Tool.create(10));
+                            ActionFunctions.createEntity(gameState, null, "Emberstone");
                         },
                     })
                 }

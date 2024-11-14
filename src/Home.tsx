@@ -1,7 +1,6 @@
-import { initialize } from "esbuild";
 import { Box, Button, Grid, Heading, Meter, Stack, Text, Tip } from "grommet";
 import * as React from "react";
-import { ActionDuration, Entity, IGameState, Item, ItemRequirement, Kin, Rite, Requirement, Action } from "./BaseClasses";
+import { ActionDuration, Entity, IGameState, Item, ItemRequirement, Kin, Rite, Requirement, Action, Message } from "./BaseClasses";
 import { groupBy, values } from "lodash";
 import _ from "lodash";
 import { actions } from "./Actions";
@@ -18,6 +17,10 @@ import { EvaluateRequirements } from "./Functions";
 import { ItemDefinitions } from "./Eras/ItemDefinitions";
 import ProgressButton from "./components/ProgressButton";
 import { RequirementDefinitions } from "./Eras/RequirementDefinitions";
+import ActionButton from "./ActionButton";
+import Inventory from "./Inventory";
+import Kins from "./Kins";
+import Entities from "./Entities";
 
 const Home = () => {
     const [gameState, setGameState] = React.useState(new GameState());
@@ -29,11 +32,11 @@ const Home = () => {
     const [rites, setRites] = React.useState([] as Rite[]);
     const [ticks, setTicks] = React.useState(0);
     const [performingActions, setPerformingActions] = React.useState([] as ActionDuration[]);
-    const [messages, setMessages] = React.useState([] as string[]);
+    const [messages, setMessages] = React.useState([] as Message[]);
     const [showMessages, setShowMessages] = React.useState(false);
 
     React.useEffect(() => {
-        const listener = (newState, messages) => {
+        const listener = (newState: GameState, messages: Message[]) => {
             setInventory(newState.inventory);
             setEntities(newState.entities);
             setMilestones(newState.milestones);
@@ -71,7 +74,7 @@ const Home = () => {
                         <Box gap="small">
                             <Text>Actions</Text>
                             {actions
-                                .filter((action) => action.entities?.length == 0 || action.entities?.includes("*"))
+                                .filter((action) => action.allowedEntities?.length == 0 || action.allowedEntities?.includes("*"))
                                 .filter((action) => action.type?.length == 0)
                                 .filter((action) => action.milestones(gameState))
                                 .map((action) => (
@@ -113,7 +116,7 @@ const Home = () => {
                             <Box gap="small">
                                 <Text>Rituals</Text>
                                 {actions
-                                    .filter((action) => action.entities?.length == 0)
+                                    .filter((action) => action.allowedEntities?.length == 0)
                                     .filter((action) => action.type?.includes("Ritual"))
                                     .filter((action) => action.milestones(gameState))
                                     .map((action) => (
@@ -131,7 +134,7 @@ const Home = () => {
                             <Box gap="small">
                                 <Text>Rites</Text>
                                 {actions
-                                    .filter((action) => action.entities?.length == 0)
+                                    .filter((action) => action.allowedEntities?.length == 0)
                                     .filter((action) => action.type?.includes("Rite"))
                                     .filter((action) => action.milestones(gameState))
                                     .map((action) => (
@@ -201,210 +204,24 @@ const Home = () => {
                         <Debug perform={(p) => gameState.performAction(p)}></Debug>
                     </Box>
                 </Box>
-                <Modal isOpen={showMessages} setIsOpen={setShowMessages}>
-                    {messages.map((message, i) => (
-                        <Box key={i}>{message}</Box>
-                    ))}
-                    <Box direction="row" justify="center">
-                        <Button label="Continue" onClick={() => setShowMessages(false)}></Button>
+                {showMessages && (
+                    <Box>
+                        {messages.map((message, i) => (
+                            <Box key={i} gap={"xsmall"}>
+                                <Box direction="row" gap={"xsmall"}>
+                                    <Text>{message.icon}</Text>
+                                    <Text>{message.text}</Text>
+                                </Box>
+                                <Text>{message.content}</Text>
+                            </Box>
+                        ))}
+                        <Box direction="row" justify="center">
+                            <Button label="Continue" onClick={() => setShowMessages(false)}></Button>
+                        </Box>
                     </Box>
-                </Modal>
+                )}
             </LayoutGroup>
         </>
-    );
-};
-
-interface ActionButtonProps {
-    action: Action;
-    performingActions: ActionDuration[];
-    performAction: Function;
-    disabled: boolean;
-    [key: string]: any;
-}
-
-const ActionButton = ({ action, performingActions, performAction, disabled, ...props }: ActionButtonProps) => {
-    let performingAction = performingActions.find((performingAction) => performingAction.action.id == action.id);
-    return (
-        <ProgressButton
-            id={performingAction?.id || -1}
-            remaining={performingAction?.remaining}
-            max={action.duration}
-            icon={<Text>{action.icon}</Text>}
-            label={action.name}
-            onClick={() => performAction(action)}
-            disabled={disabled}
-            active={!!performingAction}
-            {...props}
-            info={action.requires.length > 0 ? <RenderRequirements requirements={action.requires}></RenderRequirements> : undefined}
-        ></ProgressButton>
-    );
-};
-
-const Inventory = ({ inventory, compact }: { inventory: Item[]; compact?: boolean }) => {
-    return (
-        <Grid columns={{ size: "auto", count: 5 }} gap={"small"}>
-            <AnimatePresence>
-                {inventory.map((item, i) => (
-                    <motion.div
-                        layout
-                        layoutId={item.id.toString()}
-                        key={item.id}
-                        initial={{ opacity: 0, scale: 0 }}
-                        exit={{ opacity: [1, 1, 1, 1, 0], scale: [1, 1, 1, 1, 0], rotate: [3, 0, -3, 3, -3] }}
-                        animate={{ opacity: 1, scale: [0, 0.8, 1.1, 1] }}
-                        transition={{ ease: "easeIn", duration: 0.3 }}
-                    >
-                        <Stack anchor="bottom" fill>
-                            <Box border={!compact} align="center" width={"50px"} height={compact ? "30px" : "50px"}>
-                                <Text>{item.icon}</Text>
-                                {!compact && (
-                                    <>
-                                        <Text>{item.name}</Text>
-                                        {/* {item.durability != -1 && <Text>({(item.durability / item.maxDurability) * 100}%)</Text>} */}
-                                    </>
-                                )}
-                            </Box>
-                            <Box fill="horizontal" height={"5px"} width={"50px"}>
-                                {item.durability != -1 && <Meter value={item.durability} max={item.maxDurability}></Meter>}
-                            </Box>
-                        </Stack>
-                    </motion.div>
-                ))}
-            </AnimatePresence>
-        </Grid>
-    );
-};
-
-const Entities = ({
-    entities,
-    performEntityAction,
-    inventory,
-    milestones,
-    kins,
-    rites,
-    ticks,
-    performingActions,
-}: {
-    entities: Entity[];
-    performEntityAction: Function;
-    inventory: Item[];
-    milestones: Milestone[];
-    kins: Kin[];
-    rites: Rite[];
-    ticks: number;
-    performingActions: ActionDuration[];
-}) => {
-    return (
-        <Box height={{ min: "200px" }} fill align="start">
-            <Text>Entities</Text>
-            <Box gap={"xsmall"}>
-                {entities.map((entity, i) => (
-                    <Box key={"entity" + entity.name + i} gap="small">
-                        <Box>
-                            <Box direction="row" gap={"small"}>
-                                <Text>{entity.icon}</Text>
-                                <Text>{entity.name}</Text>
-                                {entity.ttl > 0 && <Text>{entity.ttl.toFixed(0)}s</Text>}
-                                {entity.temperature != 0 && <Text>{entity.temperature.toFixed(0)} &#176;C</Text>}
-                            </Box>
-                            {entity.performs.map((perform) => (
-                                <Box key={"entity" + entity.name + i + "perform" + perform.name} direction="row" gap={"xsmall"} align="center">
-                                    {perform.ttp > 0 && perform.condition({ inventory, entities, kins, rites, milestones, ticks } as GameState, entity) && (
-                                        <>
-                                            <Text>{perform.icon}</Text>
-                                            <Meter value={ticks - perform.lastTickPerformed} max={perform.ttp} thickness="10px" size="full"></Meter>
-                                        </>
-                                    )}
-                                </Box>
-                            ))}
-                        </Box>
-                        {actions
-                            .filter((action) => action.entities?.includes(entity.name))
-                            .filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks } as GameState))
-                            .map((action) => (
-                                <ActionButton
-                                    performingActions={performingActions}
-                                    key={action.name}
-                                    action={action}
-                                    performAction={() => performEntityAction(action, entity)}
-                                    disabled={!EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires)}
-                                ></ActionButton>
-                            ))}
-                    </Box>
-                ))}
-            </Box>
-        </Box>
-    );
-};
-
-const Kins = ({ inventory, entities, kins, rites, milestones, ticks }: { entities: Entity[]; inventory: Item[]; milestones: Milestone[]; kins: Kin[]; rites: Rite[]; ticks: number }) => {
-    return (
-        <AnimatePresence>
-            <Box gap={"small"}>
-                {kins.map((kin, i) => (
-                    <motion.div
-                        layout
-                        layoutId={kin.id.toString()}
-                        key={kin.id}
-                        initial={{ opacity: 0, scale: 0 }}
-                        exit={{ opacity: [1, 1, 1, 1, 0], scale: [1, 1, 1, 1, 0], rotate: [3, 0, -3, 3, -3] }}
-                        animate={{ opacity: 1, scale: [0, 0.8, 1.1, 1] }}
-                        transition={{ ease: "easeIn", duration: 0.3 }}
-                    >
-                        <Stack anchor="bottom" fill>
-                            <Box direction="row" border pad={"small"} width={"350px"}>
-                                <Box align="center" height={"50px"}>
-                                    <Text>{kin.icon}</Text>
-                                    <Text>{kin.name}</Text>
-                                </Box>
-                                <Box width={"300px"} gap={"xsmall"}>
-                                    <Inventory inventory={kin.inventory} compact={true}></Inventory>
-
-                                    {rites.some((rite) => rite.name == "Language" && rite.isComplete()) &&
-                                        actions
-                                            .filter((action) => action.entities?.includes(kin.name))
-                                            .filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks } as GameState))
-                                            .map((action) => (
-                                                <Box key={action.name} direction="row" gap={"xsmall"}>
-                                                    <ActionButton
-                                                        performingActions={kin.performingActions}
-                                                        primary={kin.actionPreference.find((a) => a.name == action.name) != undefined}
-                                                        action={action}
-                                                        performAction={() => kin.giveActionPreference(action)}
-                                                        disabled={!EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires)}
-                                                    ></ActionButton>
-                                                    <Button
-                                                        style={{ padding: 0 }}
-                                                        icon={<Text>{kin.actionPreference.some((a) => a.name == action.name) ? "✔️" : "🗙"}</Text>}
-                                                        onClick={() => kin.removeActionPreference(action)}
-                                                    ></Button>
-                                                </Box>
-                                            ))}
-                                </Box>
-                            </Box>
-                        </Stack>
-                    </motion.div>
-                ))}
-            </Box>
-        </AnimatePresence>
-    );
-};
-
-const RenderRequirements = ({ requirements }: { requirements: Requirement[] }) => {
-    return (
-        <Box style={{ display: "inline-flex" }} gap={"xsmall"}>
-            {requirements.map((requirement, i) => (
-                <Box key={i} gap={"xsmall"}>
-                    <Box direction="row" gap={"xsmall"}>
-                        {requirement.name && <Text>{ItemDefinitions[requirement.name]?.icon || RequirementDefinitions[requirement.name]?.icon || requirement.name}</Text>}
-                        {!requirement.name && <Text>{RequirementDefinitions[requirement.type]?.icon || requirement.type}</Text>}
-                        <Text>{requirement.operator}</Text>
-                        <Text>{requirement.value}</Text>
-                    </Box>
-                    {requirement.requires.length > 0 && <RenderRequirements requirements={requirement.requires}></RenderRequirements>}
-                </Box>
-            ))}
-        </Box>
     );
 };
 

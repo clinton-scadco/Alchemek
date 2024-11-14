@@ -1,3 +1,9 @@
 import { Milestone } from "./BaseClasses";
 
-export const MilestoneMessage = (milestone: Milestone) => `You have discovered ${milestone.name}!`;
+export const MilestoneMessage = (milestone: Milestone) => {
+    return {
+        icon: "⭐",
+        text: milestone.name,
+        content: milestone.help,
+    };
+};

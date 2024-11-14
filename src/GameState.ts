@@ -1,6 +1,7 @@
 import { actions } from "./Actions";
-import { Action, ActionDuration, Item, Entity, Kin, Rite, Milestone } from "./BaseClasses";
-import { RemoveItem } from "./Functions";
+import { Action, ActionDuration, Item, Entity, Kin, Rite, Milestone, Message } from "./BaseClasses";
+import { MilestoneDefinitions } from "./Eras/MilestoneDefinitions";
+import { EvaluateRequirements, RemoveItem } from "./Functions";
 import { MilestoneMessage } from "./Messages";
 
 export class GameState {
@@ -14,7 +15,7 @@ export class GameState {
 
     performingActions: ActionDuration[];
 
-    listeners: ((GameState: GameState, Messages: string[]) => void)[];
+    listeners: ((GameState: GameState, Messages: Message[]) => void)[];
 
     constructor() {
         this.inventory = [];
@@ -92,9 +93,14 @@ export class GameState {
     };
 
     updateMilestones = () => {
-        actions.forEach((action) => {
-            action.milestones(this);
-        });
+        for (let m in MilestoneDefinitions) {
+            let milestone = MilestoneDefinitions[m];
+            if (milestone.requirements && !this.milestones.some((m) => m.name == milestone.name)) {
+                if (EvaluateRequirements(this, MilestoneDefinitions[m].requirements)) {
+                    this.milestones.push(MilestoneDefinitions[m]);
+                }
+            }
+        }
     };
 
     tick = () => {
@@ -126,7 +132,7 @@ export class GameState {
                 return entity;
             });
 
-            this.entities = this.entities.filter((entity) => entity.ttl > 0);
+            this.entities = this.entities.filter((entity) => entity.ttl > 0 || entity.ttl === -1);
 
             this.kins.forEach((kin) => {
                 kin.tick(this);
@@ -138,5 +144,9 @@ export class GameState {
         } catch (e) {
             console.error(e);
         }
+    };
+
+    hasMilestone = (milestone: Milestone) => {
+        return this.milestones.some((m) => m.name == milestone.name);
     };
 }
