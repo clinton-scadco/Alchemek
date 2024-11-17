@@ -36,7 +36,7 @@ const Home = () => {
     const [showMessages, setShowMessages] = React.useState(false);
 
     React.useEffect(() => {
-        const listener = (newState: GameState, messages: Message[]) => {
+        const listener = (newState: GameState, newMessages: Message[]) => {
             setInventory(newState.inventory);
             setEntities(newState.entities);
             setMilestones(newState.milestones);
@@ -44,8 +44,8 @@ const Home = () => {
             setRites(newState.rites);
             setTicks(newState.ticks);
             setPerformingActions(newState.performingActions);
-            if (messages.length > 0) {
-                setMessages(messages);
+            if (newMessages.length > 0) {
+                setMessages([...messages, ...newMessages]);
                 setShowMessages(true);
             }
         };
@@ -56,12 +56,13 @@ const Home = () => {
         return () => {
             gameState.unsubscribe(listener);
         };
-    }, []);
+    }, [messages]);
 
     return (
         <>
             <LayoutGroup>
                 <Box align="center" fill gap={"xsmall"}>
+                    {/* {gameState.updates} */}
                     <Progress
                         color={DayNightColors[Math.floor(((ticks % 100) / 100) * DayNightColors.length)]}
                         value={0}
@@ -215,9 +216,6 @@ const Home = () => {
                                 <Text>{message.content}</Text>
                             </Box>
                         ))}
-                        <Box direction="row" justify="center">
-                            <Button label="Continue" onClick={() => setShowMessages(false)}></Button>
-                        </Box>
                     </Box>
                 )}
             </LayoutGroup>

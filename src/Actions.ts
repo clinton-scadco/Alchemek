@@ -49,7 +49,7 @@ const actionDefinitions = [
         icon: "🛠️",
         perform: [
             ["removeFromInventory", "Stone", 1],
-            ["addToInventory", "Tool", 1],
+            ["addToInventory", "Tool", 1, 10],
             ["chance", 6, "awardMilestone", "Hafting"],
         ],
         requires: [["item", "Stone", 1]],
@@ -112,8 +112,8 @@ const actionDefinitions = [
 ] as ActionDefinition[];
 
 export const ActionFunctions = {
-    addToInventory: (state: IGameState, source: Entity, item: string, qty: number) => {
-        state.inventory.push(...new Array(qty).fill(ItemDefinitions[item].create()));
+    addToInventory: (state: IGameState, source: Entity, item: string, qty: number, durability: number) => {
+        state.inventory.push(...new Array(qty).fill(ItemDefinitions[item].create(durability)));
     },
     removeFromInventory: (state: IGameState, source: Entity, item: string, qty: number) => {
         RemoveItem(state.inventory, item, qty);
@@ -124,7 +124,7 @@ export const ActionFunctions = {
     chance: function (state: IGameState, source: Entity, chance: number, actionFunction: string, ...params) {
         let random = GetRandom(this.id, 1 / chance);
         if (random.next()) {
-            ActionFunctions[actionFunction](state, ...params);
+            ActionFunctions[actionFunction](state, source, ...params);
         }
     },
     awardMilestone: function (state: IGameState, source: Entity, milestone: string) {

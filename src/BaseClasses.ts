@@ -223,6 +223,7 @@ export class Kin implements IKin {
             if (tool) {
                 state.inventory.splice(state.inventory.indexOf(tool), 1);
                 this.giveItem(tool);
+                state.updates += 1;
             }
         }
         if (this.actionPreference.length > 0) {
@@ -230,6 +231,7 @@ export class Kin implements IKin {
                 if (!this.performingActions.some((a) => a.action.name == action.name)) {
                     if (EvaluateRequirements(state, action.requires)) {
                         this.performingActions.push(new ActionDuration(action));
+                        state.updates += 1;
                     }
                 }
             }
@@ -239,6 +241,7 @@ export class Kin implements IKin {
             a.remaining -= 1 / state.tickRate;
             if (a.remaining <= 0) {
                 a.action.perform(state);
+                state.updates += 1;
                 this.performingActions.splice(this.performingActions.indexOf(a), 1);
             }
         });
@@ -267,6 +270,7 @@ export interface IGameState {
     milestones: Milestone[];
     ticks: number;
     tickRate: number;
+    updates: number;
 
     performingActions: IActionDuration[];
 }

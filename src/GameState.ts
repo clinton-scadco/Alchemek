@@ -12,7 +12,7 @@ export class GameState {
     milestones: Milestone[];
     ticks: number;
     tickRate: number;
-
+    updates: number;
     performingActions: ActionDuration[];
 
     listeners: ((GameState: GameState, Messages: Message[]) => void)[];
@@ -27,7 +27,7 @@ export class GameState {
         this.tickRate = 10;
         this.performingActions = [];
         this.listeners = [];
-
+        this.updates = 0;
         if (this.tickRate > 0) {
             setInterval(() => {
                 this.ticks += 1 / this.tickRate;
@@ -98,6 +98,7 @@ export class GameState {
             if (milestone.requirements && !this.milestones.some((m) => m.name == milestone.name)) {
                 if (EvaluateRequirements(this, MilestoneDefinitions[m].requirements)) {
                     this.milestones.push(MilestoneDefinitions[m]);
+                    this.updates += 1;
                 }
             }
         }
@@ -107,13 +108,17 @@ export class GameState {
         try {
             let oldState = this.snapshot();
 
+            this.updates = 0;
+
             this.performingActions.forEach((performingAction) => {
                 performingAction.remaining -= 1 / this.tickRate;
                 if (performingAction.remaining <= 0) {
                     if (!performingAction.entity) {
                         performingAction.action.perform(this);
+                        this.updates += 1;
                     } else {
                         performingAction.action.perform(this, performingAction.entity);
+                        this.updates += 1;
                     }
                 }
             });
@@ -123,10 +128,14 @@ export class GameState {
             // Decrease ttl of each entity
             this.entities.forEach((entity) => {
                 entity.tick(this, entity);
+
+                this.updates += 1;
+
                 entity.performs.forEach((perform) => {
                     if (perform.ttp && this.ticks - perform.lastTickPerformed >= perform.ttp && perform.condition(this, entity)) {
                         perform.perform(this, entity);
                         perform.lastTickPerformed = this.ticks;
+                        this.updates += 1;
                     }
                 });
                 return entity;

@@ -67840,6 +67840,7 @@
         if (tool) {
           state.inventory.splice(state.inventory.indexOf(tool), 1);
           this.giveItem(tool);
+          state.updates += 1;
         }
       }
       if (this.actionPreference.length > 0) {
@@ -67847,6 +67848,7 @@
           if (!this.performingActions.some((a) => a.action.name == action.name)) {
             if (EvaluateRequirements(state, action.requires)) {
               this.performingActions.push(new ActionDuration(action));
+              state.updates += 1;
             }
           }
         }
@@ -67855,6 +67857,7 @@
         a.remaining -= 1 / state.tickRate;
         if (a.remaining <= 0) {
           a.action.perform(state);
+          state.updates += 1;
           this.performingActions.splice(this.performingActions.indexOf(a), 1);
         }
       });
@@ -68028,7 +68031,7 @@
       icon: "\u{1F6E0}\uFE0F",
       perform: [
         ["removeFromInventory", "Stone", 1],
-        ["addToInventory", "Tool", 1],
+        ["addToInventory", "Tool", 1, 10],
         ["chance", 6, "awardMilestone", "Hafting"]
       ],
       requires: [["item", "Stone", 1]],
@@ -68090,8 +68093,8 @@
     }
   ];
   var ActionFunctions = {
-    addToInventory: (state, source, item, qty) => {
-      state.inventory.push(...new Array(qty).fill(ItemDefinitions[item].create()));
+    addToInventory: (state, source, item, qty, durability) => {
+      state.inventory.push(...new Array(qty).fill(ItemDefinitions[item].create(durability)));
     },
     removeFromInventory: (state, source, item, qty) => {
       RemoveItem(state.inventory, item, qty);
@@ -68102,7 +68105,7 @@
     chance: function(state, source, chance, actionFunction, ...params) {
       let random = GetRandom(this.id, 1 / chance);
       if (random.next()) {
-        ActionFunctions[actionFunction](state, ...params);
+        ActionFunctions[actionFunction](state, source, ...params);
       }
     },
     awardMilestone: function(state, source, milestone) {
@@ -76087,6 +76090,7 @@
           if (milestone.requirements && !this.milestones.some((m2) => m2.name == milestone.name)) {
             if (EvaluateRequirements(this, MilestoneDefinitions[m].requirements)) {
               this.milestones.push(MilestoneDefinitions[m]);
+              this.updates += 1;
             }
           }
         }
@@ -76094,23 +76098,28 @@
       this.tick = () => {
         try {
           let oldState = this.snapshot();
+          this.updates = 0;
           this.performingActions.forEach((performingAction) => {
             performingAction.remaining -= 1 / this.tickRate;
             if (performingAction.remaining <= 0) {
               if (!performingAction.entity) {
                 performingAction.action.perform(this);
+                this.updates += 1;
               } else {
                 performingAction.action.perform(this, performingAction.entity);
+                this.updates += 1;
               }
             }
           });
           this.performingActions = this.performingActions.filter((performingAction) => performingAction.remaining > 0);
           this.entities.forEach((entity) => {
             entity.tick(this, entity);
+            this.updates += 1;
             entity.performs.forEach((perform2) => {
               if (perform2.ttp && this.ticks - perform2.lastTickPerformed >= perform2.ttp && perform2.condition(this, entity)) {
                 perform2.perform(this, entity);
                 perform2.lastTickPerformed = this.ticks;
+                this.updates += 1;
               }
             });
             return entity;
@@ -76137,6 +76146,7 @@
       this.tickRate = 10;
       this.performingActions = [];
       this.listeners = [];
+      this.updates = 0;
       if (this.tickRate > 0) {
         setInterval(() => {
           this.ticks += 1 / this.tickRate;
@@ -76410,7 +76420,7 @@
     const [messages, setMessages] = React46.useState([]);
     const [showMessages, setShowMessages] = React46.useState(false);
     React46.useEffect(() => {
-      const listener3 = (newState, messages2) => {
+      const listener3 = (newState, newMessages) => {
         setInventory(newState.inventory);
         setEntities(newState.entities);
         setMilestones(newState.milestones);
@@ -76418,8 +76428,8 @@
         setRites(newState.rites);
         setTicks(newState.ticks);
         setPerformingActions(newState.performingActions);
-        if (messages2.length > 0) {
-          setMessages(messages2);
+        if (newMessages.length > 0) {
+          setMessages([...messages, ...newMessages]);
           setShowMessages(true);
         }
       };
@@ -76427,7 +76437,7 @@
       return () => {
         gameState.unsubscribe(listener3);
       };
-    }, []);
+    }, [messages]);
     return /* @__PURE__ */ React46.createElement(React46.Fragment, null, /* @__PURE__ */ React46.createElement(LayoutGroup, null, /* @__PURE__ */ React46.createElement(Box, { align: "center", fill: true, gap: "xsmall" }, /* @__PURE__ */ React46.createElement(
       Progress_default,
       {
@@ -76484,7 +76494,7 @@
         rites,
         ticks
       }
-    ), /* @__PURE__ */ React46.createElement(Box, { direction: "row", gap: "small", fill: true, align: "start" }, /* @__PURE__ */ React46.createElement(Box, { height: { min: "200px" }, width: "320px", border: true, pad: "small" }, /* @__PURE__ */ React46.createElement(Text, null, "Inventory"), /* @__PURE__ */ React46.createElement(Inventory_default, { inventory })), /* @__PURE__ */ React46.createElement(Box, { height: { min: "200px" }, width: "320px" }, kins.length > 0 && /* @__PURE__ */ React46.createElement(Text, null, "Kins"), /* @__PURE__ */ React46.createElement(Kins_default, { entities, inventory, milestones, kins, rites, ticks }))), /* @__PURE__ */ React46.createElement(Box, null, /* @__PURE__ */ React46.createElement(Debug_default, { perform: (p2) => gameState.performAction(p2) }))), showMessages && /* @__PURE__ */ React46.createElement(Box, null, messages.map((message, i) => /* @__PURE__ */ React46.createElement(Box, { key: i, gap: "xsmall" }, /* @__PURE__ */ React46.createElement(Box, { direction: "row", gap: "xsmall" }, /* @__PURE__ */ React46.createElement(Text, null, message.icon), /* @__PURE__ */ React46.createElement(Text, null, message.text)), /* @__PURE__ */ React46.createElement(Text, null, message.content))), /* @__PURE__ */ React46.createElement(Box, { direction: "row", justify: "center" }, /* @__PURE__ */ React46.createElement(Button, { label: "Continue", onClick: () => setShowMessages(false) })))));
+    ), /* @__PURE__ */ React46.createElement(Box, { direction: "row", gap: "small", fill: true, align: "start" }, /* @__PURE__ */ React46.createElement(Box, { height: { min: "200px" }, width: "320px", border: true, pad: "small" }, /* @__PURE__ */ React46.createElement(Text, null, "Inventory"), /* @__PURE__ */ React46.createElement(Inventory_default, { inventory })), /* @__PURE__ */ React46.createElement(Box, { height: { min: "200px" }, width: "320px" }, kins.length > 0 && /* @__PURE__ */ React46.createElement(Text, null, "Kins"), /* @__PURE__ */ React46.createElement(Kins_default, { entities, inventory, milestones, kins, rites, ticks }))), /* @__PURE__ */ React46.createElement(Box, null, /* @__PURE__ */ React46.createElement(Debug_default, { perform: (p2) => gameState.performAction(p2) }))), showMessages && /* @__PURE__ */ React46.createElement(Box, null, messages.map((message, i) => /* @__PURE__ */ React46.createElement(Box, { key: i, gap: "xsmall" }, /* @__PURE__ */ React46.createElement(Box, { direction: "row", gap: "xsmall" }, /* @__PURE__ */ React46.createElement(Text, null, message.icon), /* @__PURE__ */ React46.createElement(Text, null, message.text)), /* @__PURE__ */ React46.createElement(Text, null, message.content))))));
   };
   var Home_default = Home;
 
