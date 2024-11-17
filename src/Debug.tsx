@@ -75,7 +75,7 @@ const Debug = ({ perform }) => {
                 onClick={() =>
                     perform({
                         perform: (gameState: GameState) => {
-                            ActionFunctions.createEntity(gameState, null, "Emberstone");
+                            ActionFunctions.createEntity(gameState, null, null, "Emberstone");
                         },
                     })
                 }

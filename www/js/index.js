@@ -67856,11 +67856,12 @@
       this.performingActions.forEach((a) => {
         a.remaining -= 1 / state.tickRate;
         if (a.remaining <= 0) {
-          a.action.perform(state);
+          a.action.perform(state, null, this);
           state.updates += 1;
           this.performingActions.splice(this.performingActions.indexOf(a), 1);
         }
       });
+      this.inventory = this.inventory.filter((item) => item.maxDurability > 0 || item.durability < 1);
     }
     giveActionPreference(action) {
       this.actionPreference = [action];
@@ -67994,6 +67995,10 @@
       icon: "\u{1F525}\u{1FAA8}",
       create: () => new Item({ icon: "\u{1F525}\u{1FAA8}", name: "Heated Stone", durability: -1 })
     },
+    "Wooden Shaft": {
+      icon: "\u{1FAB5}\u{1FAB5}",
+      create: () => new Item({ icon: "\u{1FAB5}\u{1FAB5}", name: "Wooden Shaft", durability: -1 })
+    },
     "Language Rite": {
       icon: "\u{1F524}",
       class: LanguageRite
@@ -68090,28 +68095,59 @@
       ],
       milestones: ["Language"],
       type: ["Rite"]
+    },
+    {
+      name: "Wood Shaft",
+      icon: "\u{1FAB5}\u{1FAB5}",
+      perform: [
+        ["removeFromInventory", "Wood", 1],
+        ["forItem", "Tool", "durability", ">=", 1, "changeItemProperty", "durability", "-", 1],
+        ["addToInventory", "Wooden Shaft", 1]
+      ],
+      requires: [
+        ["item", "Wood", 1],
+        ["item", "Tool", 1, ["durability", ">=", 1]]
+      ],
+      milestones: ["Hafting"],
+      allowedEntities: ["*", "Kin"]
     }
   ];
+  var EntityFunctions = {
+    changeEntityProperty: function(state, source, kin, property, changeOperator, value) {
+      if (source) {
+        source[property] = Change(source[property], value, changeOperator);
+      }
+    }
+  };
+  var ItemFunctions = {
+    changeItemProperty: (item, property, changeOperator, value) => {
+      item[property] = Change(item[property], value, changeOperator);
+    }
+  };
+  var NestedActionFunctionValidations = {
+    forItem: Object.keys(ItemFunctions),
+    forEntity: Object.keys(EntityFunctions)
+  };
   var ActionFunctions = {
-    addToInventory: (state, source, item, qty, durability) => {
+    addToInventory: (state, source, kin, item, qty, durability) => {
       state.inventory.push(...new Array(qty).fill(ItemDefinitions[item].create(durability)));
     },
-    removeFromInventory: (state, source, item, qty) => {
+    removeFromInventory: (state, source, kin, item, qty) => {
       RemoveItem(state.inventory, item, qty);
     },
-    createEntity: (state, source, entity) => {
+    createEntity: (state, source, kin, entity) => {
       state.entities.push(EntityDefinitions[entity].create());
     },
-    chance: function(state, source, chance, actionFunction, ...params) {
+    chance: function(state, source, kin, chance, actionFunction, ...params) {
       let random = GetRandom(this.id, 1 / chance);
       if (random.next()) {
-        ActionFunctions[actionFunction](state, source, ...params);
+        ActionFunctions[actionFunction](state, source, kin, ...params);
       }
     },
-    awardMilestone: function(state, source, milestone) {
+    awardMilestone: function(state, source, kin, milestone) {
       state.milestones.push(MilestoneDefinitions[milestone]);
     },
-    forEntity: function(state, source, entity, property, operator, value, actionFunction, ...params) {
+    forEntity: function(state, source, kin, entity, property, operator, value, actionFunction, ...params) {
       if (!source) {
         let entitySource = state.entities.sort((a, b) => a[property] - b[property]).find((e) => (entity != "*" ? e.name === entity : true) && Compare(e[property], value, operator));
         if (entitySource) {
@@ -68120,24 +68156,42 @@
           return;
         }
       }
-      ActionFunctions[actionFunction](state, source, ...params);
+      ActionFunctions[actionFunction](state, source, kin, ...params);
     },
-    changeEntityProperty: function(state, source, property, changeOperator, value) {
-      if (source) {
-        source[property] = Change(source[property], value, changeOperator);
+    forItem: function(state, source, kin, item, property, operator, value, actionFunction, ...params) {
+      if (kin) {
+        let forItem = kin.inventory.find((e) => (item != "*" ? e.name === item : true) && Compare(e[property], value, operator));
+        ItemFunctions[actionFunction](forItem, ...params);
+      } else {
+        let forItem = state.inventory.find((e) => (item != "*" ? e.name === item : true) && Compare(e[property], value, operator));
+        ItemFunctions[actionFunction](forItem, ...params);
       }
     },
-    startRite: (state, source, rite) => {
+    startRite: (state, source, kin, rite) => {
       state.rites.push(RiteDefinitions[rite].create());
     }
   };
+  var ValidateActionFunction = (definition) => {
+    if (definition.perform.length > 0 && definition.perform.every((x) => x.length > 0)) {
+      definition.perform.forEach(([actionFunction, ...params]) => {
+        if (NestedActionFunctionValidations[actionFunction]) {
+          NestedActionFunctionValidations[actionFunction].forEach((validation) => {
+            if (!params.includes(validation)) {
+              throw new Error(`Action Function ${actionFunction} requires ${validation}`);
+            }
+          });
+        }
+      });
+    }
+  };
   var CreateAction = (definition) => {
+    ValidateActionFunction(definition);
     return new Action2({
       name: definition.name,
       icon: definition.icon,
-      perform: function(state, source) {
+      perform: function(state, source, kin) {
         definition.perform.forEach(([action, ...rest]) => {
-          ActionFunctions[action](state, source, ...rest);
+          ActionFunctions[action](state, source, kin, ...rest);
         });
       },
       requires: definition.requires?.map(([type, name, value, ...subRequires]) => {
@@ -76055,6 +76109,9 @@
             console.log(newMilestones);
           }
           let messages = [...newMilestones.map((m) => MilestoneMessage(m))];
+          if (oldState.inventory.length !== this.inventory.length) {
+            console.log("Inventory changed", this.inventory);
+          }
           this.listeners.forEach((listener3) => listener3(this, messages));
         } catch (e) {
           console.error(e);
@@ -76071,7 +76128,7 @@
         if (action.duration > 0) {
           this.performingActions.push(new ActionDuration(action));
         } else {
-          action.perform(this);
+          action.perform(this, null, null);
         }
         this.notify(oldState);
       };
@@ -76080,7 +76137,7 @@
         if (action.duration > 0) {
           this.performingActions.push(new ActionDuration(action, entity));
         } else {
-          action.perform(this, entity);
+          action.perform(this, entity, null);
         }
         this.notify(oldState);
       };
@@ -76103,10 +76160,10 @@
             performingAction.remaining -= 1 / this.tickRate;
             if (performingAction.remaining <= 0) {
               if (!performingAction.entity) {
-                performingAction.action.perform(this);
+                performingAction.action.perform(this, null, null);
                 this.updates += 1;
               } else {
-                performingAction.action.perform(this, performingAction.entity);
+                performingAction.action.perform(this, performingAction.entity, null);
                 this.updates += 1;
               }
             }
@@ -76128,6 +76185,7 @@
           this.kins.forEach((kin) => {
             kin.tick(this);
           });
+          this.inventory = this.inventory.filter((item) => !(item.maxDurability > 0 && item.durability < 1));
           this.updateMilestones();
           this.notify(oldState);
         } catch (e) {
@@ -76221,7 +76279,7 @@
         label: "Emberstone",
         onClick: () => perform2({
           perform: (gameState) => {
-            ActionFunctions.createEntity(gameState, null, "Emberstone");
+            ActionFunctions.createEntity(gameState, null, null, "Emberstone");
           }
         })
       }

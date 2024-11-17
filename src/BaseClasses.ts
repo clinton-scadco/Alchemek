@@ -33,7 +33,7 @@ export const ItemRequirement = ([item, amount]) => {
 export interface IAction {
     name: string;
     icon: string;
-    perform?: (state: IGameState, source?: Entity) => void;
+    perform: (state: IGameState, source: Entity | null, kin: Kin | null) => void;
     milestones?: (state: IGameState) => boolean;
     requires?: Requirement[];
     allowedEntities?: string[];
@@ -45,7 +45,7 @@ export class Action implements IAction {
     id: number;
     name: string;
     icon: string;
-    perform: (state: IGameState, source?: Entity) => void;
+    perform: (state: IGameState, source: Entity | null, kin: Kin | null) => void;
     milestones: (state: IGameState) => boolean;
     requires: Requirement[];
     allowedEntities?: string[];
@@ -240,11 +240,13 @@ export class Kin implements IKin {
         this.performingActions.forEach((a) => {
             a.remaining -= 1 / state.tickRate;
             if (a.remaining <= 0) {
-                a.action.perform(state);
+                a.action.perform(state, null, this);
                 state.updates += 1;
                 this.performingActions.splice(this.performingActions.indexOf(a), 1);
             }
         });
+
+        this.inventory = this.inventory.filter((item) => item.maxDurability > 0 || item.durability < 1);
     }
 
     giveActionPreference(action: Action) {

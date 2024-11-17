@@ -56,6 +56,11 @@ export class GameState {
             }
 
             let messages = [...newMilestones.map((m) => MilestoneMessage(m))];
+
+            if (oldState.inventory.length !== this.inventory.length) {
+                console.log("Inventory changed", this.inventory);
+            }
+
             this.listeners.forEach((listener) => listener(this, messages));
         } catch (e) {
             console.error(e);
@@ -76,7 +81,7 @@ export class GameState {
         if (action.duration > 0) {
             this.performingActions.push(new ActionDuration(action));
         } else {
-            action.perform(this);
+            action.perform(this, null, null);
         }
         this.notify(oldState);
     };
@@ -87,7 +92,7 @@ export class GameState {
         if (action.duration > 0) {
             this.performingActions.push(new ActionDuration(action, entity));
         } else {
-            action.perform(this, entity);
+            action.perform(this, entity, null);
         }
         this.notify(oldState);
     };
@@ -114,10 +119,10 @@ export class GameState {
                 performingAction.remaining -= 1 / this.tickRate;
                 if (performingAction.remaining <= 0) {
                     if (!performingAction.entity) {
-                        performingAction.action.perform(this);
+                        performingAction.action.perform(this, null, null);
                         this.updates += 1;
                     } else {
-                        performingAction.action.perform(this, performingAction.entity);
+                        performingAction.action.perform(this, performingAction.entity, null);
                         this.updates += 1;
                     }
                 }
@@ -146,6 +151,8 @@ export class GameState {
             this.kins.forEach((kin) => {
                 kin.tick(this);
             });
+
+            this.inventory = this.inventory.filter((item) => !(item.maxDurability > 0 && item.durability < 1));
 
             this.updateMilestones();
 

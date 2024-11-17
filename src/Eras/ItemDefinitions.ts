@@ -18,6 +18,10 @@ export const ItemDefinitions = {
         icon: "🔥🪨",
         create: () => new Item({ icon: "🔥🪨", name: "Heated Stone", durability: -1 } as Item),
     },
+    "Wooden Shaft": {
+        icon: "🪵🪵",
+        create: () => new Item({ icon: "🪵🪵", name: "Wooden Shaft", durability: -1 } as Item),
+    },
     "Language Rite": {
         icon: "🔤",
         class: LanguageRite,

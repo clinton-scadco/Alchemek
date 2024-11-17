@@ -109,28 +109,70 @@ const actionDefinitions = [
         milestones: ["Language"],
         type: ["Rite"],
     },
+    {
+        name: "Wood Shaft",
+        icon: "🪵🪵",
+        perform: [
+            ["removeFromInventory", "Wood", 1],
+            ["forItem", "Tool", "durability", ">=", 1, "changeItemProperty", "durability", "-", 1],
+            ["addToInventory", "Wooden Shaft", 1],
+        ],
+        requires: [
+            ["item", "Wood", 1],
+            ["item", "Tool", 1, ["durability", ">=", 1]],
+        ],
+        milestones: ["Hafting"],
+        allowedEntities: ["*", "Kin"],
+    },
 ] as ActionDefinition[];
 
-export const ActionFunctions = {
-    addToInventory: (state: IGameState, source: Entity, item: string, qty: number, durability: number) => {
-        state.inventory.push(...new Array(qty).fill(ItemDefinitions[item].create(durability)));
-    },
-    removeFromInventory: (state: IGameState, source: Entity, item: string, qty: number) => {
-        RemoveItem(state.inventory, item, qty);
-    },
-    createEntity: (state: IGameState, source: Entity, entity: string) => {
-        state.entities.push(EntityDefinitions[entity].create());
-    },
-    chance: function (state: IGameState, source: Entity, chance: number, actionFunction: string, ...params) {
-        let random = GetRandom(this.id, 1 / chance);
-        if (random.next()) {
-            ActionFunctions[actionFunction](state, source, ...params);
+interface IActionFunction {
+    (state: IGameState, source: Entity | null, kin: Kin | null, ...params): void;
+}
+
+interface IActionFunctions {
+    [key: string]: IActionFunction;
+}
+
+const EntityFunctions = {
+    changeEntityProperty: function (state: IGameState, source: Entity, kin: Kin, property: string, changeOperator: string, value: number) {
+        if (source) {
+            source[property] = Change(source[property], value, changeOperator);
         }
     },
-    awardMilestone: function (state: IGameState, source: Entity, milestone: string) {
+};
+
+const ItemFunctions = {
+    changeItemProperty: (item: Item, property: string, changeOperator: string, value: number) => {
+        item[property] = Change(item[property], value, changeOperator);
+    },
+};
+
+const NestedActionFunctionValidations = {
+    forItem: Object.keys(ItemFunctions),
+    forEntity: Object.keys(EntityFunctions),
+};
+
+export const ActionFunctions = {
+    addToInventory: (state: IGameState, source: Entity | null, kin: Kin, item: string, qty: number, durability: number) => {
+        state.inventory.push(...new Array(qty).fill(ItemDefinitions[item].create(durability)));
+    },
+    removeFromInventory: (state: IGameState, source: Entity, kin: Kin, item: string, qty: number) => {
+        RemoveItem(state.inventory, item, qty);
+    },
+    createEntity: (state: IGameState, source: Entity, kin: Kin, entity: string) => {
+        state.entities.push(EntityDefinitions[entity].create());
+    },
+    chance: function (state: IGameState, source: Entity, kin: Kin, chance: number, actionFunction: string, ...params) {
+        let random = GetRandom(this.id, 1 / chance);
+        if (random.next()) {
+            ActionFunctions[actionFunction](state, source, kin, ...params);
+        }
+    },
+    awardMilestone: function (state: IGameState, source: Entity, kin: Kin, milestone: string) {
         state.milestones.push(MilestoneDefinitions[milestone]);
     },
-    forEntity: function (state: IGameState, source: Entity, entity: string, property: string, operator: string, value: number, actionFunction: string, ...params) {
+    forEntity: function (state: IGameState, source: Entity, kin: Kin, entity: string, property: string, operator: string, value: number, actionFunction: string, ...params) {
         if (!source) {
             let entitySource = state.entities.sort((a, b) => a[property] - b[property]).find((e) => (entity != "*" ? e.name === entity : true) && Compare(e[property], value, operator));
             if (entitySource) {
@@ -139,25 +181,44 @@ export const ActionFunctions = {
                 return;
             }
         }
-        ActionFunctions[actionFunction](state, source, ...params);
+        ActionFunctions[actionFunction](state, source, kin, ...params);
     },
-    changeEntityProperty: function (state: IGameState, source: Entity, property: string, changeOperator: string, value: number) {
-        if (source) {
-            source[property] = Change(source[property], value, changeOperator);
+    forItem: function (state: IGameState, source: Entity, kin: Kin, item: string, property: string, operator: string, value: number, actionFunction: string, ...params) {
+        if (kin) {
+            let forItem = kin.inventory.find((e) => (item != "*" ? e.name === item : true) && Compare(e[property], value, operator));
+            ItemFunctions[actionFunction](forItem, ...params);
+        } else {
+            let forItem = state.inventory.find((e) => (item != "*" ? e.name === item : true) && Compare(e[property], value, operator));
+            ItemFunctions[actionFunction](forItem, ...params);
         }
     },
-    startRite: (state: IGameState, source: Entity, rite: string) => {
+    startRite: (state: IGameState, source: Entity, kin: Kin, rite: string) => {
         state.rites.push(RiteDefinitions[rite].create());
     },
+} as IActionFunctions;
+
+const ValidateActionFunction = (definition: ActionDefinition) => {
+    if (definition.perform.length > 0 && definition.perform.every((x) => x.length > 0)) {
+        definition.perform.forEach(([actionFunction, ...params]) => {
+            if (NestedActionFunctionValidations[actionFunction]) {
+                NestedActionFunctionValidations[actionFunction].forEach((validation) => {
+                    if (!params.includes(validation)) {
+                        throw new Error(`Action Function ${actionFunction} requires ${validation}`);
+                    }
+                });
+            }
+        });
+    }
 };
 
 const CreateAction = (definition: ActionDefinition) => {
+    ValidateActionFunction(definition);
     return new Action({
         name: definition.name,
         icon: definition.icon,
-        perform: function (state: IGameState, source?: Entity) {
+        perform: function (state: IGameState, source: Entity | null, kin: Kin | null) {
             definition.perform.forEach(([action, ...rest]) => {
-                ActionFunctions[action](state, source, ...rest);
+                ActionFunctions[action](state, source, kin, ...rest);
             });
         },
         requires: definition.requires?.map(([type, name, value, ...subRequires]) => {
