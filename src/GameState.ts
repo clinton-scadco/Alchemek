@@ -110,9 +110,9 @@ export class GameState {
     };
 
     tick = () => {
+        let t = +new Date();
         try {
             let oldState = this.snapshot();
-
             this.updates = 0;
 
             this.performingActions.forEach((performingAction) => {
@@ -156,7 +156,10 @@ export class GameState {
 
             this.updateMilestones();
 
-            this.notify(oldState);
+            if (this.updates > 0) {
+                this.notify(oldState);
+            }
+            // console.log(+new Date() - t);
         } catch (e) {
             console.error(e);
         }

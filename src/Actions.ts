@@ -181,7 +181,7 @@ export const ActionFunctions = {
                 return;
             }
         }
-        ActionFunctions[actionFunction](state, source, kin, ...params);
+        EntityFunctions[actionFunction](state, source, kin, ...params);
     },
     forItem: function (state: IGameState, source: Entity, kin: Kin, item: string, property: string, operator: string, value: number, actionFunction: string, ...params) {
         if (kin) {

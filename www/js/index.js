@@ -68156,7 +68156,7 @@
           return;
         }
       }
-      ActionFunctions[actionFunction](state, source, kin, ...params);
+      EntityFunctions[actionFunction](state, source, kin, ...params);
     },
     forItem: function(state, source, kin, item, property, operator, value, actionFunction, ...params) {
       if (kin) {
@@ -76153,6 +76153,7 @@
         }
       };
       this.tick = () => {
+        let t = +/* @__PURE__ */ new Date();
         try {
           let oldState = this.snapshot();
           this.updates = 0;
@@ -76187,7 +76188,9 @@
           });
           this.inventory = this.inventory.filter((item) => !(item.maxDurability > 0 && item.durability < 1));
           this.updateMilestones();
-          this.notify(oldState);
+          if (this.updates > 0) {
+            this.notify(oldState);
+          }
         } catch (e) {
           console.error(e);
         }
