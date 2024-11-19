@@ -58,7 +58,10 @@ const Entities = ({
                                     key={action.name}
                                     action={action}
                                     performAction={() => performEntityAction(action, entity)}
-                                    disabled={!EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires)}
+                                    disabled={
+                                        !EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks } as GameState, action.requires) ||
+                                        !!performingActions.find((performingAction) => performingAction.action.id == action.id)
+                                    }
                                 ></ActionButton>
                             ))}
                     </Box>

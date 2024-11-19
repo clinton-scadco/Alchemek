@@ -20,15 +20,12 @@ export const EntityDefinitions = {
             new Entity({
                 name: "Fire",
                 icon: "🔥",
-                ttl: 60,
                 temperature: 100,
                 tick: ({ tickRate }, source) => {
-                    if (source.temperature <= 100) {
-                        source.ttl -= 1 / tickRate;
-                    } else {
-                        source.ttl = 60;
-                    }
                     source.temperature -= 2 / tickRate;
+                    if (source.temperature <= 0) {
+                        source.ttl = 0;
+                    }
                 },
                 performs: [
                     {

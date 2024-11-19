@@ -1,3 +1,4 @@
+import { cloneDeep } from "lodash";
 import { actions } from "./Actions";
 import { Action, ActionDuration, Item, Entity, Kin, Rite, Milestone, Message } from "./BaseClasses";
 import { MilestoneDefinitions } from "./Eras/MilestoneDefinitions";
@@ -37,7 +38,7 @@ export class GameState {
     }
 
     snapshot = () => {
-        return JSON.parse(JSON.stringify(this)) as GameState;
+        return cloneDeep(this);
     };
 
     subscribe = (listener) => {
@@ -51,15 +52,15 @@ export class GameState {
     notify = (oldState: GameState) => {
         try {
             let newMilestones = this.milestones.filter((milestone) => !oldState.milestones.some((m) => m.name == milestone.name));
-            if (newMilestones.length > 0) {
-                console.log(newMilestones);
-            }
+            // if (newMilestones.length > 0) {
+            //     console.log(newMilestones);
+            // }
 
             let messages = [...newMilestones.map((m) => MilestoneMessage(m))];
 
-            if (oldState.inventory.length !== this.inventory.length) {
-                console.log("Inventory changed", this.inventory);
-            }
+            // if (oldState.inventory.length !== this.inventory.length) {
+            //     console.log("Inventory changed", this.inventory);
+            // }
 
             this.listeners.forEach((listener) => listener(this, messages));
         } catch (e) {
@@ -156,7 +157,9 @@ export class GameState {
 
             this.updateMilestones();
 
-            this.notify(oldState);
+            if (this.updates > 0) {
+                this.notify(oldState);
+            }
         } catch (e) {
             console.error(e);
         }
