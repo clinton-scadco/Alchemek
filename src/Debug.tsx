@@ -3,7 +3,7 @@ import React from "react";
 import { MilestoneDefinitions } from "./Eras/MilestoneDefinitions";
 import { GameState } from "./GameState";
 import { Kin } from "./BaseClasses";
-import { EntityDefinitions } from "./Eras/One";
+import { EntityDefinitions, TasksRite } from "./Eras/One";
 import { ItemDefinitions } from "./Eras/ItemDefinitions";
 import { ActionFunctions } from "./Actions";
 

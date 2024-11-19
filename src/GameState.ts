@@ -49,6 +49,10 @@ export class GameState {
         this.listeners = this.listeners.filter((l) => l !== listener);
     };
 
+    update = () => {
+        this.notify(this.snapshot());
+    };
+
     notify = (oldState: GameState) => {
         try {
             let newMilestones = this.milestones.filter((milestone) => !oldState.milestones.some((m) => m.name == milestone.name));

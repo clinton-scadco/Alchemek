@@ -226,12 +226,14 @@ export class Kin implements IKin {
                 state.updates += 1;
             }
         }
-        if (this.actionPreference.length > 0) {
-            for (let action of this.actionPreference) {
-                if (!this.performingActions.some((a) => a.action.name == action.name)) {
-                    if (EvaluateRequirements(state, action.requires)) {
-                        this.performingActions.push(new ActionDuration(action));
-                        state.updates += 1;
+        if (this.inventory.some((i) => i.name == "Tool")) {
+            if (this.actionPreference.length > 0) {
+                for (let action of this.actionPreference) {
+                    if (!this.performingActions.some((a) => a.action.name == action.name)) {
+                        if (EvaluateRequirements(state, action.requires)) {
+                            this.performingActions.push(new ActionDuration(action));
+                            state.updates += 1;
+                        }
                     }
                 }
             }
@@ -275,6 +277,8 @@ export interface IGameState {
     updates: number;
 
     performingActions: IActionDuration[];
+
+    update: Function;
 }
 
 export class Milestone {

@@ -31,7 +31,7 @@ const Kins = ({ inventory, entities, kins, rites, milestones, ticks }: { entitie
                                 <Box width={"300px"} gap={"xsmall"}>
                                     <Inventory inventory={kin.inventory} compact={true}></Inventory>
 
-                                    {rites.some((rite) => rite.name == "Language" && rite.isComplete()) &&
+                                    {rites.some((rite) => rite.name == "Tasks" && rite.isComplete()) && kin.inventory.some((i) => i.name == "Tool") &&
                                         actions
                                             .filter((action) => action.allowedEntities?.includes(kin.name))
                                             .filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks } as GameState))

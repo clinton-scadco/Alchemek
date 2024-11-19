@@ -1,5 +1,5 @@
 import { Action, Entity, IAction, IGameState, Item, ItemRequirement, Kin, Requirement, Rite } from "./BaseClasses";
-import { EntityDefinitions, LanguageRite, RiteDefinitions } from "./Eras/One";
+import { EntityDefinitions, RiteDefinitions } from "./Eras/One";
 import { MilestoneDefinitions } from "./Eras/MilestoneDefinitions";
 import { Change, Compare, ParseOperatorValue, RemoveItem } from "./Functions";
 import { GetRandom } from "./utils/Random";
@@ -26,6 +26,7 @@ const actionDefinitions = [
         perform: [["addToInventory", "Stone", 1]],
         duration: 2,
         allowedEntities: ["*", "Kin"],
+        type: ["Resource"],
     },
     {
         name: "Collect Wood",
@@ -33,6 +34,7 @@ const actionDefinitions = [
         perform: [["addToInventory", "Wood", 1]],
         duration: 2,
         allowedEntities: ["*", "Kin"],
+        type: ["Resource"],
     },
     {
         name: "Make Fire",
@@ -43,6 +45,7 @@ const actionDefinitions = [
         ],
         requires: [["item", "Wood", 2]],
         duration: 5,
+        milestones: ["Fire"],
     },
     {
         name: "Make Tool",
@@ -54,6 +57,7 @@ const actionDefinitions = [
         ],
         requires: [["item", "Stone", 1]],
         duration: 8,
+        milestones: ["Stone Tools"],
     },
     {
         name: "Feed Fire",
@@ -99,12 +103,12 @@ const actionDefinitions = [
         allowedEntities: ["Fire", "Emberstone"],
     },
     {
-        name: "Language",
+        name: "Tasks",
         icon: "🔤",
-        perform: [["startRite", "Language"]],
+        perform: [["startRite", "Tasks"]],
         requires: [
             ["kin", "Kin", 5],
-            ["rite", "Language", "<1"],
+            ["rite", "Tasks", "<1"],
         ],
         milestones: ["Language"],
         type: ["Rite"],

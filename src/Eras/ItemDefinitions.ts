@@ -1,5 +1,5 @@
 import { Item } from "../BaseClasses";
-import { LanguageRite } from "./One";
+import { TasksRite } from "./One";
 
 export const ItemDefinitions = {
     Stone: {
@@ -22,8 +22,8 @@ export const ItemDefinitions = {
         icon: "🪵🪵",
         create: () => new Item({ icon: "🪵🪵", name: "Wooden Shaft", durability: -1 } as Item),
     },
-    "Language Rite": {
+    "Tasks": {
         icon: "🔤",
-        class: LanguageRite,
+        class: TasksRite,
     },
 };

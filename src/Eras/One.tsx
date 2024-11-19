@@ -1,16 +1,16 @@
 import { create } from "lodash";
 import { Entity, Kin, Rite } from "../BaseClasses";
 
-export class LanguageRite extends Rite {
+export class TasksRite extends Rite {
     icon: string = "🔤";
     constructor() {
-        super({ name: "Language", ingredients: [["Tool", 10]] });
+        super({ name: "Tasks", ingredients: [["Tool", 10]] });
     }
 }
 
 export const RiteDefinitions = {
-    Language: {
-        create: () => new LanguageRite(),
+    Tasks: {
+        create: () => new TasksRite(),
     },
 };
 

@@ -2391,9 +2391,9 @@
           if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
             __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(new Error());
           }
-          var React50 = require_react();
+          var React51 = require_react();
           var Scheduler = require_scheduler();
-          var ReactSharedInternals = React50.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+          var ReactSharedInternals = React51.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
           var suppressWarning = false;
           function setSuppressWarning(newSuppressWarning) {
             {
@@ -3998,7 +3998,7 @@
             {
               if (props.value == null) {
                 if (typeof props.children === "object" && props.children !== null) {
-                  React50.Children.forEach(props.children, function(child) {
+                  React51.Children.forEach(props.children, function(child) {
                     if (child == null) {
                       return;
                     }
@@ -26707,7 +26707,7 @@
         }
         return target;
       }
-      var normalizeColor2 = function normalizeColor3(color2, theme, dark) {
+      var normalizeColor3 = function normalizeColor4(color2, theme, dark) {
         var colorSpec = theme.global && theme.global.colors[color2] !== void 0 ? theme.global.colors[color2] : color2;
         var result = colorSpec;
         if (colorSpec) {
@@ -26718,12 +26718,12 @@
           }
         }
         if (result && theme.global && theme.global.colors[result] !== void 0) {
-          result = normalizeColor3(result, theme, dark);
+          result = normalizeColor4(result, theme, dark);
         }
         return result;
       };
       var colorStyle2 = function colorStyle3(name, value, theme, required) {
-        return (0, _styledComponents.css)(["", ":", ";"], name, normalizeColor2(value, theme, required));
+        return (0, _styledComponents.css)(["", ":", ";"], name, normalizeColor3(value, theme, required));
       };
       var colorCss = (0, _styledComponents.css)(["", " ", " g{fill:inherit;stroke:inherit;}*:not([stroke]){&[fill='none']{stroke-width:0;}}*[stroke*='#'],*[STROKE*='#']{stroke:inherit;fill:none;}*[fill-rule],*[FILL-RULE],*[fill*='#'],*[FILL*='#']{fill:inherit;stroke:none;}"], function(props) {
         return colorStyle2("fill", props.color || props.theme.global.colors.icon, props.theme);
@@ -28393,7 +28393,7 @@
       "use strict";
       exports.__esModule = true;
       exports.normalizeColor = exports.getRGBArray = exports.getRGBA = exports.colorIsDark = exports.canExtractRGBArray = void 0;
-      var _normalizeColor2 = exports.normalizeColor = function normalizeColor2(color2, theme, dark) {
+      var _normalizeColor2 = exports.normalizeColor = function normalizeColor3(color2, theme, dark) {
         var colorSpec = theme.global && theme.global.colors[color2] !== void 0 ? theme.global.colors[color2] : color2;
         var result = colorSpec;
         if (colorSpec) {
@@ -29864,7 +29864,7 @@
       if (true) {
         (function() {
           "use strict";
-          var React50 = require_react();
+          var React51 = require_react();
           var REACT_ELEMENT_TYPE = Symbol.for("react.element");
           var REACT_PORTAL_TYPE = Symbol.for("react.portal");
           var REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
@@ -29890,7 +29890,7 @@
             }
             return null;
           }
-          var ReactSharedInternals = React50.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+          var ReactSharedInternals = React51.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
           function error(format3) {
             {
               {
@@ -36243,7 +36243,7 @@
   });
 
   // src/index.tsx
-  var React49 = __toESM(require_react(), 1);
+  var React50 = __toESM(require_react(), 1);
   var import_client2 = __toESM(require_client(), 1);
 
   // node_modules/@fortawesome/fontawesome-svg-core/index.mjs
@@ -59924,7 +59924,7 @@
   };
 
   // src/App.tsx
-  var React48 = __toESM(require_react(), 1);
+  var React49 = __toESM(require_react(), 1);
 
   // node_modules/react-router-dom/dist/index.js
   var React2 = __toESM(require_react());
@@ -73103,7 +73103,7 @@
   var ErrorBoundary_default = ErrorBoundary;
 
   // src/Home.tsx
-  var React46 = __toESM(require_react(), 1);
+  var React47 = __toESM(require_react(), 1);
 
   // src/Eras/TimeDefinitions.ts
   var TimeDefinitions = {
@@ -73323,12 +73323,14 @@
           state.updates += 1;
         }
       }
-      if (this.actionPreference.length > 0) {
-        for (let action of this.actionPreference) {
-          if (!this.performingActions.some((a) => a.action.name == action.name)) {
-            if (EvaluateRequirements(state, action.requires)) {
-              this.performingActions.push(new ActionDuration(action));
-              state.updates += 1;
+      if (this.inventory.some((i) => i.name == "Tool")) {
+        if (this.actionPreference.length > 0) {
+          for (let action of this.actionPreference) {
+            if (!this.performingActions.some((a) => a.action.name == action.name)) {
+              if (EvaluateRequirements(state, action.requires)) {
+                this.performingActions.push(new ActionDuration(action));
+                state.updates += 1;
+              }
             }
           }
         }
@@ -73357,345 +73359,6 @@
       this.requirements = requirements;
     }
   };
-
-  // src/Eras/One.tsx
-  var LanguageRite = class extends Rite {
-    constructor() {
-      super({ name: "Language", ingredients: [["Tool", 10]] });
-      this.icon = "\u{1F524}";
-    }
-  };
-  var RiteDefinitions = {
-    Language: {
-      create: () => new LanguageRite()
-    }
-  };
-  var EntityDefinitions = {
-    Fire: {
-      create: (ticks) => new Entity({
-        name: "Fire",
-        icon: "\u{1F525}",
-        temperature: 100,
-        tick: ({ tickRate }, source) => {
-          source.temperature -= 2 / tickRate;
-          if (source.temperature <= 0) {
-            source.ttl = 0;
-          }
-        },
-        performs: [
-          {
-            name: "Gather",
-            icon: "\u{1F464}",
-            ttp: 10,
-            lastTickPerformed: ticks,
-            condition: ({ kins }, source) => {
-              return source.temperature > 60 && kins.length < 5;
-            },
-            perform: ({ kins }, source) => {
-              kins.push(new Kin({ name: "Kin" }));
-            }
-          }
-        ]
-      })
-    },
-    Emberstone: {
-      create: () => new Entity({
-        name: "Emberstone",
-        icon: "\u{1F525}\u{1FAA8}\u{1F525}",
-        temperature: 200,
-        tick: ({ tickRate }, source) => {
-          if (source.temperature <= 200) {
-            source.temperature += 2 / tickRate;
-          }
-        }
-      })
-    }
-  };
-
-  // src/Eras/MilestoneDefinitions.ts
-  var MilestoneDefinitions = {
-    Emberstone: new Milestone("Emberstone", "A small, glowing emberstone. It seems to keep a very high temperature.", [
-      new Requirement({ type: "entity", value: 1, name: "Fire", requires: [new Requirement({ type: "temperature", value: 200, operator: ">" })] })
-    ]),
-    Hafting: new Milestone("Hafting", "We can make better tools by attaching a handle."),
-    Language: new Milestone("Language", "The ability to talk, it can only get better from here... Right?", [new Requirement({ type: "kin", value: 5, name: "Kin", operator: ">=" })])
-  };
-
-  // src/utils/Random.ts
-  var instances = /* @__PURE__ */ new Map();
-  var Random = class {
-    constructor(id3, chance) {
-      this.chance = chance;
-      this.iterations = 0;
-    }
-    next() {
-      let r = Math.random();
-      if (r < this.chance) {
-        this.iterations = 0;
-        return true;
-      } else {
-        this.iterations++;
-      }
-      if (this.iterations >= 1 / this.chance) {
-        this.iterations = 0;
-        return true;
-      }
-      return false;
-    }
-  };
-  var GetRandom = (id3, change) => {
-    let instance = instances.get(id3);
-    if (instance) {
-      return instance;
-    } else {
-      const instance2 = new Random(id3, change);
-      instances.set(id3, instance2);
-      return instance2;
-    }
-  };
-
-  // src/Eras/ItemDefinitions.ts
-  var ItemDefinitions = {
-    Stone: {
-      icon: "\u{1FAA8}",
-      create: () => new Item({ icon: "\u{1FAA8}", name: "Stone", durability: -1 })
-    },
-    Wood: {
-      icon: "\u{1FAB5}",
-      create: () => new Item({ icon: "\u{1FAB5}", name: "Wood", durability: -1 })
-    },
-    Tool: {
-      icon: "\u{1F6E0}\uFE0F",
-      create: (durability) => new Item({ icon: "\u{1F6E0}\uFE0F", name: "Tool", durability })
-    },
-    "Heated Stone": {
-      icon: "\u{1F525}\u{1FAA8}",
-      create: () => new Item({ icon: "\u{1F525}\u{1FAA8}", name: "Heated Stone", durability: -1 })
-    },
-    "Wooden Shaft": {
-      icon: "\u{1FAB5}\u{1FAB5}",
-      create: () => new Item({ icon: "\u{1FAB5}\u{1FAB5}", name: "Wooden Shaft", durability: -1 })
-    },
-    "Language Rite": {
-      icon: "\u{1F524}",
-      class: LanguageRite
-    }
-  };
-
-  // src/Actions.ts
-  var actionDefinitions = [
-    {
-      name: "Collect Stone",
-      icon: "\u{1FAA8}",
-      perform: [["addToInventory", "Stone", 1]],
-      duration: 2,
-      allowedEntities: ["*", "Kin"]
-    },
-    {
-      name: "Collect Wood",
-      icon: "\u{1FAB5}",
-      perform: [["addToInventory", "Wood", 1]],
-      duration: 2,
-      allowedEntities: ["*", "Kin"]
-    },
-    {
-      name: "Make Fire",
-      icon: "\u{1F525}",
-      perform: [
-        ["removeFromInventory", "Wood", 2],
-        ["createEntity", "Fire"]
-      ],
-      requires: [["item", "Wood", 2]],
-      duration: 5
-    },
-    {
-      name: "Make Tool",
-      icon: "\u{1F6E0}\uFE0F",
-      perform: [
-        ["removeFromInventory", "Stone", 1],
-        ["addToInventory", "Tool", 1, 10],
-        ["chance", 6, "awardMilestone", "Hafting"]
-      ],
-      requires: [["item", "Stone", 1]],
-      duration: 8
-    },
-    {
-      name: "Feed Fire",
-      icon: "\u{1FAB5}\u{1F525}",
-      perform: [
-        ["removeFromInventory", "Wood", 1],
-        ["forEntity", "Fire", "temperature", "<", 200, "changeEntityProperty", "temperature", "+", 10]
-      ],
-      duration: 1,
-      allowedEntities: ["Fire", "Kin"],
-      requires: [
-        ["item", "Wood", 1],
-        ["entity", "Fire", 1, ["temperature", "<", 220]]
-      ]
-    },
-    {
-      name: "Emberstone",
-      icon: "\u{1F525}\u{1FAA8}\u{1F525}",
-      perform: [
-        ["removeFromInventory", "Heated Stone", 2],
-        ["createEntity", "Emberstone"]
-      ],
-      requires: [
-        ["item", "Heated Stone", 2],
-        ["entity", "*", 1, ["temperature", ">", 200]],
-        ["timeName", "Midnight", "="]
-      ],
-      milestones: ["Emberstone"],
-      type: ["Ritual"]
-    },
-    {
-      name: "Heat Stone",
-      icon: "\u{1F525}\u{1FAA8}",
-      perform: [
-        ["removeFromInventory", "Stone", 1],
-        ["forEntity", "*", "temperature", ">=", 150, "changeEntityProperty", "temperature", "-", 10],
-        ["addToInventory", "Heated Stone", 1]
-      ],
-      requires: [
-        ["item", "Stone", 1],
-        ["entity", "*", 1, ["temperature", ">=", 150]]
-      ],
-      allowedEntities: ["Fire", "Emberstone"]
-    },
-    {
-      name: "Language",
-      icon: "\u{1F524}",
-      perform: [["startRite", "Language"]],
-      requires: [
-        ["kin", "Kin", 5],
-        ["rite", "Language", "<1"]
-      ],
-      milestones: ["Language"],
-      type: ["Rite"]
-    },
-    {
-      name: "Wood Shaft",
-      icon: "\u{1FAB5}\u{1FAB5}",
-      perform: [
-        ["removeFromInventory", "Wood", 1],
-        ["forItem", "Tool", "durability", ">=", 1, "changeItemProperty", "durability", "-", 1],
-        ["addToInventory", "Wooden Shaft", 1]
-      ],
-      requires: [
-        ["item", "Wood", 1],
-        ["item", "Tool", 1, ["durability", ">=", 1]]
-      ],
-      milestones: ["Hafting"],
-      allowedEntities: ["*", "Kin"]
-    }
-  ];
-  var EntityFunctions = {
-    changeEntityProperty: function(state, source, kin, property, changeOperator, value) {
-      if (source) {
-        source[property] = Change(source[property], value, changeOperator);
-      }
-    }
-  };
-  var ItemFunctions = {
-    changeItemProperty: (item, property, changeOperator, value) => {
-      item[property] = Change(item[property], value, changeOperator);
-    }
-  };
-  var NestedActionFunctionValidations = {
-    forItem: Object.keys(ItemFunctions),
-    forEntity: Object.keys(EntityFunctions)
-  };
-  var ActionFunctions = {
-    addToInventory: (state, source, kin, item, qty, durability) => {
-      state.inventory.push(...new Array(qty).fill(ItemDefinitions[item].create(durability)));
-    },
-    removeFromInventory: (state, source, kin, item, qty) => {
-      RemoveItem(state.inventory, item, qty);
-    },
-    createEntity: (state, source, kin, entity) => {
-      state.entities.push(EntityDefinitions[entity].create());
-    },
-    chance: function(state, source, kin, chance, actionFunction, ...params) {
-      let random = GetRandom(this.id, 1 / chance);
-      if (random.next()) {
-        ActionFunctions[actionFunction](state, source, kin, ...params);
-      }
-    },
-    awardMilestone: function(state, source, kin, milestone) {
-      state.milestones.push(MilestoneDefinitions[milestone]);
-    },
-    forEntity: function(state, source, kin, entity, property, operator, value, actionFunction, ...params) {
-      if (!source) {
-        let entitySource = state.entities.sort((a, b) => a[property] - b[property]).find((e) => (entity != "*" ? e.name === entity : true) && Compare(e[property], value, operator));
-        if (entitySource) {
-          source = entitySource;
-        } else {
-          return;
-        }
-      }
-      EntityFunctions[actionFunction](state, source, kin, ...params);
-    },
-    forItem: function(state, source, kin, item, property, operator, value, actionFunction, ...params) {
-      if (kin) {
-        let forItem = kin.inventory.find((e) => (item != "*" ? e.name === item : true) && Compare(e[property], value, operator));
-        ItemFunctions[actionFunction](forItem, ...params);
-      } else {
-        let forItem = state.inventory.find((e) => (item != "*" ? e.name === item : true) && Compare(e[property], value, operator));
-        ItemFunctions[actionFunction](forItem, ...params);
-      }
-    },
-    startRite: (state, source, kin, rite) => {
-      state.rites.push(RiteDefinitions[rite].create());
-    }
-  };
-  var ValidateActionFunction = (definition) => {
-    if (definition.perform.length > 0 && definition.perform.every((x) => x.length > 0)) {
-      definition.perform.forEach(([actionFunction, ...params]) => {
-        if (NestedActionFunctionValidations[actionFunction]) {
-          NestedActionFunctionValidations[actionFunction].forEach((validation) => {
-            if (!params.includes(validation)) {
-              throw new Error(`Action Function ${actionFunction} requires ${validation}`);
-            }
-          });
-        }
-      });
-    }
-  };
-  var CreateAction = (definition) => {
-    ValidateActionFunction(definition);
-    return new Action2({
-      name: definition.name,
-      icon: definition.icon,
-      perform: function(state, source, kin) {
-        definition.perform.forEach(([action, ...rest]) => {
-          ActionFunctions[action](state, source, kin, ...rest);
-        });
-      },
-      requires: definition.requires?.map(([type, name, value, ...subRequires]) => {
-        let { operator, value: v } = ParseOperatorValue(value);
-        return new Requirement({
-          type,
-          name,
-          value: v,
-          operator,
-          requires: subRequires?.map((x) => {
-            let [type2, operator2, value2] = [x[0], x[1], x[2]];
-            return new Requirement({ type: type2, operator: operator2, value: value2 });
-          })
-        });
-      }),
-      duration: definition.duration,
-      allowedEntities: definition.allowedEntities,
-      milestones: (state) => {
-        if (definition.milestones) {
-          return definition.milestones?.every((m) => state.milestones.includes(MilestoneDefinitions[m]));
-        }
-        return true;
-      },
-      type: definition.type
-    });
-  };
-  var actions = actionDefinitions.map(CreateAction);
 
   // node_modules/framer-motion/dist/es/utils/warn-once.mjs
   var warned = /* @__PURE__ */ new Set();
@@ -81561,6 +81224,17 @@
   // src/GameState.ts
   var import_lodash = __toESM(require_lodash(), 1);
 
+  // src/Eras/MilestoneDefinitions.ts
+  var MilestoneDefinitions = {
+    Fire: new Milestone("Fire", "The ability to create and control fire.", [new Requirement({ type: "item", value: 2, name: "Wood" })]),
+    "Stone Tools": new Milestone("Stone Tools", "The ability to create tools from stone.", [new Requirement({ type: "item", value: 1, name: "Stone" })]),
+    Emberstone: new Milestone("Emberstone", "A small, glowing emberstone. It seems to keep a very high temperature.", [
+      new Requirement({ type: "entity", value: 1, name: "Fire", requires: [new Requirement({ type: "temperature", value: 200, operator: ">" })] })
+    ]),
+    Hafting: new Milestone("Hafting", "We can make better tools by attaching a handle."),
+    Language: new Milestone("Language", "The ability to talk, it can only get better from here... Right?", [new Requirement({ type: "kin", value: 5, name: "Kin", operator: ">=" })])
+  };
+
   // src/Messages.ts
   var MilestoneMessage = (milestone) => {
     return {
@@ -81581,6 +81255,9 @@
       };
       this.unsubscribe = (listener3) => {
         this.listeners = this.listeners.filter((l) => l !== listener3);
+      };
+      this.update = () => {
+        this.notify(this.snapshot());
       };
       this.notify = (oldState) => {
         try {
@@ -81692,6 +81369,342 @@
 
   // src/Debug.tsx
   var import_react68 = __toESM(require_react(), 1);
+
+  // src/Eras/One.tsx
+  var TasksRite = class extends Rite {
+    constructor() {
+      super({ name: "Tasks", ingredients: [["Tool", 10]] });
+      this.icon = "\u{1F524}";
+    }
+  };
+  var RiteDefinitions = {
+    Tasks: {
+      create: () => new TasksRite()
+    }
+  };
+  var EntityDefinitions = {
+    Fire: {
+      create: (ticks) => new Entity({
+        name: "Fire",
+        icon: "\u{1F525}",
+        temperature: 100,
+        tick: ({ tickRate }, source) => {
+          source.temperature -= 2 / tickRate;
+          if (source.temperature <= 0) {
+            source.ttl = 0;
+          }
+        },
+        performs: [
+          {
+            name: "Gather",
+            icon: "\u{1F464}",
+            ttp: 10,
+            lastTickPerformed: ticks,
+            condition: ({ kins }, source) => {
+              return source.temperature > 60 && kins.length < 5;
+            },
+            perform: ({ kins }, source) => {
+              kins.push(new Kin({ name: "Kin" }));
+            }
+          }
+        ]
+      })
+    },
+    Emberstone: {
+      create: () => new Entity({
+        name: "Emberstone",
+        icon: "\u{1F525}\u{1FAA8}\u{1F525}",
+        temperature: 200,
+        tick: ({ tickRate }, source) => {
+          if (source.temperature <= 200) {
+            source.temperature += 2 / tickRate;
+          }
+        }
+      })
+    }
+  };
+
+  // src/Eras/ItemDefinitions.ts
+  var ItemDefinitions = {
+    Stone: {
+      icon: "\u{1FAA8}",
+      create: () => new Item({ icon: "\u{1FAA8}", name: "Stone", durability: -1 })
+    },
+    Wood: {
+      icon: "\u{1FAB5}",
+      create: () => new Item({ icon: "\u{1FAB5}", name: "Wood", durability: -1 })
+    },
+    Tool: {
+      icon: "\u{1F6E0}\uFE0F",
+      create: (durability) => new Item({ icon: "\u{1F6E0}\uFE0F", name: "Tool", durability })
+    },
+    "Heated Stone": {
+      icon: "\u{1F525}\u{1FAA8}",
+      create: () => new Item({ icon: "\u{1F525}\u{1FAA8}", name: "Heated Stone", durability: -1 })
+    },
+    "Wooden Shaft": {
+      icon: "\u{1FAB5}\u{1FAB5}",
+      create: () => new Item({ icon: "\u{1FAB5}\u{1FAB5}", name: "Wooden Shaft", durability: -1 })
+    },
+    "Tasks": {
+      icon: "\u{1F524}",
+      class: TasksRite
+    }
+  };
+
+  // src/utils/Random.ts
+  var instances = /* @__PURE__ */ new Map();
+  var Random = class {
+    constructor(id3, chance) {
+      this.chance = chance;
+      this.iterations = 0;
+    }
+    next() {
+      let r = Math.random();
+      if (r < this.chance) {
+        this.iterations = 0;
+        return true;
+      } else {
+        this.iterations++;
+      }
+      if (this.iterations >= 1 / this.chance) {
+        this.iterations = 0;
+        return true;
+      }
+      return false;
+    }
+  };
+  var GetRandom = (id3, change) => {
+    let instance = instances.get(id3);
+    if (instance) {
+      return instance;
+    } else {
+      const instance2 = new Random(id3, change);
+      instances.set(id3, instance2);
+      return instance2;
+    }
+  };
+
+  // src/Actions.ts
+  var actionDefinitions = [
+    {
+      name: "Collect Stone",
+      icon: "\u{1FAA8}",
+      perform: [["addToInventory", "Stone", 1]],
+      duration: 2,
+      allowedEntities: ["*", "Kin"],
+      type: ["Resource"]
+    },
+    {
+      name: "Collect Wood",
+      icon: "\u{1FAB5}",
+      perform: [["addToInventory", "Wood", 1]],
+      duration: 2,
+      allowedEntities: ["*", "Kin"],
+      type: ["Resource"]
+    },
+    {
+      name: "Make Fire",
+      icon: "\u{1F525}",
+      perform: [
+        ["removeFromInventory", "Wood", 2],
+        ["createEntity", "Fire"]
+      ],
+      requires: [["item", "Wood", 2]],
+      duration: 5,
+      milestones: ["Fire"]
+    },
+    {
+      name: "Make Tool",
+      icon: "\u{1F6E0}\uFE0F",
+      perform: [
+        ["removeFromInventory", "Stone", 1],
+        ["addToInventory", "Tool", 1, 10],
+        ["chance", 6, "awardMilestone", "Hafting"]
+      ],
+      requires: [["item", "Stone", 1]],
+      duration: 8,
+      milestones: ["Stone Tools"]
+    },
+    {
+      name: "Feed Fire",
+      icon: "\u{1FAB5}\u{1F525}",
+      perform: [
+        ["removeFromInventory", "Wood", 1],
+        ["forEntity", "Fire", "temperature", "<", 200, "changeEntityProperty", "temperature", "+", 10]
+      ],
+      duration: 1,
+      allowedEntities: ["Fire", "Kin"],
+      requires: [
+        ["item", "Wood", 1],
+        ["entity", "Fire", 1, ["temperature", "<", 220]]
+      ]
+    },
+    {
+      name: "Emberstone",
+      icon: "\u{1F525}\u{1FAA8}\u{1F525}",
+      perform: [
+        ["removeFromInventory", "Heated Stone", 2],
+        ["createEntity", "Emberstone"]
+      ],
+      requires: [
+        ["item", "Heated Stone", 2],
+        ["entity", "*", 1, ["temperature", ">", 200]],
+        ["timeName", "Midnight", "="]
+      ],
+      milestones: ["Emberstone"],
+      type: ["Ritual"]
+    },
+    {
+      name: "Heat Stone",
+      icon: "\u{1F525}\u{1FAA8}",
+      perform: [
+        ["removeFromInventory", "Stone", 1],
+        ["forEntity", "*", "temperature", ">=", 150, "changeEntityProperty", "temperature", "-", 10],
+        ["addToInventory", "Heated Stone", 1]
+      ],
+      requires: [
+        ["item", "Stone", 1],
+        ["entity", "*", 1, ["temperature", ">=", 150]]
+      ],
+      allowedEntities: ["Fire", "Emberstone"]
+    },
+    {
+      name: "Tasks",
+      icon: "\u{1F524}",
+      perform: [["startRite", "Tasks"]],
+      requires: [
+        ["kin", "Kin", 5],
+        ["rite", "Tasks", "<1"]
+      ],
+      milestones: ["Language"],
+      type: ["Rite"]
+    },
+    {
+      name: "Wood Shaft",
+      icon: "\u{1FAB5}\u{1FAB5}",
+      perform: [
+        ["removeFromInventory", "Wood", 1],
+        ["forItem", "Tool", "durability", ">=", 1, "changeItemProperty", "durability", "-", 1],
+        ["addToInventory", "Wooden Shaft", 1]
+      ],
+      requires: [
+        ["item", "Wood", 1],
+        ["item", "Tool", 1, ["durability", ">=", 1]]
+      ],
+      milestones: ["Hafting"],
+      allowedEntities: ["*", "Kin"]
+    }
+  ];
+  var EntityFunctions = {
+    changeEntityProperty: function(state, source, kin, property, changeOperator, value) {
+      if (source) {
+        source[property] = Change(source[property], value, changeOperator);
+      }
+    }
+  };
+  var ItemFunctions = {
+    changeItemProperty: (item, property, changeOperator, value) => {
+      item[property] = Change(item[property], value, changeOperator);
+    }
+  };
+  var NestedActionFunctionValidations = {
+    forItem: Object.keys(ItemFunctions),
+    forEntity: Object.keys(EntityFunctions)
+  };
+  var ActionFunctions = {
+    addToInventory: (state, source, kin, item, qty, durability) => {
+      state.inventory.push(...new Array(qty).fill(ItemDefinitions[item].create(durability)));
+    },
+    removeFromInventory: (state, source, kin, item, qty) => {
+      RemoveItem(state.inventory, item, qty);
+    },
+    createEntity: (state, source, kin, entity) => {
+      state.entities.push(EntityDefinitions[entity].create());
+    },
+    chance: function(state, source, kin, chance, actionFunction, ...params) {
+      let random = GetRandom(this.id, 1 / chance);
+      if (random.next()) {
+        ActionFunctions[actionFunction](state, source, kin, ...params);
+      }
+    },
+    awardMilestone: function(state, source, kin, milestone) {
+      state.milestones.push(MilestoneDefinitions[milestone]);
+    },
+    forEntity: function(state, source, kin, entity, property, operator, value, actionFunction, ...params) {
+      if (!source) {
+        let entitySource = state.entities.sort((a, b) => a[property] - b[property]).find((e) => (entity != "*" ? e.name === entity : true) && Compare(e[property], value, operator));
+        if (entitySource) {
+          source = entitySource;
+        } else {
+          return;
+        }
+      }
+      EntityFunctions[actionFunction](state, source, kin, ...params);
+    },
+    forItem: function(state, source, kin, item, property, operator, value, actionFunction, ...params) {
+      if (kin) {
+        let forItem = kin.inventory.find((e) => (item != "*" ? e.name === item : true) && Compare(e[property], value, operator));
+        ItemFunctions[actionFunction](forItem, ...params);
+      } else {
+        let forItem = state.inventory.find((e) => (item != "*" ? e.name === item : true) && Compare(e[property], value, operator));
+        ItemFunctions[actionFunction](forItem, ...params);
+      }
+    },
+    startRite: (state, source, kin, rite) => {
+      state.rites.push(RiteDefinitions[rite].create());
+    }
+  };
+  var ValidateActionFunction = (definition) => {
+    if (definition.perform.length > 0 && definition.perform.every((x) => x.length > 0)) {
+      definition.perform.forEach(([actionFunction, ...params]) => {
+        if (NestedActionFunctionValidations[actionFunction]) {
+          NestedActionFunctionValidations[actionFunction].forEach((validation) => {
+            if (!params.includes(validation)) {
+              throw new Error(`Action Function ${actionFunction} requires ${validation}`);
+            }
+          });
+        }
+      });
+    }
+  };
+  var CreateAction = (definition) => {
+    ValidateActionFunction(definition);
+    return new Action2({
+      name: definition.name,
+      icon: definition.icon,
+      perform: function(state, source, kin) {
+        definition.perform.forEach(([action, ...rest]) => {
+          ActionFunctions[action](state, source, kin, ...rest);
+        });
+      },
+      requires: definition.requires?.map(([type, name, value, ...subRequires]) => {
+        let { operator, value: v } = ParseOperatorValue(value);
+        return new Requirement({
+          type,
+          name,
+          value: v,
+          operator,
+          requires: subRequires?.map((x) => {
+            let [type2, operator2, value2] = [x[0], x[1], x[2]];
+            return new Requirement({ type: type2, operator: operator2, value: value2 });
+          })
+        });
+      }),
+      duration: definition.duration,
+      allowedEntities: definition.allowedEntities,
+      milestones: (state) => {
+        if (definition.milestones) {
+          return definition.milestones?.every((m) => state.milestones.includes(MilestoneDefinitions[m]));
+        }
+        return true;
+      },
+      type: definition.type
+    });
+  };
+  var actions = actionDefinitions.map(CreateAction);
+
+  // src/Debug.tsx
   var Debug = ({ perform: perform2 }) => {
     return /* @__PURE__ */ import_react68.default.createElement(Box, { direction: "row", gap: "small", wrap: true }, Object.values(MilestoneDefinitions).map((milestone) => {
       return /* @__PURE__ */ import_react68.default.createElement(
@@ -81787,7 +81800,7 @@
   var Progress_default = Progress;
 
   // src/ActionButton.tsx
-  var import_react71 = __toESM(require_react(), 1);
+  var import_react72 = __toESM(require_react(), 1);
 
   // src/components/ProgressButton.tsx
   var import_react69 = __toESM(require_react(), 1);
@@ -81841,31 +81854,106 @@
   };
   var Requirements_default = RenderRequirements;
 
+  // src/components/PlusMinus.tsx
+  var import_utils32 = __toESM(require_utils2(), 1);
+  var import_react71 = __toESM(require_react(), 1);
+  var PlusMinus = ({ value, onChange: onChange2 }) => {
+    const [isDarkMode] = useDarkMode();
+    return /* @__PURE__ */ import_react71.default.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ import_react71.default.createElement(
+      Box,
+      {
+        pad: "xsmall",
+        hoverIndicator: "background-back",
+        onClick: () => {
+          onChange2(-1);
+        },
+        round: "3px"
+      },
+      /* @__PURE__ */ import_react71.default.createElement(FontAwesomeIcon, { icon: ["fad", "minus"], color: (0, import_utils32.normalizeColor)("text", Theme_default, isDarkMode), size: "sm" })
+    ), /* @__PURE__ */ import_react71.default.createElement(Text, null, value), /* @__PURE__ */ import_react71.default.createElement(
+      Box,
+      {
+        pad: "xsmall",
+        background: "brand",
+        hoverIndicator: "background-back",
+        onClick: () => {
+          onChange2(1);
+        },
+        round: "3px"
+      },
+      /* @__PURE__ */ import_react71.default.createElement(FontAwesomeIcon, { icon: ["fad", "plus"], color: (0, import_utils32.normalizeColor)("background", Theme_default, isDarkMode), size: "sm" })
+    ));
+  };
+  var PlusMinus_default = PlusMinus;
+
   // src/ActionButton.tsx
+  var ActionButtons = ({ gameState, performingActions, performAction, condition }) => {
+    const assignPreference = (action) => {
+      for (let kin of gameState.kins) {
+        if (!kin.actionPreference.some((a) => a.id == action.id)) {
+          kin.actionPreference.push(action);
+          gameState.update();
+          break;
+        }
+      }
+    };
+    const removePreference = (action) => {
+      for (let kin of gameState.kins) {
+        if (kin.actionPreference.some((a) => a.id == action.id)) {
+          kin.actionPreference = kin.actionPreference.filter((a) => a.id != action.id);
+          gameState.update();
+          break;
+        }
+      }
+    };
+    const handlePreferenceChange = (action, value) => {
+      if (value > 0) {
+        assignPreference(action);
+      } else {
+        removePreference(action);
+      }
+    };
+    return /* @__PURE__ */ import_react72.default.createElement(Box, { gap: "xsmall" }, actions.filter((action) => action.allowedEntities?.length == 0 || action.allowedEntities?.includes("*")).filter(condition).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ import_react72.default.createElement(Box, { gap: "xsmall", key: action.name }, /* @__PURE__ */ import_react72.default.createElement(
+      ActionButton,
+      {
+        performingActions,
+        primary: action.type?.includes("Rite") && gameState.rites.find((rite) => rite.name == action.name)?.isComplete(),
+        action,
+        performAction,
+        disabled: !EvaluateRequirements(gameState, action.requires) || !!performingActions.find((performingAction) => performingAction.action.id == action.id)
+      }
+    ), action.allowedEntities?.includes("Kin") && gameState.rites.some((rite) => rite.name == "Tasks" && rite.isComplete()) && /* @__PURE__ */ import_react72.default.createElement(Box, { direction: "row", gap: "xsmall" }, /* @__PURE__ */ import_react72.default.createElement(Text, null, "Kins Assigned"), /* @__PURE__ */ import_react72.default.createElement(
+      PlusMinus_default,
+      {
+        value: gameState.kins.filter((k) => k.actionPreference.some((a) => a.id == action.id) && k.inventory.some((i) => i.name == "Tool")).length,
+        onChange: (v) => handlePreferenceChange(action, v)
+      }
+    )))));
+  };
   var ActionButton = ({ action, performingActions, performAction, disabled: disabled2, ...props }) => {
     let performingAction = performingActions.find((performingAction2) => performingAction2.action.id == action.id);
-    return /* @__PURE__ */ import_react71.default.createElement(
+    return /* @__PURE__ */ import_react72.default.createElement(
       ProgressButton_default,
       {
         id: performingAction?.id || -1,
         remaining: performingAction?.remaining,
         max: action.duration,
-        icon: /* @__PURE__ */ import_react71.default.createElement(Text, null, action.icon),
+        icon: /* @__PURE__ */ import_react72.default.createElement(Text, null, action.icon),
         label: action.name,
         onClick: () => performAction(action),
         disabled: disabled2,
         active: !!performingAction,
         ...props,
-        info: action.requires.length > 0 ? /* @__PURE__ */ import_react71.default.createElement(Requirements_default, { requirements: action.requires }) : void 0
+        info: action.requires.length > 0 ? /* @__PURE__ */ import_react72.default.createElement(Requirements_default, { requirements: action.requires }) : void 0
       }
     );
   };
   var ActionButton_default = ActionButton;
 
   // src/Inventory.tsx
-  var import_react72 = __toESM(require_react(), 1);
+  var import_react73 = __toESM(require_react(), 1);
   var Inventory = ({ inventory, compact }) => {
-    return /* @__PURE__ */ import_react72.default.createElement(Grid, { columns: { size: "auto", count: 5 }, gap: "small" }, /* @__PURE__ */ import_react72.default.createElement(AnimatePresence, null, inventory.map((item, i) => /* @__PURE__ */ import_react72.default.createElement(
+    return /* @__PURE__ */ import_react73.default.createElement(Grid, { columns: { size: "auto", count: 5 }, gap: "small" }, /* @__PURE__ */ import_react73.default.createElement(AnimatePresence, null, inventory.map((item, i) => /* @__PURE__ */ import_react73.default.createElement(
       motion.div,
       {
         layout: true,
@@ -81876,15 +81964,15 @@
         animate: { opacity: 1, scale: [0, 0.8, 1.1, 1] },
         transition: { ease: "easeIn", duration: 0.3 }
       },
-      /* @__PURE__ */ import_react72.default.createElement(Stack, { anchor: "bottom", fill: true }, /* @__PURE__ */ import_react72.default.createElement(Box, { border: !compact, align: "center", width: "50px", height: compact ? "30px" : "50px" }, /* @__PURE__ */ import_react72.default.createElement(Text, null, item.icon), !compact && /* @__PURE__ */ import_react72.default.createElement(import_react72.default.Fragment, null, /* @__PURE__ */ import_react72.default.createElement(Text, null, item.name))), /* @__PURE__ */ import_react72.default.createElement(Box, { fill: "horizontal", height: "5px", width: "50px" }, item.durability != -1 && /* @__PURE__ */ import_react72.default.createElement(Meter, { value: item.durability, max: item.maxDurability })))
+      /* @__PURE__ */ import_react73.default.createElement(Stack, { anchor: "bottom", fill: true }, /* @__PURE__ */ import_react73.default.createElement(Box, { border: !compact, align: "center", width: "50px", height: compact ? "30px" : "50px" }, /* @__PURE__ */ import_react73.default.createElement(Text, null, item.icon), !compact && /* @__PURE__ */ import_react73.default.createElement(import_react73.default.Fragment, null, /* @__PURE__ */ import_react73.default.createElement(Text, null, item.name))), /* @__PURE__ */ import_react73.default.createElement(Box, { fill: "horizontal", height: "5px", width: "50px" }, item.durability != -1 && /* @__PURE__ */ import_react73.default.createElement(Meter, { value: item.durability, max: item.maxDurability })))
     ))));
   };
   var Inventory_default = Inventory;
 
   // src/Kins.tsx
-  var import_react73 = __toESM(require_react(), 1);
+  var import_react74 = __toESM(require_react(), 1);
   var Kins = ({ inventory, entities, kins, rites, milestones, ticks }) => {
-    return /* @__PURE__ */ import_react73.default.createElement(AnimatePresence, null, /* @__PURE__ */ import_react73.default.createElement(Box, { gap: "small" }, kins.map((kin, i) => /* @__PURE__ */ import_react73.default.createElement(
+    return /* @__PURE__ */ import_react74.default.createElement(AnimatePresence, null, /* @__PURE__ */ import_react74.default.createElement(Box, { gap: "small" }, kins.map((kin, i) => /* @__PURE__ */ import_react74.default.createElement(
       motion.div,
       {
         layout: true,
@@ -81895,7 +81983,7 @@
         animate: { opacity: 1, scale: [0, 0.8, 1.1, 1] },
         transition: { ease: "easeIn", duration: 0.3 }
       },
-      /* @__PURE__ */ import_react73.default.createElement(Stack, { anchor: "bottom", fill: true }, /* @__PURE__ */ import_react73.default.createElement(Box, { direction: "row", border: true, pad: "small", width: "350px" }, /* @__PURE__ */ import_react73.default.createElement(Box, { align: "center", height: "50px" }, /* @__PURE__ */ import_react73.default.createElement(Text, null, kin.icon), /* @__PURE__ */ import_react73.default.createElement(Text, null, kin.name)), /* @__PURE__ */ import_react73.default.createElement(Box, { width: "300px", gap: "xsmall" }, /* @__PURE__ */ import_react73.default.createElement(Inventory_default, { inventory: kin.inventory, compact: true }), rites.some((rite) => rite.name == "Language" && rite.isComplete()) && actions.filter((action) => action.allowedEntities?.includes(kin.name)).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ import_react73.default.createElement(Box, { key: action.name, direction: "row", gap: "xsmall" }, /* @__PURE__ */ import_react73.default.createElement(
+      /* @__PURE__ */ import_react74.default.createElement(Stack, { anchor: "bottom", fill: true }, /* @__PURE__ */ import_react74.default.createElement(Box, { direction: "row", border: true, pad: "small", width: "350px" }, /* @__PURE__ */ import_react74.default.createElement(Box, { align: "center", height: "50px" }, /* @__PURE__ */ import_react74.default.createElement(Text, null, kin.icon), /* @__PURE__ */ import_react74.default.createElement(Text, null, kin.name)), /* @__PURE__ */ import_react74.default.createElement(Box, { width: "300px", gap: "xsmall" }, /* @__PURE__ */ import_react74.default.createElement(Inventory_default, { inventory: kin.inventory, compact: true }), rites.some((rite) => rite.name == "Tasks" && rite.isComplete()) && kin.inventory.some((i2) => i2.name == "Tool") && actions.filter((action) => action.allowedEntities?.includes(kin.name)).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ import_react74.default.createElement(Box, { key: action.name, direction: "row", gap: "xsmall" }, /* @__PURE__ */ import_react74.default.createElement(
         ActionButton_default,
         {
           performingActions: kin.performingActions,
@@ -81904,11 +81992,11 @@
           performAction: () => kin.giveActionPreference(action),
           disabled: !EvaluateRequirements({ inventory, entities, kins, rites, milestones, ticks }, action.requires)
         }
-      ), /* @__PURE__ */ import_react73.default.createElement(
+      ), /* @__PURE__ */ import_react74.default.createElement(
         Button,
         {
           style: { padding: 0 },
-          icon: /* @__PURE__ */ import_react73.default.createElement(Text, null, kin.actionPreference.some((a) => a.name == action.name) ? "\u2714\uFE0F" : "\u{1F5D9}"),
+          icon: /* @__PURE__ */ import_react74.default.createElement(Text, null, kin.actionPreference.some((a) => a.name == action.name) ? "\u2714\uFE0F" : "\u{1F5D9}"),
           onClick: () => kin.removeActionPreference(action)
         }
       ))))))
@@ -81917,7 +82005,7 @@
   var Kins_default = Kins;
 
   // src/Entities.tsx
-  var import_react74 = __toESM(require_react(), 1);
+  var import_react75 = __toESM(require_react(), 1);
   var Entities = ({
     entities,
     performEntityAction,
@@ -81928,7 +82016,7 @@
     ticks,
     performingActions
   }) => {
-    return /* @__PURE__ */ import_react74.default.createElement(Box, { height: { min: "200px" }, fill: true, align: "start" }, /* @__PURE__ */ import_react74.default.createElement(Text, null, "Entities"), /* @__PURE__ */ import_react74.default.createElement(Box, { gap: "xsmall" }, entities.map((entity, i) => /* @__PURE__ */ import_react74.default.createElement(Box, { key: "entity" + entity.name + i, gap: "small" }, /* @__PURE__ */ import_react74.default.createElement(Box, null, /* @__PURE__ */ import_react74.default.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ import_react74.default.createElement(Text, null, entity.icon), /* @__PURE__ */ import_react74.default.createElement(Text, null, entity.name), entity.ttl > 0 && /* @__PURE__ */ import_react74.default.createElement(Text, null, entity.ttl.toFixed(0), "s"), entity.temperature != 0 && /* @__PURE__ */ import_react74.default.createElement(Text, null, entity.temperature.toFixed(0), " \xB0C")), entity.performs.map((perform2) => /* @__PURE__ */ import_react74.default.createElement(Box, { key: "entity" + entity.name + i + "perform" + perform2.name, direction: "row", gap: "xsmall", align: "center" }, perform2.ttp > 0 && perform2.condition({ inventory, entities, kins, rites, milestones, ticks }, entity) && /* @__PURE__ */ import_react74.default.createElement(import_react74.default.Fragment, null, /* @__PURE__ */ import_react74.default.createElement(Text, null, perform2.icon), /* @__PURE__ */ import_react74.default.createElement(Meter, { value: ticks - perform2.lastTickPerformed, max: perform2.ttp, thickness: "10px", size: "full" }))))), actions.filter((action) => action.allowedEntities?.includes(entity.name)).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ import_react74.default.createElement(
+    return /* @__PURE__ */ import_react75.default.createElement(Box, { height: { min: "200px" }, fill: true, align: "start" }, /* @__PURE__ */ import_react75.default.createElement(Text, null, "Entities"), /* @__PURE__ */ import_react75.default.createElement(Box, { gap: "xsmall" }, entities.map((entity, i) => /* @__PURE__ */ import_react75.default.createElement(Box, { key: "entity" + entity.name + i, gap: "small" }, /* @__PURE__ */ import_react75.default.createElement(Box, null, /* @__PURE__ */ import_react75.default.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ import_react75.default.createElement(Text, null, entity.icon), /* @__PURE__ */ import_react75.default.createElement(Text, null, entity.name), entity.ttl > 0 && /* @__PURE__ */ import_react75.default.createElement(Text, null, entity.ttl.toFixed(0), "s"), entity.temperature != 0 && /* @__PURE__ */ import_react75.default.createElement(Text, null, entity.temperature.toFixed(0), " \xB0C")), entity.performs.map((perform2) => /* @__PURE__ */ import_react75.default.createElement(Box, { key: "entity" + entity.name + i + "perform" + perform2.name, direction: "row", gap: "xsmall", align: "center" }, perform2.ttp > 0 && perform2.condition({ inventory, entities, kins, rites, milestones, ticks }, entity) && /* @__PURE__ */ import_react75.default.createElement(import_react75.default.Fragment, null, /* @__PURE__ */ import_react75.default.createElement(Text, null, perform2.icon), /* @__PURE__ */ import_react75.default.createElement(Meter, { value: ticks - perform2.lastTickPerformed, max: perform2.ttp, thickness: "10px", size: "full" }))))), actions.filter((action) => action.allowedEntities?.includes(entity.name)).filter((action) => action.milestones({ inventory, entities, kins, rites, milestones, ticks })).map((action) => /* @__PURE__ */ import_react75.default.createElement(
       ActionButton_default,
       {
         performingActions,
@@ -81943,17 +82031,17 @@
 
   // src/Home.tsx
   var Home = () => {
-    const [gameState, setGameState] = React46.useState(new GameState());
-    const [inventory, setInventory] = React46.useState([]);
-    const [entities, setEntities] = React46.useState([]);
-    const [milestones, setMilestones] = React46.useState([]);
-    const [kins, setKins] = React46.useState([]);
-    const [rites, setRites] = React46.useState([]);
-    const [ticks, setTicks] = React46.useState(0);
-    const [performingActions, setPerformingActions] = React46.useState([]);
-    const [messages, setMessages] = React46.useState([]);
-    const [showMessages, setShowMessages] = React46.useState(false);
-    React46.useEffect(() => {
+    const [gameState, setGameState] = React47.useState(new GameState());
+    const [inventory, setInventory] = React47.useState([]);
+    const [entities, setEntities] = React47.useState([]);
+    const [milestones, setMilestones] = React47.useState([]);
+    const [kins, setKins] = React47.useState([]);
+    const [rites, setRites] = React47.useState([]);
+    const [ticks, setTicks] = React47.useState(0);
+    const [performingActions, setPerformingActions] = React47.useState([]);
+    const [messages, setMessages] = React47.useState([]);
+    const [showMessages, setShowMessages] = React47.useState(false);
+    React47.useEffect(() => {
       const listener3 = (newState, newMessages) => {
         setInventory(newState.inventory);
         setEntities(newState.entities);
@@ -81972,7 +82060,7 @@
         gameState.unsubscribe(listener3);
       };
     }, [messages]);
-    return /* @__PURE__ */ React46.createElement(React46.Fragment, null, /* @__PURE__ */ React46.createElement(LayoutGroup, null, /* @__PURE__ */ React46.createElement(Box, { align: "center", fill: true, gap: "xsmall" }, /* @__PURE__ */ React46.createElement(
+    return /* @__PURE__ */ React47.createElement(React47.Fragment, null, /* @__PURE__ */ React47.createElement(LayoutGroup, null, /* @__PURE__ */ React47.createElement(Box, { pad: "small" }, /* @__PURE__ */ React47.createElement(Debug_default, { perform: (p2) => gameState.performAction(p2) })), /* @__PURE__ */ React47.createElement(Box, { align: "center", fill: true, gap: "xsmall" }, /* @__PURE__ */ React47.createElement(
       Progress_default,
       {
         color: DayNightColors[Math.floor(ticks % 100 / 100 * DayNightColors.length)],
@@ -81981,42 +82069,46 @@
         ttl: 100,
         width: "100%"
       }
-    ), "Day " + (Math.floor(ticks / 100) + 1), /* @__PURE__ */ React46.createElement(Box, { direction: "row", gap: "small", align: "start", fill: true }, /* @__PURE__ */ React46.createElement(Box, { gap: "small" }, /* @__PURE__ */ React46.createElement(Text, null, "Actions"), actions.filter((action) => action.allowedEntities?.length == 0 || action.allowedEntities?.includes("*")).filter((action) => action.type?.length == 0).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React46.createElement(
-      ActionButton_default,
+    ), "Day " + (Math.floor(ticks / 100) + 1), /* @__PURE__ */ React47.createElement(Box, { direction: "row", gap: "small", align: "start", fill: true }, /* @__PURE__ */ React47.createElement(Box, { gap: "small" }, /* @__PURE__ */ React47.createElement(Text, null, "Resources"), /* @__PURE__ */ React47.createElement(
+      ActionButtons,
       {
+        condition: (action) => action.type?.includes("Resource") == true && (action.allowedEntities?.length == 0 || action.allowedEntities?.includes("*") == true),
+        gameState,
         performingActions,
-        key: action.name,
-        action,
-        performAction: gameState.performAction,
-        disabled: !EvaluateRequirements(gameState, action.requires) || !!performingActions.find((performingAction) => performingAction.action.id == action.id)
+        performAction: gameState.performAction
       }
-    ))), milestones.length > 0 && /* @__PURE__ */ React46.createElement(Box, { gap: "small" }, /* @__PURE__ */ React46.createElement(Text, null, "Milestones"), milestones.map((milestone, i) => /* @__PURE__ */ React46.createElement(Button, { disabled: true, key: milestone.name + i, label: milestone.name }))), milestones.length > 0 && /* @__PURE__ */ React46.createElement(Box, { gap: "small" }, /* @__PURE__ */ React46.createElement(Text, null, "Rituals"), actions.filter((action) => action.allowedEntities?.length == 0).filter((action) => action.type?.includes("Ritual")).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React46.createElement(
-      ActionButton_default,
+    )), /* @__PURE__ */ React47.createElement(Box, { gap: "small" }, /* @__PURE__ */ React47.createElement(Text, null, "Actions"), /* @__PURE__ */ React47.createElement(
+      ActionButtons,
       {
+        condition: (action) => (action.type?.length == 0 || action.type?.includes("*") == true) && (action.allowedEntities?.length == 0 || action.allowedEntities?.includes("*") == true),
+        gameState,
         performingActions,
-        key: action.name,
-        action,
-        performAction: gameState.performAction,
-        disabled: !EvaluateRequirements(gameState, action.requires)
+        performAction: gameState.performAction
       }
-    ))), milestones.length > 0 && /* @__PURE__ */ React46.createElement(Box, { gap: "small" }, /* @__PURE__ */ React46.createElement(Text, null, "Rites"), actions.filter((action) => action.allowedEntities?.length == 0).filter((action) => action.type?.includes("Rite")).filter((action) => action.milestones(gameState)).map((action) => /* @__PURE__ */ React46.createElement(
-      ActionButton_default,
+    )), /* @__PURE__ */ React47.createElement(Box, { gap: "small" }, /* @__PURE__ */ React47.createElement(Text, null, "Rituals"), /* @__PURE__ */ React47.createElement(
+      ActionButtons,
       {
+        condition: (action) => action.type?.includes("Ritual") == true && (action.allowedEntities?.length == 0 || action.allowedEntities?.includes("*") == true),
+        gameState,
         performingActions,
-        primary: rites.find((rite) => rite.name == action.name)?.isComplete(),
-        key: action.name,
-        action,
-        performAction: gameState.performAction,
-        disabled: !EvaluateRequirements(gameState, action.requires)
+        performAction: gameState.performAction
       }
-    ))), milestones.length > 0 && /* @__PURE__ */ React46.createElement(Box, { gap: "small" }, /* @__PURE__ */ React46.createElement(Text, null, "Active Rites"), rites.filter((rite) => !rite.isComplete()).map((rite) => /* @__PURE__ */ React46.createElement(Box, { key: rite.id }, /* @__PURE__ */ React46.createElement(Text, null, rite.icon), /* @__PURE__ */ React46.createElement(Text, null, rite.name), rite.ingredients.map(([name, count]) => /* @__PURE__ */ React46.createElement(Box, { key: "rite" + rite.id + "ingredient" + name }, /* @__PURE__ */ React46.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React46.createElement(Text, null, name, " x", count), /* @__PURE__ */ React46.createElement(
+    )), /* @__PURE__ */ React47.createElement(Box, { gap: "small" }, /* @__PURE__ */ React47.createElement(Text, null, "Rites"), /* @__PURE__ */ React47.createElement(
+      ActionButtons,
+      {
+        condition: (action) => action.type?.includes("Rite") == true && (action.allowedEntities?.length == 0 || action.allowedEntities?.includes("*") == true),
+        gameState,
+        performingActions,
+        performAction: gameState.performAction
+      }
+    )), /* @__PURE__ */ React47.createElement(Box, { gap: "small" }, /* @__PURE__ */ React47.createElement(Text, null, "Active Rites"), rites.filter((rite) => !rite.isComplete()).map((rite) => /* @__PURE__ */ React47.createElement(Box, { key: rite.id }, /* @__PURE__ */ React47.createElement(Text, null, rite.icon), /* @__PURE__ */ React47.createElement(Text, null, rite.name), rite.ingredients.map(([name, count]) => /* @__PURE__ */ React47.createElement(Box, { key: "rite" + rite.id + "ingredient" + name }, /* @__PURE__ */ React47.createElement(Box, { direction: "row", gap: "small" }, /* @__PURE__ */ React47.createElement(Text, null, name, " x", count), /* @__PURE__ */ React47.createElement(
       Button,
       {
         label: "Offer " + name,
         onClick: () => gameState.performOffering(rite, name),
         disabled: !EvaluateRequirements(gameState, [ItemRequirement([name, 1])])
       }
-    )), /* @__PURE__ */ React46.createElement(Box, { fill: "horizontal", height: "5px", width: "50px" }, /* @__PURE__ */ React46.createElement(Meter, { value: rite.progress.find(([n, c]) => n == name)?.[1], max: count })))))))), /* @__PURE__ */ React46.createElement(
+    )), /* @__PURE__ */ React47.createElement(Box, { fill: "horizontal", height: "5px", width: "50px" }, /* @__PURE__ */ React47.createElement(Meter, { value: rite.progress.find(([n, c]) => n == name)?.[1], max: count })))))))), /* @__PURE__ */ React47.createElement(
       Entities_default,
       {
         performingActions,
@@ -82028,15 +82120,15 @@
         rites,
         ticks
       }
-    ), /* @__PURE__ */ React46.createElement(Box, { direction: "row", gap: "small", fill: true, align: "start" }, /* @__PURE__ */ React46.createElement(Box, { height: { min: "200px" }, width: "320px", border: true, pad: "small" }, /* @__PURE__ */ React46.createElement(Text, null, "Inventory"), /* @__PURE__ */ React46.createElement(Inventory_default, { inventory })), /* @__PURE__ */ React46.createElement(Box, { height: { min: "200px" }, width: "320px" }, kins.length > 0 && /* @__PURE__ */ React46.createElement(Text, null, "Kins"), /* @__PURE__ */ React46.createElement(Kins_default, { entities, inventory, milestones, kins, rites, ticks }))), /* @__PURE__ */ React46.createElement(Box, null, /* @__PURE__ */ React46.createElement(Debug_default, { perform: (p2) => gameState.performAction(p2) }))), showMessages && /* @__PURE__ */ React46.createElement(Box, null, messages.map((message, i) => /* @__PURE__ */ React46.createElement(Box, { key: i, gap: "xsmall" }, /* @__PURE__ */ React46.createElement(Box, { direction: "row", gap: "xsmall" }, /* @__PURE__ */ React46.createElement(Text, null, message.icon), /* @__PURE__ */ React46.createElement(Text, null, message.text)), /* @__PURE__ */ React46.createElement(Text, null, message.content))))));
+    ), /* @__PURE__ */ React47.createElement(Box, { direction: "row", gap: "small", fill: true, align: "start" }, /* @__PURE__ */ React47.createElement(Box, { height: { min: "200px" }, width: "320px", border: true, pad: "small" }, /* @__PURE__ */ React47.createElement(Text, null, "Inventory"), /* @__PURE__ */ React47.createElement(Inventory_default, { inventory })), /* @__PURE__ */ React47.createElement(Box, { height: { min: "200px" }, width: "320px" }, kins.length > 0 && /* @__PURE__ */ React47.createElement(Text, null, "Kins"), /* @__PURE__ */ React47.createElement(Kins_default, { entities, inventory, milestones, kins, rites, ticks })))), showMessages && /* @__PURE__ */ React47.createElement(Box, null, messages.map((message, i) => /* @__PURE__ */ React47.createElement(Box, { key: i, gap: "xsmall" }, /* @__PURE__ */ React47.createElement(Box, { direction: "row", gap: "xsmall" }, /* @__PURE__ */ React47.createElement(Text, null, message.icon), /* @__PURE__ */ React47.createElement(Text, null, message.text)), /* @__PURE__ */ React47.createElement(Text, null, message.content))))));
   };
   var Home_default = Home;
 
   // src/components/ComponentTest.tsx
-  var import_react75 = __toESM(require_react(), 1);
+  var import_react76 = __toESM(require_react(), 1);
   var ComponentTest = () => {
-    const [value, setValue] = (0, import_react75.useState)(5);
-    return /* @__PURE__ */ import_react75.default.createElement(Box, { gap: "small" }, /* @__PURE__ */ import_react75.default.createElement(
+    const [value, setValue] = (0, import_react76.useState)(5);
+    return /* @__PURE__ */ import_react76.default.createElement(Box, { gap: "small" }, /* @__PURE__ */ import_react76.default.createElement(
       ProgressButton_default,
       {
         label: "Click me",
@@ -82048,7 +82140,7 @@
         id: 1,
         active: true
       }
-    ), /* @__PURE__ */ import_react75.default.createElement(
+    ), /* @__PURE__ */ import_react76.default.createElement(
       ProgressButton_default,
       {
         label: "Click me",
@@ -82059,7 +82151,7 @@
         },
         id: 2
       }
-    ), /* @__PURE__ */ import_react75.default.createElement(
+    ), /* @__PURE__ */ import_react76.default.createElement(
       ProgressButton_default,
       {
         label: "Click me",
@@ -82079,10 +82171,10 @@
   function App() {
     const navigate = useNavigate();
     const [isDarkMode, toggleDarkMode] = useDarkMode();
-    const [grommetProps, setGrommetProps] = React48.useState({});
-    React48.useEffect(() => {
+    const [grommetProps, setGrommetProps] = React49.useState({});
+    React49.useEffect(() => {
     }, []);
-    return /* @__PURE__ */ React48.createElement(Grommet, { ...grommetProps, full: true, theme: Theme_default, themeMode: isDarkMode ? "dark" : "light" }, /* @__PURE__ */ React48.createElement(Box, { background: { color: "background" } }, /* @__PURE__ */ React48.createElement(DarkModeSwitch_default, null), /* @__PURE__ */ React48.createElement(Box, { style: { backgroundSize: "cover" }, height: { min: "100vh" }, pad: { top: "small" } }, /* @__PURE__ */ React48.createElement(Box, { pad: { left: "medium", right: "medium" }, style: { position: "relative" } }, /* @__PURE__ */ React48.createElement(ErrorBoundary_default, null, /* @__PURE__ */ React48.createElement(Routes, null, /* @__PURE__ */ React48.createElement(Route, { path: "/test", element: /* @__PURE__ */ React48.createElement(ComponentTest_default, null) }), /* @__PURE__ */ React48.createElement(Route, { path: "/*", element: /* @__PURE__ */ React48.createElement(Home_default, null) })))))));
+    return /* @__PURE__ */ React49.createElement(Grommet, { ...grommetProps, full: true, theme: Theme_default, themeMode: isDarkMode ? "dark" : "light" }, /* @__PURE__ */ React49.createElement(Box, { background: { color: "background" } }, /* @__PURE__ */ React49.createElement(DarkModeSwitch_default, null), /* @__PURE__ */ React49.createElement(Box, { style: { backgroundSize: "cover" }, height: { min: "100vh" }, pad: { top: "small" } }, /* @__PURE__ */ React49.createElement(Box, { pad: { left: "medium", right: "medium" }, style: { position: "relative" } }, /* @__PURE__ */ React49.createElement(ErrorBoundary_default, null, /* @__PURE__ */ React49.createElement(Routes, null, /* @__PURE__ */ React49.createElement(Route, { path: "/test", element: /* @__PURE__ */ React49.createElement(ComponentTest_default, null) }), /* @__PURE__ */ React49.createElement(Route, { path: "/*", element: /* @__PURE__ */ React49.createElement(Home_default, null) })))))));
   }
   var App_default = App;
 
@@ -82091,12 +82183,12 @@
   var router = createBrowserRouter([
     {
       path: "/*",
-      element: /* @__PURE__ */ React49.createElement(App_default, null)
+      element: /* @__PURE__ */ React50.createElement(App_default, null)
     }
   ]);
   var container = document.getElementById("app");
   var root = (0, import_client2.createRoot)(container);
-  root.render(/* @__PURE__ */ React49.createElement(RouterProvider, { router }));
+  root.render(/* @__PURE__ */ React50.createElement(RouterProvider, { router }));
 })();
 /*! For license information please see index.js.LEGAL.txt */
 //# sourceMappingURL=index.js.map
