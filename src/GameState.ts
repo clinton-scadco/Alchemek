@@ -115,9 +115,9 @@ export class GameState {
     };
 
     tick = () => {
+        let t = +new Date();
         try {
             let oldState = this.snapshot();
-
             this.updates = 0;
 
             this.performingActions.forEach((performingAction) => {

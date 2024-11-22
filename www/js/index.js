@@ -73360,6 +73360,348 @@
     }
   };
 
+  // src/Eras/One.tsx
+  var LanguageRite = class extends Rite {
+    constructor() {
+      super({ name: "Language", ingredients: [["Tool", 10]] });
+      this.icon = "\u{1F524}";
+    }
+  };
+  var RiteDefinitions = {
+    Language: {
+      create: () => new LanguageRite()
+    }
+  };
+  var EntityDefinitions = {
+    Fire: {
+      create: (ticks) => new Entity({
+        name: "Fire",
+        icon: "\u{1F525}",
+        ttl: 60,
+        temperature: 100,
+        tick: ({ tickRate }, source) => {
+          if (source.temperature <= 100) {
+            source.ttl -= 1 / tickRate;
+          } else {
+            source.ttl = 60;
+          }
+          source.temperature -= 2 / tickRate;
+        },
+        performs: [
+          {
+            name: "Gather",
+            icon: "\u{1F464}",
+            ttp: 10,
+            lastTickPerformed: ticks,
+            condition: ({ kins }, source) => {
+              return source.temperature > 60 && kins.length < 5;
+            },
+            perform: ({ kins }, source) => {
+              kins.push(new Kin({ name: "Kin" }));
+            }
+          }
+        ]
+      })
+    },
+    Emberstone: {
+      create: () => new Entity({
+        name: "Emberstone",
+        icon: "\u{1F525}\u{1FAA8}\u{1F525}",
+        temperature: 200,
+        tick: ({ tickRate }, source) => {
+          if (source.temperature <= 200) {
+            source.temperature += 2 / tickRate;
+          }
+        }
+      })
+    }
+  };
+
+  // src/Eras/MilestoneDefinitions.ts
+  var MilestoneDefinitions = {
+    Emberstone: new Milestone("Emberstone", "A small, glowing emberstone. It seems to keep a very high temperature.", [
+      new Requirement({ type: "entity", value: 1, name: "Fire", requires: [new Requirement({ type: "temperature", value: 200, operator: ">" })] })
+    ]),
+    Hafting: new Milestone("Hafting", "We can make better tools by attaching a handle."),
+    Language: new Milestone("Language", "The ability to talk, it can only get better from here... Right?", [new Requirement({ type: "kin", value: 5, name: "Kin", operator: ">=" })])
+  };
+
+  // src/utils/Random.ts
+  var instances = /* @__PURE__ */ new Map();
+  var Random = class {
+    constructor(id3, chance) {
+      this.chance = chance;
+      this.iterations = 0;
+    }
+    next() {
+      let r = Math.random();
+      if (r < this.chance) {
+        this.iterations = 0;
+        return true;
+      } else {
+        this.iterations++;
+      }
+      if (this.iterations >= 1 / this.chance) {
+        this.iterations = 0;
+        return true;
+      }
+      return false;
+    }
+  };
+  var GetRandom = (id3, change) => {
+    let instance = instances.get(id3);
+    if (instance) {
+      return instance;
+    } else {
+      const instance2 = new Random(id3, change);
+      instances.set(id3, instance2);
+      return instance2;
+    }
+  };
+
+  // src/Eras/ItemDefinitions.ts
+  var ItemDefinitions = {
+    Stone: {
+      icon: "\u{1FAA8}",
+      create: () => new Item({ icon: "\u{1FAA8}", name: "Stone", durability: -1 })
+    },
+    Wood: {
+      icon: "\u{1FAB5}",
+      create: () => new Item({ icon: "\u{1FAB5}", name: "Wood", durability: -1 })
+    },
+    Tool: {
+      icon: "\u{1F6E0}\uFE0F",
+      create: (durability) => new Item({ icon: "\u{1F6E0}\uFE0F", name: "Tool", durability })
+    },
+    "Heated Stone": {
+      icon: "\u{1F525}\u{1FAA8}",
+      create: () => new Item({ icon: "\u{1F525}\u{1FAA8}", name: "Heated Stone", durability: -1 })
+    },
+    "Wooden Shaft": {
+      icon: "\u{1FAB5}\u{1FAB5}",
+      create: () => new Item({ icon: "\u{1FAB5}\u{1FAB5}", name: "Wooden Shaft", durability: -1 })
+    },
+    "Language Rite": {
+      icon: "\u{1F524}",
+      class: LanguageRite
+    }
+  };
+
+  // src/Actions.ts
+  var actionDefinitions = [
+    {
+      name: "Collect Stone",
+      icon: "\u{1FAA8}",
+      perform: [["addToInventory", "Stone", 1]],
+      duration: 2,
+      allowedEntities: ["*", "Kin"]
+    },
+    {
+      name: "Collect Wood",
+      icon: "\u{1FAB5}",
+      perform: [["addToInventory", "Wood", 1]],
+      duration: 2,
+      allowedEntities: ["*", "Kin"]
+    },
+    {
+      name: "Make Fire",
+      icon: "\u{1F525}",
+      perform: [
+        ["removeFromInventory", "Wood", 2],
+        ["createEntity", "Fire"]
+      ],
+      requires: [["item", "Wood", 2]],
+      duration: 5
+    },
+    {
+      name: "Make Tool",
+      icon: "\u{1F6E0}\uFE0F",
+      perform: [
+        ["removeFromInventory", "Stone", 1],
+        ["addToInventory", "Tool", 1, 10],
+        ["chance", 6, "awardMilestone", "Hafting"]
+      ],
+      requires: [["item", "Stone", 1]],
+      duration: 8
+    },
+    {
+      name: "Feed Fire",
+      icon: "\u{1FAB5}\u{1F525}",
+      perform: [
+        ["removeFromInventory", "Wood", 1],
+        ["forEntity", "Fire", "temperature", "<", 200, "changeEntityProperty", "temperature", "+", 10]
+      ],
+      duration: 1,
+      allowedEntities: ["Fire", "Kin"],
+      requires: [
+        ["item", "Wood", 1],
+        ["entity", "Fire", 1, ["temperature", "<", 220]]
+      ]
+    },
+    {
+      name: "Emberstone",
+      icon: "\u{1F525}\u{1FAA8}\u{1F525}",
+      perform: [
+        ["removeFromInventory", "Heated Stone", 2],
+        ["createEntity", "Emberstone"]
+      ],
+      requires: [
+        ["item", "Heated Stone", 2],
+        ["entity", "*", 1, ["temperature", ">", 200]],
+        ["timeName", "Midnight", "="]
+      ],
+      milestones: ["Emberstone"],
+      type: ["Ritual"]
+    },
+    {
+      name: "Heat Stone",
+      icon: "\u{1F525}\u{1FAA8}",
+      perform: [
+        ["removeFromInventory", "Stone", 1],
+        ["forEntity", "*", "temperature", ">=", 150, "changeEntityProperty", "temperature", "-", 10],
+        ["addToInventory", "Heated Stone", 1]
+      ],
+      requires: [
+        ["item", "Stone", 1],
+        ["entity", "*", 1, ["temperature", ">=", 150]]
+      ],
+      allowedEntities: ["Fire", "Emberstone"]
+    },
+    {
+      name: "Language",
+      icon: "\u{1F524}",
+      perform: [["startRite", "Language"]],
+      requires: [
+        ["kin", "Kin", 5],
+        ["rite", "Language", "<1"]
+      ],
+      milestones: ["Language"],
+      type: ["Rite"]
+    },
+    {
+      name: "Wood Shaft",
+      icon: "\u{1FAB5}\u{1FAB5}",
+      perform: [
+        ["removeFromInventory", "Wood", 1],
+        ["forItem", "Tool", "durability", ">=", 1, "changeItemProperty", "durability", "-", 1],
+        ["addToInventory", "Wooden Shaft", 1]
+      ],
+      requires: [
+        ["item", "Wood", 1],
+        ["item", "Tool", 1, ["durability", ">=", 1]]
+      ],
+      milestones: ["Hafting"],
+      allowedEntities: ["*", "Kin"]
+    }
+  ];
+  var EntityFunctions = {
+    changeEntityProperty: function(state, source, kin, property, changeOperator, value) {
+      if (source) {
+        source[property] = Change(source[property], value, changeOperator);
+      }
+    }
+  };
+  var ItemFunctions = {
+    changeItemProperty: (item, property, changeOperator, value) => {
+      item[property] = Change(item[property], value, changeOperator);
+    }
+  };
+  var NestedActionFunctionValidations = {
+    forItem: Object.keys(ItemFunctions),
+    forEntity: Object.keys(EntityFunctions)
+  };
+  var ActionFunctions = {
+    addToInventory: (state, source, kin, item, qty, durability) => {
+      state.inventory.push(...new Array(qty).fill(ItemDefinitions[item].create(durability)));
+    },
+    removeFromInventory: (state, source, kin, item, qty) => {
+      RemoveItem(state.inventory, item, qty);
+    },
+    createEntity: (state, source, kin, entity) => {
+      state.entities.push(EntityDefinitions[entity].create());
+    },
+    chance: function(state, source, kin, chance, actionFunction, ...params) {
+      let random = GetRandom(this.id, 1 / chance);
+      if (random.next()) {
+        ActionFunctions[actionFunction](state, source, kin, ...params);
+      }
+    },
+    awardMilestone: function(state, source, kin, milestone) {
+      state.milestones.push(MilestoneDefinitions[milestone]);
+    },
+    forEntity: function(state, source, kin, entity, property, operator, value, actionFunction, ...params) {
+      if (!source) {
+        let entitySource = state.entities.sort((a, b) => a[property] - b[property]).find((e) => (entity != "*" ? e.name === entity : true) && Compare(e[property], value, operator));
+        if (entitySource) {
+          source = entitySource;
+        } else {
+          return;
+        }
+      }
+      EntityFunctions[actionFunction](state, source, kin, ...params);
+    },
+    forItem: function(state, source, kin, item, property, operator, value, actionFunction, ...params) {
+      if (kin) {
+        let forItem = kin.inventory.find((e) => (item != "*" ? e.name === item : true) && Compare(e[property], value, operator));
+        ItemFunctions[actionFunction](forItem, ...params);
+      } else {
+        let forItem = state.inventory.find((e) => (item != "*" ? e.name === item : true) && Compare(e[property], value, operator));
+        ItemFunctions[actionFunction](forItem, ...params);
+      }
+    },
+    startRite: (state, source, kin, rite) => {
+      state.rites.push(RiteDefinitions[rite].create());
+    }
+  };
+  var ValidateActionFunction = (definition) => {
+    if (definition.perform.length > 0 && definition.perform.every((x) => x.length > 0)) {
+      definition.perform.forEach(([actionFunction, ...params]) => {
+        if (NestedActionFunctionValidations[actionFunction]) {
+          NestedActionFunctionValidations[actionFunction].forEach((validation) => {
+            if (!params.includes(validation)) {
+              throw new Error(`Action Function ${actionFunction} requires ${validation}`);
+            }
+          });
+        }
+      });
+    }
+  };
+  var CreateAction = (definition) => {
+    ValidateActionFunction(definition);
+    return new Action2({
+      name: definition.name,
+      icon: definition.icon,
+      perform: function(state, source, kin) {
+        definition.perform.forEach(([action, ...rest]) => {
+          ActionFunctions[action](state, source, kin, ...rest);
+        });
+      },
+      requires: definition.requires?.map(([type, name, value, ...subRequires]) => {
+        let { operator, value: v } = ParseOperatorValue(value);
+        return new Requirement({
+          type,
+          name,
+          value: v,
+          operator,
+          requires: subRequires?.map((x) => {
+            let [type2, operator2, value2] = [x[0], x[1], x[2]];
+            return new Requirement({ type: type2, operator: operator2, value: value2 });
+          })
+        });
+      }),
+      duration: definition.duration,
+      allowedEntities: definition.allowedEntities,
+      milestones: (state) => {
+        if (definition.milestones) {
+          return definition.milestones?.every((m) => state.milestones.includes(MilestoneDefinitions[m]));
+        }
+        return true;
+      },
+      type: definition.type
+    });
+  };
+  var actions = actionDefinitions.map(CreateAction);
+
   // node_modules/framer-motion/dist/es/utils/warn-once.mjs
   var warned = /* @__PURE__ */ new Set();
   function warnOnce(condition, message, element) {
@@ -81304,6 +81646,7 @@
         }
       };
       this.tick = () => {
+        let t = +/* @__PURE__ */ new Date();
         try {
           let oldState = this.snapshot();
           this.updates = 0;
