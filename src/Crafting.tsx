@@ -1,12 +1,13 @@
 import { AnimatePresence, m, motion } from "framer-motion";
-import { Grid, Stack, Box, Meter, Text, Menu, Button } from "grommet";
+import { Grid, Stack, Box, Meter, Text, Menu, Button, TextInput } from "grommet";
 import { IGameState, Item } from "./BaseClasses";
 import React, { useEffect } from "react";
 import { ItemDefinitions } from "./Eras/ItemDefinitions";
-import { Schematic, Schematics } from "./Eras/CraftingDefinitions";
+import { Schematic, SchematicPlan, Schematics } from "./Eras/CraftingDefinitions";
 import { GameState } from "./GameState";
 import ActionButton from "./ActionButton";
 import { GetNextId } from "./utils/Data";
+import Modal from "./components/Modal";
 
 //crafting grid areas 5x5
 const gridAreas = [
@@ -78,6 +79,8 @@ const Crafting = ({ inventory, gameState }: { inventory: Item[]; gameState: Game
     const [usedItems, setUsedItems] = React.useState([] as Item[]);
     const [matchedItems, setMatchedItems] = React.useState([] as { item: string; quantity: number }[]);
 
+    const [ghostItems, setGhostItems] = React.useState({} as { [key: string]: string });
+
     const [craftActionId, setCraftActionId] = React.useState(GetNextId());
 
     const selectItem = (slot: string, item: Item) => {
@@ -85,6 +88,11 @@ const Crafting = ({ inventory, gameState }: { inventory: Item[]; gameState: Game
             setItems((prev) => {
                 return { ...prev, [slot]: item };
             });
+            if (ghostItems[slot]) {
+                let newGhostItems = { ...ghostItems };
+                delete newGhostItems[slot];
+                setGhostItems(newGhostItems);
+            }
         }
     };
 
@@ -113,6 +121,15 @@ const Crafting = ({ inventory, gameState }: { inventory: Item[]; gameState: Game
                     delete newItems[slot];
                 }
             }
+            let newGhostItems = { ...ghostItems };
+            for (let slot in ghostItems) {
+                let item = newState.inventory.find((i) => i.name === ghostItems[slot]);
+                if (item) {
+                    newItems[slot] = item;
+                    delete newGhostItems[slot];
+                }
+            }
+            setGhostItems(newGhostItems);
             setItems(newItems);
         };
 
@@ -124,83 +141,144 @@ const Crafting = ({ inventory, gameState }: { inventory: Item[]; gameState: Game
         };
     }, [items]);
 
+    const [showSchematicPlanModal, setShowSchematicPlanModal] = React.useState(false);
+    const [schematicPlanName, setSchematicPlanName] = React.useState("");
+
+    const saveSchematicPlan = () => {
+        let plan = Object.fromEntries(
+            Object.entries(items)
+                .map(([slot, item]) => {
+                    return [slot, item.name];
+                })
+                .concat(Object.entries(ghostItems).map(([slot, item]) => [slot, item]))
+        );
+
+        gameState.schematicPlans.push({ slots: plan, name: schematicPlanName } as SchematicPlan);
+        setShowSchematicPlanModal(false);
+    };
+
+    const loadItemsFromPlan = (plan: SchematicPlan) => {
+        let availableItems = inventory.filter((i) => !usedItems.includes(i));
+        let newItems = { ...items };
+        let newGhostItems = { ...ghostItems };
+
+        for (let slot in plan.slots) {
+            let item = availableItems.find((i) => i.name === plan.slots[slot]);
+            if (item) {
+                newItems[slot] = item;
+            } else {
+                newGhostItems[slot] = plan.slots[slot];
+            }
+        }
+        setItems(newItems);
+        setGhostItems(newGhostItems);
+    };
+
     return (
         <Box>
-            <Grid columns={columns} rows={rows} gap={"small"} areas={gridAreas}>
-                <AnimatePresence>
-                    {slots.map((slot) => (
-                        <Box
-                            gridArea={slot}
-                            key={slot}
-                            width={"60px"}
-                            height={"60px"}
-                            align={"center"}
-                            justify={"center"}
-                            border={{ size: "2px", color: usedItems.includes(items[slot]) ? "status-ok" : !items[slot] ? "background-back" : "text" }}
-                        >
-                            {items[slot] && (
-                                <motion.div
-                                    layout
-                                    layoutId={slot}
-                                    initial={{ opacity: 0, scale: 0 }}
-                                    exit={{ opacity: [1, 1, 1, 1, 0], scale: [1, 1, 1, 1, 0], rotate: [3, 0, -3, 3, -3] }}
-                                    animate={{ opacity: 1, scale: [0, 0.8, 1.1, 1] }}
-                                    transition={{ ease: "easeIn", duration: 0.3 }}
-                                    onClick={() => {
-                                        clearItem(slot);
-                                    }}
-                                >
-                                    <Text>{items[slot].name}</Text>
-                                </motion.div>
-                            )}
-                            {!items[slot] && (
-                                <Box fill onClick={() => {}} hoverIndicator={"background-front"}>
-                                    <Menu
-                                        disabled={gameState.performingActions.some((performingAction) => performingAction.action.id === craftActionId)}
-                                        fill
-                                        icon={false}
-                                        label=""
-                                        items={inventory
-                                            .filter((i) => Object.values(items).indexOf(i) === -1)
-                                            .map((i) => ({
-                                                label: i.name,
-                                                onClick: () => {
-                                                    selectItem(slot, i);
-                                                },
-                                            }))}
-                                    />
-                                </Box>
-                            )}
+            <Box direction="row" gap="small">
+                <Grid columns={columns} rows={rows} gap={"small"} areas={gridAreas}>
+                    <AnimatePresence>
+                        {slots.map((slot) => (
+                            <Box
+                                gridArea={slot}
+                                key={slot}
+                                width={"60px"}
+                                height={"60px"}
+                                align={"center"}
+                                justify={"center"}
+                                border={{ size: "2px", color: usedItems.includes(items[slot]) ? "status-ok" : !items[slot] ? "background-back" : "text" }}
+                            >
+                                {items[slot] && (
+                                    <motion.div
+                                        layout
+                                        layoutId={slot}
+                                        initial={{ opacity: 0, scale: 0 }}
+                                        exit={{ opacity: [1, 1, 1, 1, 0], scale: [1, 1, 1, 1, 0], rotate: [3, 0, -3, 3, -3] }}
+                                        animate={{ opacity: 1, scale: [0, 0.8, 1.1, 1] }}
+                                        transition={{ ease: "easeIn", duration: 0.3 }}
+                                        onClick={() => {
+                                            clearItem(slot);
+                                        }}
+                                    >
+                                        <Text>{items[slot].name}</Text>
+                                    </motion.div>
+                                )}
+                                {!items[slot] && (
+                                    <Box fill onClick={() => {}} hoverIndicator={"background-front"}>
+                                        <Menu
+                                            disabled={gameState.performingActions.some((performingAction) => performingAction.action.id === craftActionId)}
+                                            fill
+                                            icon={false}
+                                            label={<Text color={"status-warning"}>{ghostItems[slot] || ""}</Text>}
+                                            items={inventory
+                                                .filter((i) => Object.values(items).indexOf(i) === -1)
+                                                .map((i) => ({
+                                                    label: i.name,
+                                                    onClick: () => {
+                                                        selectItem(slot, i);
+                                                    },
+                                                }))}
+                                        />
+                                    </Box>
+                                )}
+                            </Box>
+                        ))}
+                    </AnimatePresence>
+                </Grid>
+                <Box>
+                    {gameState.schematicPlans.map((plan, i) => (
+                        <Box key={"plan" + i}>
+                            <Text>{plan.name}</Text>
+                            <Button
+                                onClick={() => {
+                                    loadItemsFromPlan(plan);
+                                }}
+                                label="Load"
+                            ></Button>
                         </Box>
                     ))}
-                </AnimatePresence>
-            </Grid>
+                </Box>
+            </Box>
+
             {matchedItems.map((matchedItem, i) => (
                 <Text key={i}>
                     {matchedItem.quantity}x {matchedItem.item}
                 </Text>
             ))}
-            {matchedItems.length > 0 && (
-                <ActionButton
-                    action={{
-                        id: craftActionId,
-                        duration: matchedItems.length * 2,
-                        name: "Craft",
-                        requires: [],
-                        perform: (gameState: IGameState, entity, target) => {
-                            matchedItems.forEach((matchedItem) => {
-                                gameState.inventory.push(ItemDefinitions[matchedItem.item].create(matchedItem.quantity));
-                            });
-                            gameState.inventory = gameState.inventory.filter((i) => !usedItems.includes(i));
-                        },
-                        icon: "🔨",
-                        milestones: (gameState: IGameState) => true,
-                    }}
-                    performingActions={gameState.performingActions}
-                    performAction={gameState.performAction}
-                    disabled={false}
-                ></ActionButton>
+
+            {(Object.entries(items).length > 0 || Object.entries(ghostItems).length > 0) && (
+                <Box direction="row" gap="small">
+                    <ActionButton
+                        action={{
+                            id: craftActionId,
+                            duration: matchedItems.length * 2,
+                            name: "Craft",
+                            requires: [],
+                            perform: (gameState: IGameState, entity, target) => {
+                                matchedItems.forEach((matchedItem) => {
+                                    gameState.inventory.push(ItemDefinitions[matchedItem.item].create(matchedItem.quantity));
+                                });
+                                gameState.inventory = gameState.inventory.filter((i) => !usedItems.includes(i));
+                            },
+                            icon: "🔨",
+                            milestones: (gameState: IGameState) => true,
+                        }}
+                        performingActions={gameState.performingActions}
+                        performAction={gameState.performAction}
+                        disabled={matchedItems.length == 0}
+                    ></ActionButton>
+                    <Button onClick={() => setShowSchematicPlanModal(true)} label={"Save as Plan"}></Button>
+                </Box>
             )}
+
+            <Modal isOpen={showSchematicPlanModal} setIsOpen={setShowSchematicPlanModal}>
+                <Box pad="medium" gap="small">
+                    <Text>Save as Plan</Text>
+                    <TextInput value={schematicPlanName} onChange={(e) => setSchematicPlanName(e.target.value)}></TextInput>
+                    <Button onClick={saveSchematicPlan} label="Save"></Button>
+                </Box>
+            </Modal>
         </Box>
     );
 };

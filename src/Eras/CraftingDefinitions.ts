@@ -14,3 +14,8 @@ export const Schematics = [
         outputs: [{ item: "Tool", quantity: 1 }],
     },
 ];
+
+export interface SchematicPlan {
+    name: string;
+    slots: { [slot: string]: string };
+}

@@ -4,6 +4,7 @@ import { Action, ActionDuration, Item, Entity, Kin, Rite, Milestone, Message } f
 import { MilestoneDefinitions } from "./Eras/MilestoneDefinitions";
 import { EvaluateRequirements, RemoveItem } from "./Functions";
 import { MilestoneMessage } from "./Messages";
+import { SchematicPlan } from "./Eras/CraftingDefinitions";
 
 export class GameState {
     inventory: Item[];
@@ -14,6 +15,8 @@ export class GameState {
     ticks: number;
     tickRate: number;
     updates: number;
+    schematicPlans: SchematicPlan[];
+    
     performingActions: ActionDuration[];
 
     listeners: ((GameState: GameState, Messages: Message[]) => void)[];
@@ -29,6 +32,7 @@ export class GameState {
         this.performingActions = [];
         this.listeners = [];
         this.updates = 0;
+        this.schematicPlans = [];
         if (this.tickRate > 0) {
             setInterval(() => {
                 this.ticks += 1 / this.tickRate;

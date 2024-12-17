@@ -1,3 +1,4 @@
+import { SchematicPlan } from "./Eras/CraftingDefinitions";
 import { EvaluateRequirements } from "./Functions";
 import { GetNextId } from "./utils/Data";
 
@@ -275,6 +276,8 @@ export interface IGameState {
     ticks: number;
     tickRate: number;
     updates: number;
+
+    schematicPlans: SchematicPlan[];
 
     performingActions: IActionDuration[];
 
