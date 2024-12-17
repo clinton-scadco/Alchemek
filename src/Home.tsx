@@ -21,6 +21,7 @@ import ActionButton, { ActionButtons } from "./ActionButton";
 import Inventory from "./Inventory";
 import Kins from "./Kins";
 import Entities from "./Entities";
+import Crafting from "./Crafting";
 
 const Home = () => {
     const [gameState, setGameState] = React.useState(new GameState());
@@ -160,6 +161,10 @@ const Home = () => {
                         <Box height={{ min: "200px" }} width={"320px"} border pad={"small"}>
                             <Text>Inventory</Text>
                             <Inventory inventory={inventory}></Inventory>
+                        </Box>
+                        <Box height={{ min: "200px" }} border pad={"small"}>
+                            <Text>Crafting</Text>
+                            <Crafting inventory={inventory} gameState={gameState}></Crafting>
                         </Box>
                         <Box height={{ min: "200px" }} width={"320px"}>
                             {kins.length > 0 && <Text>Kins</Text>}

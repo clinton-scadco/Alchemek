@@ -22,8 +22,12 @@ export const ItemDefinitions = {
         icon: "🪵🪵",
         create: () => new Item({ icon: "🪵🪵", name: "Wooden Shaft", durability: -1 } as Item),
     },
-    "Tasks": {
+    Tasks: {
         icon: "🔤",
         class: TasksRite,
+    },
+    Reed: {
+        icon: "🌾",
+        create: () => new Item({ icon: "🌾", name: "Reed", durability: -1 } as Item),
     },
 };

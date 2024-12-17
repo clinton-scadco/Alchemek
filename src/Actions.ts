@@ -40,7 +40,7 @@ const actionDefinitions = [
         name: "Collect Reed",
         icon: "🌾",
         perform: [["addToInventory", "Reed", 1]],
-        duration: 3,
+        duration: 1,
         allowedEntities: ["*", "Kin"],
         type: ["Resource"],
     },
@@ -75,9 +75,12 @@ const actionDefinitions = [
             ["forItem", "Tool", "durability", ">=", 1, "changeItemProperty", "durability", "-", 1],
             ["addToInventory", "Sharpened Stone", 1],
         ],
-        requires: [["item", "Stone", 1]],
+        requires: [
+            ["item", "Stone", 1],
+            ["item", "Tool", 1, ["durability", ">=", 1]],
+        ],
         duration: 4,
-        allowedEntities: ["*", "Kin"]
+        allowedEntities: ["*", "Kin"],
     },
     {
         name: "Feed Fire",
@@ -152,6 +155,7 @@ const actionDefinitions = [
         name: "Craft Spear",
         icon: "🔱",
         perform: [
+            ["forItem", "Tool", "durability", ">=", 1, "changeItemProperty", "durability", "-", 1],
             ["removeFromInventory", "Wooden Shaft", 1],
             ["removeFromInventory", "Sharpened Stone", 1],
             ["removeFromInventory", "Reed", 1],
@@ -161,11 +165,12 @@ const actionDefinitions = [
             ["item", "Wooden Shaft", 1],
             ["item", "Sharpened Stone", 1],
             ["item", "Reed", 1],
+            ["item", "Tool", 1, ["durability", ">=", 1]],
         ],
         milestones: ["Hafting"],
         duration: 5,
         allowedEntities: ["*", "Kin"],
-    }
+    },
 ] as ActionDefinition[];
 
 interface IActionFunction {
