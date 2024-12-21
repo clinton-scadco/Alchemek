@@ -1,77 +1,153 @@
 Bundled license information:
 
-react/cjs/react.development.js:
+phaser/dist/phaser.js:
   /**
-   * @license React
-   * react.development.js
-   *
-   * Copyright (c) Facebook, Inc. and its affiliates.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE file in the root directory of this source tree.
-   */
-
-scheduler/cjs/scheduler.development.js:
-  /**
-   * @license React
-   * scheduler.development.js
-   *
-   * Copyright (c) Facebook, Inc. and its affiliates.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE file in the root directory of this source tree.
-   */
-
-react-dom/cjs/react-dom.development.js:
-  /**
-   * @license React
-   * react-dom.development.js
-   *
-   * Copyright (c) Facebook, Inc. and its affiliates.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE file in the root directory of this source tree.
+   * @author       samme
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
    */
   /**
-   * Checks if an event is supported in the current execution environment.
-   *
-   * NOTE: This will not work correctly for non-generic events such as `change`,
-   * `reset`, `load`, `error`, and `select`.
-   *
-   * Borrows from Modernizr.
-   *
-   * @param {string} eventNameSuffix Event name, e.g. "click".
-   * @return {boolean} True if the event is supported.
-   * @internal
-   * @license Modernizr 3.0.0pre (Custom Build) | MIT
+   * @author       Richard Davey <rich@phaser.io>
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
    */
-
-react-is/cjs/react-is.development.js:
-  /** @license React v16.13.1
-   * react-is.development.js
-   *
-   * Copyright (c) Facebook, Inc. and its affiliates.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE file in the root directory of this source tree.
+  /**
+   * @author       Richard Davey <rich@phaser.io>
+   * @author       samme <samme.npm@gmail.com>
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
    */
-
-object-assign/index.js:
-  /*
-  object-assign
-  (c) Sindre Sorhus
-  @license MIT
+  /**
+   * @author       Jason Nicholls <nicholls.jason@gmail.com>
+   * @copyright    2018 Photon Storm Ltd.
+   * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+   */
+  /**
+   * @author       Richard Davey <rich@phaser.io>
+   * @author       Felipe Alfonso <@bitnenfer>
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Florian Vazelle
+   * @author       Geoffrey Glaive
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Richard Davey
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Richard Davey <rich@phaser.io>
+   * @author       Florian Mertens
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Richard Davey <rich@phaser.io>
+   * @author       Igor Ognichenko <ognichenko.igor@gmail.com>
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Richard Davey <rich@phaser.io>
+   * @copyright    2021 Photon Storm Ltd.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Greg McLean <GregDevProjects>
+   * @copyright    2021 Photon Storm Ltd.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Vladislav Forsh <vlad@robowhale.com>
+   * @copyright    2021 RoboWhale
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Richard Davey <rich@phaser.io>
+   * @author       @samme
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Joachim Grill <joachim@codeandweb.com>
+   * @author       Richard Davey <rich@phaser.io>
+   * @copyright    2018 CodeAndWeb GmbH
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Stefan Hedman <schteppe@gmail.com> (http://steffe.se)
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+  * @author       Richard Davey <rich@phaser.io>
+  * @copyright    2013-2024 Phaser Studio Inc.
+  * @license      {@link https://github.com/photonstorm/phaser3-plugin-template/blob/master/LICENSE|MIT License}
   */
-
-react/cjs/react-jsx-runtime.development.js:
   /**
-   * @license React
-   * react-jsx-runtime.development.js
-   *
-   * Copyright (c) Facebook, Inc. and its affiliates.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE file in the root directory of this source tree.
+   * @author       Benjamin D. Richards <benjamindrichards@gmail.com>
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Richard Davey <rich@phaser.io>
+   * @author       Felipe Alfonso <@bitnenfer>
+   * @author       Matthew Groves <@doormat>
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Richard Davey <rich@photonstorm.com>
+   * @copyright    2013-2023 Photon Storm Ltd.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       samme
+   * @copyright    2021 Photon Storm Ltd.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Richard Davey <rich@phaser.io>
+   * @author       Pavle Goloskokovic <pgoloskokovic@gmail.com> (http://prunegames.com)
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       pi-kei
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Vladimir Agafonkin
+   * @author       Richard Davey <rich@phaser.io>
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Ben Richards <benjamindrichards@gmail.com>
+   * @copyright    2024 Photon Storm Ltd.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Seth Berrier <berriers@uwstout.edu>
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Richard Davey <rich@phaser.io>
+   * @author       Angry Bytes (and contributors)
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
+   */
+  /**
+   * @author       Niklas von Hertzen (https://github.com/niklasvh/base64-arraybuffer)
+   * @author       Richard Davey <rich@phaser.io>
+   * @copyright    2013-2024 Phaser Studio Inc.
+   * @license      {@link https://opensource.org/licenses/MIT|MIT License}
    */
 
 lodash/lodash.js:
@@ -84,38 +160,13 @@ lodash/lodash.js:
    * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
    */
 
-@remix-run/router/dist/router.js:
+react/cjs/react.development.js:
   /**
-   * @remix-run/router v1.20.0
+   * @license React
+   * react.development.js
    *
-   * Copyright (c) Remix Software Inc.
+   * Copyright (c) Facebook, Inc. and its affiliates.
    *
    * This source code is licensed under the MIT license found in the
-   * LICENSE.md file in the root directory of this source tree.
-   *
-   * @license MIT
-   */
-
-react-router/dist/index.js:
-  /**
-   * React Router v6.27.0
-   *
-   * Copyright (c) Remix Software Inc.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE.md file in the root directory of this source tree.
-   *
-   * @license MIT
-   */
-
-react-router-dom/dist/index.js:
-  /**
-   * React Router DOM v6.27.0
-   *
-   * Copyright (c) Remix Software Inc.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE.md file in the root directory of this source tree.
-   *
-   * @license MIT
+   * LICENSE file in the root directory of this source tree.
    */

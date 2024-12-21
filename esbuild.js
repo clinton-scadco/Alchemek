@@ -42,7 +42,7 @@ if (watch) {
 }
 
 const context = await esbuild.context({
-    entryPoints: ["src/index.tsx"],
+    entryPoints: ["phaser/index.ts"],
     bundle: true,
     outdir: "www/js",
     plugins: [
