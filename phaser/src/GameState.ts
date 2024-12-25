@@ -7,7 +7,7 @@ import { MilestoneMessage } from "./Messages";
 import { SchematicPlan } from "./Eras/CraftingDefinitions";
 
 export class GameState {
-    inventory: Item[];
+    // inventory: Item[];
     entities: Entity[];
     kins: Kin[];
     rites: Rite[];
@@ -22,7 +22,7 @@ export class GameState {
     listeners: ((GameState: GameState, Messages: Message[]) => void)[];
 
     constructor() {
-        this.inventory = [];
+        // this.inventory = [];
         this.entities = [];
         this.kins = [];
         this.rites = [];
@@ -76,10 +76,10 @@ export class GameState {
         }
     };
 
-    performOffering = (rite: Rite, itemName: string) => {
+    performOffering = (rite: Rite, kin: Kin, itemName: string) => {
         let oldState = this.snapshot();
 
-        RemoveItem(this.inventory, itemName, 1);
+        RemoveItem(kin.inventory, itemName, 1);
         rite.offerItem(itemName);
         this.notify(oldState);
     };
@@ -161,7 +161,7 @@ export class GameState {
                 kin.tick(this);
             });
 
-            this.inventory = this.inventory.filter((item) => !(item.maxDurability > 0 && item.durability < 1));
+            // this.inventory = this.inventory.filter((item) => !(item.maxDurability > 0 && item.durability < 1));
 
             this.updateMilestones();
 

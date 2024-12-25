@@ -6,6 +6,8 @@ import { GameState } from "./src/GameState";
 import { EvaluateRequirements } from "./src/Functions";
 import { DayNightColors } from "./src/utils/Theme";
 import { ItemDefinitions } from "./src/Eras/ItemDefinitions";
+import { Kin } from "./src/BaseClasses";
+import { PhaserKin, WorldState } from "./src/PhaserClasses";
 
 class GameScene extends Phaser.Scene {
     dayText: Phaser.GameObjects.Text;
@@ -14,6 +16,11 @@ class GameScene extends Phaser.Scene {
     messages: { icon: string; text: string }[] = [];
     timeIndicator: Phaser.GameObjects.Triangle;
     timeDefault = { x: 5, y: 58 };
+
+    worldState: WorldState;
+
+    gameState: GameState;
+
     constructor() {
         super({ key: "GameScene" });
     }
@@ -26,36 +33,41 @@ class GameScene extends Phaser.Scene {
     create() {
         const logo = this.physics.add.image(960, 540, "logo");
 
-        const gameState = new GameState();
+        this.gameState = new GameState();
+        this.worldState = new WorldState();
 
-        gameState.inventory.push(ItemDefinitions.Stone.create());
+        let k = new Kin({ name: "Kin" });
+
+        this.gameState.kins.push(k);
+
+        this.worldState.kins = { [k.id]: new PhaserKin(this, k, 500, 500) };
+
+        // gameState.inventory.push(ItemDefinitions.Stone.create());
 
         // Subscribe to GameState updates
-        gameState.subscribe((newState, newMessages) => {
+        this.gameState.subscribe((newState, newMessages) => {
             this.updateGameState(newState, newMessages);
         });
 
         this.setupUI();
-        // this.setupActions();
 
-        this.registry.set("state", gameState);
         this.timeDefault = { x: 5, y: 58 };
     }
 
     update(time, delta) {
-        let state = this.registry.get("state") as GameState;
+        this.gameState.tick(delta);
 
-        state.tick(delta);
-
-        const day = Math.floor(state.ticks / 100) + 1;
-        const colorIndex = Math.floor(((state.ticks % 100) / 100) * DayNightColors.length);
-
-        this.registry.set("state", state);
+        const day = Math.floor(this.gameState.ticks / 100) + 1;
+        const colorIndex = Math.floor(((this.gameState.ticks % 100) / 100) * DayNightColors.length);
 
         this.dayText.setText(`Day ${day}`);
         this.progressBar.setFillStyle(DayNightColors[colorIndex.toString()], 1);
 
-        this.timeIndicator.setPosition(this.timeDefault.x + Math.ceil((200 * (state.ticks % 100) / 100)), this.timeDefault.y);
+        this.timeIndicator.setPosition(this.timeDefault.x + Math.ceil((200 * (this.gameState.ticks % 100)) / 100), this.timeDefault.y);
+
+        Object.keys(this.worldState.kins).forEach((key) => {
+            this.worldState.kins[key].update();
+        });
     }
 
     setupUI() {
@@ -70,10 +82,10 @@ class GameScene extends Phaser.Scene {
         this.timeIndicator.setOrigin(0, 0);
 
         // Example: Adding inventory UI
-        this.inventoryText = this.add.text(10, 60, "Inventory:", { font: "16px Arial", color: "#ffffff" });
+        // this.inventoryText = this.add.text(10, 60, "Inventory:", { font: "16px Arial", color: "#ffffff" });
 
         // Update inventory display
-        this.updateInventory();
+        // this.updateInventory();
     }
 
     // setupActions() {
@@ -109,16 +121,17 @@ class GameScene extends Phaser.Scene {
             this.messages = [...this.messages, ...newMessages];
             this.displayMessages();
         }
-        this.updateInventory();
+
+        // this.updateInventory();
     }
 
-    updateInventory() {
-        let state = this.registry.get("state") as GameState;
-        if (state) {
-            const inventoryContent = state.inventory.map((item) => `${item.name}`).join("\n");
-            this.inventoryText.setText(`Inventory:\n${inventoryContent}`);
-        }
-    }
+    // updateInventory() {
+    //     let state = this.registry.get("state") as GameState;
+    //     if (state) {
+    //         const inventoryContent = state.inventory.map((item) => `${item.name}`).join("\n");
+    //         this.inventoryText.setText(`Inventory:\n${inventoryContent}`);
+    //     }
+    // }
 
     displayMessages() {
         let state = this.registry.get("state") as GameState;

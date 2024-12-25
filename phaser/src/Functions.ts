@@ -68,7 +68,7 @@ export const EvaluateRequirements = (state: IGameState, requirements: Requiremen
     let met = true;
     requirements.forEach((requirement) => {
         if (requirement.type === "item") {
-            met = met && Compare(state.inventory.filter((i) => MeetsRequirement(requirement, i, state)).length, requirement.value, requirement.operator);
+            met = met && state.kins.some((k) => Compare(k.inventory.filter((i) => MeetsRequirement(requirement, i, state)).length, requirement.value, requirement.operator));
         }
         if (requirement.type === "entity") {
             met = met && Compare(state.entities.filter((i) => MeetsRequirement(requirement, i, state)).length, requirement.value, requirement.operator);

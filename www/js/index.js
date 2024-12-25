@@ -77603,7 +77603,7 @@
                   __webpack_require__2(63595);
                   var CONST = __webpack_require__2(8054);
                   var Extend = __webpack_require__2(79291);
-                  var Phaser2 = {
+                  var Phaser3 = {
                     Actions: __webpack_require__2(61061),
                     Animations: __webpack_require__2(60421),
                     BlendModes: __webpack_require__2(10312),
@@ -77639,15 +77639,15 @@
                     Utils: __webpack_require__2(91799)
                   };
                   if (true) {
-                    Phaser2.Sound = __webpack_require__2(23717);
+                    Phaser3.Sound = __webpack_require__2(23717);
                   }
                   if (false) {
                   }
                   if (false) {
                   }
-                  Phaser2 = Extend(false, Phaser2, CONST);
-                  module2.exports = Phaser2;
-                  __webpack_require__2.g.Phaser = Phaser2;
+                  Phaser3 = Extend(false, Phaser3, CONST);
+                  module2.exports = Phaser3;
+                  __webpack_require__2.g.Phaser = Phaser3;
                 }
               ),
               /***/
@@ -150237,7 +150237,7 @@
     let met = true;
     requirements.forEach((requirement) => {
       if (requirement.type === "item") {
-        met = met && Compare(state.inventory.filter((i) => MeetsRequirement(requirement, i, state)).length, requirement.value, requirement.operator);
+        met = met && state.kins.some((k) => Compare(k.inventory.filter((i) => MeetsRequirement(requirement, i, state)).length, requirement.value, requirement.operator));
       }
       if (requirement.type === "entity") {
         met = met && Compare(state.entities.filter((i) => MeetsRequirement(requirement, i, state)).length, requirement.value, requirement.operator);
@@ -150294,35 +150294,46 @@
       this.entity = entity;
     }
   };
-  var Rite = class {
-    constructor({ name, ingredients }) {
-      this.icon = "\u{1F4E6}";
+  var Kin = class {
+    constructor({ name, inventory }) {
+      this.icon = "\u{1F464}";
       this.id = GetNextId();
       this.name = name;
-      this.ingredients = ingredients || [];
-      this.progress = [];
+      this.inventory = inventory || [];
+      this.performingActions = [];
+      this.actionPreference = [];
     }
-    isComplete() {
-      return this.ingredients.every(([name, count]) => {
-        return this.progress.filter(([n, c]) => n == name && c == count).length > 0;
+    giveItem(item) {
+      this.inventory.push(item);
+    }
+    tick(state) {
+      if (this.inventory.some((i) => i.name == "Tool")) {
+        if (this.actionPreference.length > 0) {
+          for (let action of this.actionPreference) {
+            if (!this.performingActions.some((a) => a.action.name == action.name)) {
+              if (EvaluateRequirements(state, action.requires)) {
+                this.performingActions.push(new ActionDuration(action));
+                state.updates += 1;
+              }
+            }
+          }
+        }
+      }
+      this.performingActions.forEach((a) => {
+        a.remaining -= 1 / state.tickRate;
+        if (a.remaining <= 0) {
+          a.action.perform(state, null, this);
+          state.updates += 1;
+          this.performingActions.splice(this.performingActions.indexOf(a), 1);
+        }
       });
+      this.inventory = this.inventory.filter((item) => item.maxDurability > 0 || item.durability < 1);
     }
-    offerItem(item) {
-      let p = this.progress.find(([name, count]) => name == item);
-      if (p) {
-        p[1] += 1;
-      } else
-        [this.progress.push([item, 1])];
+    giveActionPreference(action) {
+      this.actionPreference = [action];
     }
-  };
-  var Item = class {
-    constructor({ icon, name, durability, maxDurability }) {
-      this.icon = "\u{1F4E6}";
-      this.id = GetNextId();
-      this.icon = icon || this.icon;
-      this.name = name;
-      this.durability = durability || -1;
-      this.maxDurability = maxDurability || durability || -1;
+    removeActionPreference(action) {
+      this.actionPreference = this.actionPreference.filter((a) => a.name != action.name);
     }
   };
   var Milestone = class {
@@ -150377,9 +150388,9 @@
           console.error(e);
         }
       };
-      this.performOffering = (rite, itemName) => {
+      this.performOffering = (rite, kin, itemName) => {
         let oldState = this.snapshot();
-        RemoveItem(this.inventory, itemName, 1);
+        RemoveItem(kin.inventory, itemName, 1);
         rite.offerItem(itemName);
         this.notify(oldState);
       };
@@ -150446,7 +150457,6 @@
           this.kins.forEach((kin) => {
             kin.tick(this);
           });
-          this.inventory = this.inventory.filter((item) => !(item.maxDurability > 0 && item.durability < 1));
           this.updateMilestones();
           if (this.updates > 0) {
             this.notify(oldState);
@@ -150459,7 +150469,6 @@
       this.hasMilestone = (milestone) => {
         return this.milestones.some((m) => m.name == milestone.name);
       };
-      this.inventory = [];
       this.entities = [];
       this.kins = [];
       this.rites = [];
@@ -150473,43 +150482,73 @@
     }
   };
 
-  // phaser/src/Eras/One.tsx
-  var TasksRite = class extends Rite {
+  // phaser/src/PhaserClasses.ts
+  var WorldState = class {
     constructor() {
-      super({ name: "Tasks", ingredients: [["Tool", 10]] });
-      this.icon = "\u{1F524}";
+      this.kins = {};
     }
   };
-
-  // phaser/src/Eras/ItemDefinitions.ts
-  var ItemDefinitions = {
-    Stone: {
-      icon: "\u{1FAA8}",
-      create: () => new Item({ icon: "\u{1FAA8}", name: "Stone", durability: -1 })
-    },
-    Wood: {
-      icon: "\u{1FAB5}",
-      create: () => new Item({ icon: "\u{1FAB5}", name: "Wood", durability: -1 })
-    },
-    Tool: {
-      icon: "\u{1F6E0}\uFE0F",
-      create: (durability) => new Item({ icon: "\u{1F6E0}\uFE0F", name: "Tool", durability })
-    },
-    "Heated Stone": {
-      icon: "\u{1F525}\u{1FAA8}",
-      create: () => new Item({ icon: "\u{1F525}\u{1FAA8}", name: "Heated Stone", durability: -1 })
-    },
-    "Wooden Shaft": {
-      icon: "\u{1FAB5}\u{1FAB5}",
-      create: () => new Item({ icon: "\u{1FAB5}\u{1FAB5}", name: "Wooden Shaft", durability: -1 })
-    },
-    Tasks: {
-      icon: "\u{1F524}",
-      class: TasksRite
-    },
-    Reed: {
-      icon: "\u{1F33E}",
-      create: () => new Item({ icon: "\u{1F33E}", name: "Reed", durability: -1 })
+  var PhaserKin = class extends Phaser.GameObjects.GameObject {
+    constructor(scene, kin, x, y) {
+      super(scene, "PhaserKin");
+      this.kin = kin;
+      this.x = x;
+      this.y = y;
+      this.wander = new WanderAI(x, y, 0.5);
+      this.nameText = scene.add.text(x, y, kin.name, { font: "16px Arial", color: "#ffffff" });
+    }
+    update(...args) {
+      super.update(...args);
+      this.wander.update();
+      this.x = this.wander.x;
+      this.y = this.wander.y;
+      this.nameText.setPosition(this.x, this.y);
+    }
+  };
+  var WanderAI = class {
+    constructor(x, y, speed) {
+      this.x = x;
+      this.y = y;
+      this.speed = speed;
+      this.chooseNewTarget(30, 60);
+    }
+    // Helper function to calculate distance
+    distanceToTarget() {
+      const dx = this.targetX - this.x;
+      const dy = this.targetY - this.y;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+    // Update position and target
+    update() {
+      if (this.pause > 0) {
+        this.pause--;
+        return;
+      }
+      const dx = this.targetX - this.x;
+      const dy = this.targetY - this.y;
+      const distance = this.distanceToTarget();
+      if (distance === 0) {
+        return;
+      }
+      const moveX = dx / distance * this.speed;
+      const moveY = dy / distance * this.speed;
+      this.x += moveX;
+      this.y += moveY;
+      if (distance <= this.speed) {
+        this.x = this.targetX;
+        this.y = this.targetY;
+        this.chooseNewTarget(30, 60);
+      }
+    }
+    // Choose a new random target within a min and max range in any direction
+    chooseNewTarget(minRange, maxRange) {
+      this.targetX = this.x + Math.floor(Math.random() * (maxRange - minRange) + minRange) * (Math.random() < 0.5 ? -1 : 1);
+      this.targetY = this.y + Math.floor(Math.random() * (maxRange - minRange) + minRange) * (Math.random() < 0.5 ? -1 : 1);
+      this.pause = Math.ceil(Math.random() * 360);
+    }
+    // Get current position
+    getPosition() {
+      return { x: this.x, y: this.y };
     }
   };
 
@@ -150525,24 +150564,27 @@
     }
     create() {
       const logo = this.physics.add.image(960, 540, "logo");
-      const gameState = new GameState();
-      gameState.inventory.push(ItemDefinitions.Stone.create());
-      gameState.subscribe((newState, newMessages) => {
+      this.gameState = new GameState();
+      this.worldState = new WorldState();
+      let k = new Kin({ name: "Kin" });
+      this.gameState.kins.push(k);
+      this.worldState.kins = { [k.id]: new PhaserKin(this, k, 500, 500) };
+      this.gameState.subscribe((newState, newMessages) => {
         this.updateGameState(newState, newMessages);
       });
       this.setupUI();
-      this.registry.set("state", gameState);
       this.timeDefault = { x: 5, y: 58 };
     }
     update(time, delta) {
-      let state = this.registry.get("state");
-      state.tick(delta);
-      const day = Math.floor(state.ticks / 100) + 1;
-      const colorIndex = Math.floor(state.ticks % 100 / 100 * DayNightColors.length);
-      this.registry.set("state", state);
+      this.gameState.tick(delta);
+      const day = Math.floor(this.gameState.ticks / 100) + 1;
+      const colorIndex = Math.floor(this.gameState.ticks % 100 / 100 * DayNightColors.length);
       this.dayText.setText(`Day ${day}`);
       this.progressBar.setFillStyle(DayNightColors[colorIndex.toString()], 1);
-      this.timeIndicator.setPosition(this.timeDefault.x + Math.ceil(200 * (state.ticks % 100) / 100), this.timeDefault.y);
+      this.timeIndicator.setPosition(this.timeDefault.x + Math.ceil(200 * (this.gameState.ticks % 100) / 100), this.timeDefault.y);
+      Object.keys(this.worldState.kins).forEach((key) => {
+        this.worldState.kins[key].update();
+      });
     }
     setupUI() {
       this.dayText = this.add.text(10, 10, "Day 1", { font: "16px Arial", color: "#ffffff" });
@@ -150550,8 +150592,6 @@
       this.progressBar.setOrigin(0, 0);
       this.timeIndicator = this.add.triangle(5, 58, 0, 0, 10, 0, 5, -10, 16711680);
       this.timeIndicator.setOrigin(0, 0);
-      this.inventoryText = this.add.text(10, 60, "Inventory:", { font: "16px Arial", color: "#ffffff" });
-      this.updateInventory();
     }
     // setupActions() {
     //     // Setup buttons for actions, e.g., rituals, crafting, etc.
@@ -150576,16 +150616,14 @@
         this.messages = [...this.messages, ...newMessages];
         this.displayMessages();
       }
-      this.updateInventory();
     }
-    updateInventory() {
-      let state = this.registry.get("state");
-      if (state) {
-        const inventoryContent = state.inventory.map((item) => `${item.name}`).join("\n");
-        this.inventoryText.setText(`Inventory:
-${inventoryContent}`);
-      }
-    }
+    // updateInventory() {
+    //     let state = this.registry.get("state") as GameState;
+    //     if (state) {
+    //         const inventoryContent = state.inventory.map((item) => `${item.name}`).join("\n");
+    //         this.inventoryText.setText(`Inventory:\n${inventoryContent}`);
+    //     }
+    // }
     displayMessages() {
       let state = this.registry.get("state");
       const messageText = this.messages.map((msg) => `${msg.icon} ${msg.text}`).join("\n");

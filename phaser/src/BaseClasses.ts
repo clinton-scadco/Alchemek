@@ -34,7 +34,7 @@ export const ItemRequirement = ([item, amount]) => {
 export interface IAction {
     name: string;
     icon: string;
-    perform: (state: IGameState, source: Entity | null, kin: Kin | null) => void;
+    perform: (state: IGameState, source: Entity | null, kin: Kin) => void;
     milestones?: (state: IGameState) => boolean;
     requires?: Requirement[];
     allowedEntities?: string[];
@@ -46,7 +46,7 @@ export class Action implements IAction {
     id: number;
     name: string;
     icon: string;
-    perform: (state: IGameState, source: Entity | null, kin: Kin | null) => void;
+    perform: (state: IGameState, source: Entity | null, kin: Kin) => void;
     milestones: (state: IGameState) => boolean;
     requires: Requirement[];
     allowedEntities?: string[];
@@ -219,14 +219,15 @@ export class Kin implements IKin {
     }
 
     tick(state: IGameState) {
-        if (!this.inventory.some((i) => i.name == "Tool") && state.inventory.some((i) => i.name == "Tool")) {
-            let tool = state.inventory.find((i) => i.name == "Tool");
-            if (tool) {
-                state.inventory.splice(state.inventory.indexOf(tool), 1);
-                this.giveItem(tool);
-                state.updates += 1;
-            }
-        }
+        // Take available tools from inventory
+        // if (!this.inventory.some((i) => i.name == "Tool") && state.inventory.some((i) => i.name == "Tool")) {
+        //     let tool = state.inventory.find((i) => i.name == "Tool");
+        //     if (tool) {
+        //         state.inventory.splice(state.inventory.indexOf(tool), 1);
+        //         this.giveItem(tool);
+        //         state.updates += 1;
+        //     }
+        // }
         if (this.inventory.some((i) => i.name == "Tool")) {
             if (this.actionPreference.length > 0) {
                 for (let action of this.actionPreference) {
@@ -268,7 +269,7 @@ export interface IActionDuration {
 }
 
 export interface IGameState {
-    inventory: Item[];
+    // inventory: Item[];
     entities: Entity[];
     kins: Kin[];
     rites: Rite[];
