@@ -150518,6 +150518,7 @@
     constructor() {
       super({ key: "GameScene" });
       this.messages = [];
+      this.timeDefault = { x: 5, y: 58 };
     }
     preload() {
       this.load.image("logo", "/assets/logo.png");
@@ -150531,6 +150532,7 @@
       });
       this.setupUI();
       this.registry.set("state", gameState);
+      this.timeDefault = { x: 5, y: 58 };
     }
     update(time, delta) {
       let state = this.registry.get("state");
@@ -150540,11 +150542,14 @@
       this.registry.set("state", state);
       this.dayText.setText(`Day ${day}`);
       this.progressBar.setFillStyle(DayNightColors[colorIndex.toString()], 1);
+      this.timeIndicator.setPosition(this.timeDefault.x + Math.ceil(200 * (state.ticks % 100) / 100), this.timeDefault.y);
     }
     setupUI() {
       this.dayText = this.add.text(10, 10, "Day 1", { font: "16px Arial", color: "#ffffff" });
       this.progressBar = this.add.rectangle(10, 30, 200, 20, 16777215);
       this.progressBar.setOrigin(0, 0);
+      this.timeIndicator = this.add.triangle(5, 58, 0, 0, 10, 0, 5, -10, 16711680);
+      this.timeIndicator.setOrigin(0, 0);
       this.inventoryText = this.add.text(10, 60, "Inventory:", { font: "16px Arial", color: "#ffffff" });
       this.updateInventory();
     }

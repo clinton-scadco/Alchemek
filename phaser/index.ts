@@ -12,7 +12,8 @@ class GameScene extends Phaser.Scene {
     progressBar: Phaser.GameObjects.Rectangle;
     inventoryText: Phaser.GameObjects.Text;
     messages: { icon: string; text: string }[] = [];
-
+    timeIndicator: Phaser.GameObjects.Triangle;
+    timeDefault = { x: 5, y: 58 };
     constructor() {
         super({ key: "GameScene" });
     }
@@ -38,6 +39,7 @@ class GameScene extends Phaser.Scene {
         // this.setupActions();
 
         this.registry.set("state", gameState);
+        this.timeDefault = { x: 5, y: 58 };
     }
 
     update(time, delta) {
@@ -52,6 +54,8 @@ class GameScene extends Phaser.Scene {
 
         this.dayText.setText(`Day ${day}`);
         this.progressBar.setFillStyle(DayNightColors[colorIndex.toString()], 1);
+
+        this.timeIndicator.setPosition(this.timeDefault.x + Math.ceil((200 * (state.ticks % 100) / 100)), this.timeDefault.y);
     }
 
     setupUI() {
@@ -61,6 +65,9 @@ class GameScene extends Phaser.Scene {
         // Example: Adding a progress bar for day-night cycle
         this.progressBar = this.add.rectangle(10, 30, 200, 20, 0xffffff);
         this.progressBar.setOrigin(0, 0);
+
+        this.timeIndicator = this.add.triangle(5, 58, 0, 0, 10, 0, 5, -10, 0xff0000);
+        this.timeIndicator.setOrigin(0, 0);
 
         // Example: Adding inventory UI
         this.inventoryText = this.add.text(10, 60, "Inventory:", { font: "16px Arial", color: "#ffffff" });
